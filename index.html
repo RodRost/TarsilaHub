@@ -2011,6 +2011,7 @@ html,body{
           <button class="chip active" data-sort="status">Status</button>
           <button class="chip" data-sort="load">Capacity</button>
           <button class="chip" data-sort="energy">Energy</button>
+          <button class="chip" data-sort="role">Role</button>
         </div>
       </div>
       <div class="designer-list" id="designerList"></div>
@@ -3072,6 +3073,8 @@ function renderList(filter='all'){
   // Sort
   const energyOrder = {low:0, steady:1, high:2};
   filtered.sort((a,b) => {
+    const roleOrder = {Trainee:0,Junior:1,Senior:2,Lead:3,ACD:4,CD:5};
+    if(currentSort === 'role')   return (roleOrder[a.role]??99) - (roleOrder[b.role]??99);
     if(currentSort === 'load')   return b.load - a.load;
     if(currentSort === 'energy') return (energyOrder[a.energy]??1) - (energyOrder[b.energy]??1);
     // default: status (alert → watch → steady)
