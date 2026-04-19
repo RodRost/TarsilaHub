@@ -3913,7 +3913,8 @@ async function saveProjectToSupabase(p){
     phase: p.phase, priority: p.priority, health: p.health, health_label: p.healthLabel,
     deadline: p.deadline, duration: p.duration, start_date: p.startDate,
     team_load: p.teamLoad, open_role: p.openRole, needs: p.needs,
-    stakeholder: p.stakeholder, growth_ops: p.growthOps, risks: p.risks, last_updated: p.lastUpdated
+    stakeholder: p.stakeholder, growth_ops: p.growthOps, risks: p.risks, last_updated: p.lastUpdated,
+    past_team: p.pastTeam || []
   };
   // Upsert: POST with resolution=merge-duplicates
   const xhr = new Promise((resolve, reject) => {
@@ -4467,13 +4468,13 @@ function editDesigner(id, focusSub){
     <div class="form-section" id="pastProjectsSection">
       <div class="form-section-head">
         <div class="form-section-title">Previous projects</div>
-        <button type="button" class="btn" id="addPastProjectBtn" style="padding:4px 12px;font-size:12px">+ Add</button>
+        <span style="font-size:11.5px;color:var(--muted)">Select from registered projects</span>
       </div>
       <div id="pastProjectsList">
         ${(d.pastProjects||[]).length === 0
-          ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or add manually.</div>'
+          ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or select below.</div>'
           : (d.pastProjects||[]).map((pp,i) => `
-            <div class="past-edit-row" data-idx="${i}">
+            <div class="past-edit-row" data-idx="${i}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
               <div>
                 <div style="font-size:13px;font-weight:500">${pp.name}</div>
                 <div style="font-size:11.5px;color:var(--muted)">${pp.client||''}</div>
@@ -4481,21 +4482,15 @@ function editDesigner(id, focusSub){
               <button type="button" class="photo-remove-btn" onclick="removePastProject(${i})" style="margin-left:auto">Remove</button>
             </div>`).join('')}
       </div>
-      <div id="newPastProjectForm" style="display:none;margin-top:10px;padding:12px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--line)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Project name</label>
-            <input type="text" class="form-input" id="pp_name" placeholder="e.g., Aria Research v1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Client</label>
-            <input type="text" class="form-input" id="pp_client" placeholder="e.g., Aria Health">
-          </div>
+      <div style="margin-top:10px">
+        <div class="skill-picker" id="pastProjectPicker">
+          ${[...projects, ...archivedProjects]
+            .filter(p => !(d.pastProjects||[]).find(pp => pp.id === p.id))
+            .map(p => `<button type="button" class="skill-pick-btn" data-project-id="${p.id}" data-project-name="${p.name}" data-project-client="${p.client||''}">${p.name}</button>`)
+            .join('')}
         </div>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button type="button" class="btn primary" id="savePastProjectBtn" style="padding:7px 16px;font-size:12.5px">Add project</button>
-          <button type="button" class="btn" id="cancelPastProjectBtn" style="padding:7px 12px;font-size:12.5px">Cancel</button>
-        </div>
+        ${[...projects,...archivedProjects].filter(p=>!(d.pastProjects||[]).find(pp=>pp.id===p.id)).length===0
+          ? '<div class="form-hint" style="margin-top:6px">All registered projects already added.</div>' : ''}
       </div>
     </div>
   `;
@@ -4630,21 +4625,16 @@ function editDesigner(id, focusSub){
   }
   let pendingPhoto = d.photo || null; // tracks the photo for this edit session
 
-  // ── Past projects form wiring ──
+  // ── Past projects picker wiring ──
   setTimeout(() => {
-    const addBtn    = document.getElementById('addPastProjectBtn');
-    const saveBtn   = document.getElementById('savePastProjectBtn');
-    const cancelBtn = document.getElementById('cancelPastProjectBtn');
-    const form      = document.getElementById('newPastProjectForm');
-
     function renderPastList(){
       const listEl = document.getElementById('pastProjectsList');
       if(!listEl) return;
       const past = d.pastProjects || [];
       listEl.innerHTML = past.length === 0
-        ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or add manually.</div>'
+        ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or select below.</div>'
         : past.map((pp,i) => `
-            <div class="past-edit-row" data-idx="${i}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
               <div>
                 <div style="font-size:13px;font-weight:500">${pp.name}</div>
                 <div style="font-size:11.5px;color:var(--muted)">${pp.client||''}</div>
@@ -4653,29 +4643,29 @@ function editDesigner(id, focusSub){
             </div>`).join('');
     }
 
-    if(addBtn) addBtn.addEventListener('click', () => {
-      form.style.display = 'block';
-      document.getElementById('pp_name').focus();
-    });
-    if(cancelBtn) cancelBtn.addEventListener('click', () => {
-      form.style.display = 'none';
-      document.getElementById('pp_name').value = '';
-      document.getElementById('pp_client').value = '';
-    });
-    if(saveBtn) saveBtn.addEventListener('click', () => {
-      const name = document.getElementById('pp_name').value.trim();
-      if(!name){ document.getElementById('pp_name').focus(); return; }
-      if(!d.pastProjects) d.pastProjects = [];
-      d.pastProjects.push({ name, client: document.getElementById('pp_client').value.trim() });
-      renderPastList();
-      form.style.display = 'none';
-      document.getElementById('pp_name').value = '';
-      document.getElementById('pp_client').value = '';
+    // Wire each project pill — clicking adds it to pastProjects and hides the pill
+    document.querySelectorAll('#pastProjectPicker .skill-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(!d.pastProjects) d.pastProjects = [];
+        const id     = btn.dataset.projectId;
+        const name   = btn.dataset.projectName;
+        const client = btn.dataset.projectClient || '';
+        if(!d.pastProjects.find(pp => pp.id === id)){
+          d.pastProjects.push({ id, name, client });
+          btn.style.display = 'none'; // hide pill once added
+          renderPastList();
+        }
+      });
     });
 
     window.removePastProject = (idx) => {
       if(!d.pastProjects) return;
-      d.pastProjects.splice(idx, 1);
+      const removed = d.pastProjects.splice(idx, 1)[0];
+      // Re-show the pill for the removed project
+      if(removed?.id){
+        const pill = document.querySelector(`#pastProjectPicker .skill-pick-btn[data-project-id="${removed.id}"]`);
+        if(pill) pill.style.display = '';
+      }
       renderPastList();
     };
   }, 60);
@@ -5601,9 +5591,80 @@ function editProject(id, focusSub){
         <div class="form-hint">Stretch assignments this project offers. Used by the match engine's growth-fit factor.</div>
       </div>
     </div>
+
+    <div class="form-section" id="pastTeamSection">
+      <div class="form-section-head">
+        <div class="form-section-title">Previous team members</div>
+        <span style="font-size:11.5px;color:var(--muted)">Select from registered designers</span>
+      </div>
+      <div id="pastTeamList">
+        ${(p.pastTeam||[]).length === 0
+          ? '<div class="form-hint">No previous team members yet. Added automatically when a project is archived, or select below.</div>'
+          : (p.pastTeam||[]).map((pt,i) => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
+              <div>
+                <div style="font-size:13px;font-weight:500">${pt.name}</div>
+                <div style="font-size:11.5px;color:var(--muted)">${pt.role||''}</div>
+              </div>
+              <button type="button" class="photo-remove-btn" onclick="removePastTeamMember(${i})" style="margin-left:auto">Remove</button>
+            </div>`).join('')}
+      </div>
+      <div style="margin-top:10px">
+        <div class="skill-picker" id="pastTeamPicker">
+          ${[...designers, ...archivedDesigners]
+            .filter(ds => !(p.pastTeam||[]).find(pt => pt.id === ds.id))
+            .map(ds => `<button type="button" class="skill-pick-btn" data-designer-id="${ds.id}" data-designer-name="${ds.name}" data-designer-role="${ds.role||''}" data-designer-initials="${ds.initials||''}">${ds.name}</button>`)
+            .join('')}
+        </div>
+      </div>
+    </div>
   `;
 
   openModal();
+
+  // ── Past team picker wiring ──
+  setTimeout(() => {
+    function renderPastTeamList(){
+      const listEl = document.getElementById('pastTeamList');
+      if(!listEl) return;
+      const past = p.pastTeam || [];
+      listEl.innerHTML = past.length === 0
+        ? '<div class="form-hint">No previous team members yet. Added automatically when a project is archived, or select below.</div>'
+        : past.map((pt,i) => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
+              <div>
+                <div style="font-size:13px;font-weight:500">${pt.name}</div>
+                <div style="font-size:11.5px;color:var(--muted)">${pt.role||''}</div>
+              </div>
+              <button type="button" class="photo-remove-btn" onclick="removePastTeamMember(${i})" style="margin-left:auto">Remove</button>
+            </div>`).join('');
+    }
+
+    document.querySelectorAll('#pastTeamPicker .skill-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(!p.pastTeam) p.pastTeam = [];
+        const id       = parseInt(btn.dataset.designerId);
+        const name     = btn.dataset.designerName;
+        const role     = btn.dataset.designerRole || '';
+        const initials = btn.dataset.designerInitials || '';
+        if(!p.pastTeam.find(pt => pt.id === id)){
+          p.pastTeam.push({ id, name, role, initials });
+          btn.style.display = 'none';
+          renderPastTeamList();
+        }
+      });
+    });
+
+    window.removePastTeamMember = (idx) => {
+      if(!p.pastTeam) return;
+      const removed = p.pastTeam.splice(idx, 1)[0];
+      if(removed?.id){
+        const pill = document.querySelector(`#pastTeamPicker .skill-pick-btn[data-designer-id="${removed.id}"]`);
+        if(pill) pill.style.display = '';
+      }
+      renderPastTeamList();
+    };
+  }, 60);
 
   if(focusSub){
     setTimeout(() => {
