@@ -1185,7 +1185,8 @@ html,body{
   background:var(--surface-2);
 }
 .modal-foot-left{font-size:12px;color:var(--muted)}
-.modal-foot-right{display:flex;gap:8px}
+.modal-foot-right{display:flex;gap:8px;align-items:stretch}
+.modal-foot-right .btn{white-space:nowrap;flex:none}
 
 /* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1303,7 +1304,21 @@ html,body{
   padding-left:10px;border-left:2px solid var(--line);
 }
 .achievement-empty{font-size:12.5px;color:var(--muted);padding:8px 0;font-style:italic}
-.achievement-edit-row{
+.skill-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.skill-pick-btn{
+  font-family:inherit;font-size:12px;font-weight:500;
+  padding:5px 11px;border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--surface-2);color:var(--ink-2);
+  cursor:pointer;transition:all .1s;
+}
+.skill-pick-btn:hover{border-color:var(--accent);color:var(--accent)}
+.skill-pick-btn.selected{
+  background:var(--accent);border-color:var(--accent);color:white;
+}
+[data-theme="dark"] .skill-pick-btn.selected{color:var(--bg)}
+
+/* ACHIEVEMENT EDIT ROW */
   display:flex;align-items:center;gap:10px;
   padding:8px 10px;border-radius:var(--r-md);
   background:var(--surface-2);margin-bottom:6px;
@@ -1596,6 +1611,86 @@ html,body{
 .pin-btn:hover{background:var(--ink-2)}
 
 
+/* ===== ASSIGN BUTTON ===== */
+.assign-btn{
+  width:100%;margin-top:10px;padding:7px;font-size:12px;
+  font-family:inherit;font-weight:500;
+  border:1px solid var(--ok);border-radius:var(--r-md);
+  background:var(--ok-soft);color:var(--ok);
+  cursor:pointer;transition:all .12s;
+}
+.assign-btn:hover{background:var(--ok);color:var(--bg)}
+.assign-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* ===== PROJECT TIMELINE ===== */
+.timeline-wrap{overflow-x:auto;padding-bottom:8px}
+.timeline-grid{position:relative;min-width:600px}
+.timeline-header{display:flex;margin-bottom:8px;padding-left:140px}
+.timeline-month{flex:1;font-size:10px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);text-align:center}
+.timeline-row{display:flex;align-items:center;gap:0;margin-bottom:8px;min-height:32px}
+.timeline-name{width:140px;flex-shrink:0;font-size:12px;font-weight:500;color:var(--ink-2);padding-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.timeline-track{flex:1;position:relative;height:24px}
+.timeline-bar{
+  position:absolute;height:20px;top:2px;
+  border-radius:var(--r-sm);
+  display:flex;align-items:center;padding:0 8px;
+  font-size:10.5px;font-weight:500;overflow:hidden;
+  white-space:nowrap;cursor:pointer;
+  transition:opacity .1s;
+}
+.timeline-bar:hover{opacity:0.85}
+.timeline-bar.ok{background:#DBEAFE;color:#1E40AF}
+.timeline-bar.warn{background:#FEF3C7;color:#854D0E}
+.timeline-bar.crit{background:#FCE7F3;color:#9D174D}
+[data-theme="dark"] .timeline-bar.ok{background:#0F2645;color:#93C5FD}
+[data-theme="dark"] .timeline-bar.warn{background:#3A2A0A;color:#FCD34D}
+[data-theme="dark"] .timeline-bar.crit{background:#3A0E26;color:#F9A8D4}
+.timeline-today{position:absolute;top:0;bottom:0;width:1px;background:var(--crit);opacity:0.5;z-index:1}
+
+/* ===== CAPACITY PANEL ===== */
+.capacity-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.capacity-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:14px 16px;
+}
+.capacity-card-label{font-size:11px;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.capacity-card-val{font-size:26px;font-weight:600;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums}
+.capacity-card-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.capacity-bar{height:6px;border-radius:999px;background:var(--surface-2);margin-top:10px;overflow:hidden}
+.capacity-bar-fill{height:100%;border-radius:999px;background:var(--accent);transition:width .3s}
+.capacity-bar-fill.warn{background:var(--warn)}
+.capacity-bar-fill.crit{background:var(--crit)}
+
+/* ===== SKILL MAP ===== */
+.skill-map-grid{display:grid;grid-template-columns:140px 1fr 1fr 1fr 1fr;gap:0;font-size:12px}
+.skill-map-head{font-size:10px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+.skill-map-head:first-child{text-align:left}
+.skill-map-row{display:contents}
+.skill-map-row:hover .skill-map-cell{background:var(--surface-2)}
+.skill-map-label{padding:10px 10px;border-bottom:1px solid var(--line-soft);font-weight:500;display:flex;align-items:center}
+.skill-map-cell{
+  padding:10px 10px;border-bottom:1px solid var(--line-soft);
+  text-align:center;font-variant-numeric:tabular-nums;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  transition:background .1s;
+}
+.skill-map-dot{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;flex-shrink:0;
+}
+.skill-map-dot.l1{background:#F1F5F9;color:#475569}
+.skill-map-dot.l2{background:#DBEAFE;color:#1E40AF}
+.skill-map-dot.l3{background:#D1FAE5;color:#065F46}
+.skill-map-dot.l4{background:#FEF3C7;color:#854D0E}
+[data-theme="dark"] .skill-map-dot.l1{background:#1E2A3A;color:#94A3B8}
+[data-theme="dark"] .skill-map-dot.l2{background:#0F2645;color:#93C5FD}
+[data-theme="dark"] .skill-map-dot.l3{background:#14291F;color:#6EE7B7}
+[data-theme="dark"] .skill-map-dot.l4{background:#3A2A0A;color:#FCD34D}
+
+/* ===== SELF VIEW PAGE ===== */
+/* (in profile.html) */
+
 /* ===== BENCH ===== */
 .bench-chip{
   display:inline-flex;align-items:center;gap:5px;
@@ -1800,6 +1895,15 @@ html,body{
     </aside>
   </div>
 
+  <!-- ===== SECTION 2.5: TEAM CAPACITY ===== -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 0 0-10-10"/></svg></div>
+      <h2>Team capacity</h2>
+    </div>
+  </div>
+  <div id="capacityPanel"></div>
+
   <!-- ===== SECTION 3: PROJECTS ===== -->
   <div class="section-head">
     <div class="section-title">
@@ -1828,6 +1932,15 @@ html,body{
       </table>
     </div>
   </div>
+
+  <!-- ===== SECTION 4: PROJECT TIMELINE ===== -->
+  <div class="section-head" style="margin-top:40px">
+    <div class="section-title">
+      <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <h2>Project timeline</h2>
+    </div>
+  </div>
+  <div class="panel" id="timelinePanel"></div>
 
   <footer class="footer">
     <div>Tarsila Hub · Design Team Operations</div>
@@ -1862,6 +1975,9 @@ html,body{
       <button class="admin-tab" data-admin-tab="projects">
         <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Projects</span>
         <span class="tab-count" id="projectsTabCount">0</span>
+      </button>
+      <button class="admin-tab" data-admin-tab="skills">
+        <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M6 20V10l6-6 6 6v10"/><path d="M10 20v-5h4v5"/></svg>Team skills</span>
       </button>
       <button class="admin-tab" data-admin-tab="settings">
         <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</span>
@@ -2036,6 +2152,24 @@ html,body{
         <div id="weightsList"></div>
       </div>
 
+    </div>
+
+    <!-- TEAM SKILLS -->
+    <div class="admin-panel" data-admin-panel="skills">
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-head">
+          <div class="panel-title">Skill map</div>
+          <span class="panel-sub">Level 1 = Learning · 2 = Applying · 3 = Leading · 4 = Teaching</span>
+        </div>
+        <div id="skillMapGrid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Skill gap — active projects vs team supply</div>
+          <span class="panel-sub">Skills your current projects need that your team is thin on</span>
+        </div>
+        <div id="skillGapGrid"></div>
+      </div>
     </div>
 
     <!-- ARCHIVE -->
@@ -2260,35 +2394,35 @@ const designers = [
     load:102, energy:"low",    context:3, pto:62, meetingLoad:"heavy",
     projects:[{n:"Kairos Dashboard",c:"b"},{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",3],["Motion Design",1],["Prototyping",4],["Presentation",3],["Strategy",2],["AI",2]],
-    achievements:[{id:"a1",title:"Led end-to-end discovery for Kairos Dashboard",month:"Oct",projectId:"kairos",skill:"Product Design",type:"leadership",scope:"cross-team",impact:"Shaped Q4 roadmap priorities"},{id:"a2",title:"Started mentoring Nadia Rivera on interaction craft",month:"Sep",projectId:null,skill:"UI Design",type:"collaboration",scope:"internal",impact:""}],
+    achievements:[{id:"a1",title:"Led end-to-end discovery for Kairos Dashboard",month:"Oct",projectId:"kairos",skills:["Product Design"],type:"leadership",scope:"cross-team",impact:"Shaped Q4 roadmap priorities"},{id:"a2",title:"Started mentoring Nadia Rivera on interaction craft",month:"Sep",projectId:null,skills:["UI Design"],type:"collaboration",scope:"internal",impact:""}],
     history:[3,3,3,3,2,2,2]
   },
   { id:2, name:"Tomás Leite", initials:"TL", role:"Product Designer", status:"alert",
     load:88,  energy:"low",    context:2, pto:104, meetingLoad:"heavy",
     projects:[{n:"Aria Research",c:"c"},{n:"Vela",c:"e"}],
     skills:[["UI Design",2],["UX Design",4],["Product Design",3],["Art Direction",2],["Design System",2],["Motion Design",1],["Prototyping",3],["Presentation",4],["Strategy",3],["AI",2]],
-    achievements:[{id:"a3",title:"Conducted solo research sprint for Aria Health",month:"Nov",projectId:"aria",skill:"UX Design",type:"craft",scope:"external",impact:"Unblocked clinical approval process"},{id:"a4",title:"Documented research protocol for healthcare projects",month:"Oct",projectId:"aria",skill:"Strategy",type:"learning",scope:"internal",impact:""}],
+    achievements:[{id:"a3",title:"Conducted solo research sprint for Aria Health",month:"Nov",projectId:"aria",skills:["UX Design"],type:"craft",scope:"external",impact:"Unblocked clinical approval process"},{id:"a4",title:"Documented research protocol for healthcare projects",month:"Oct",projectId:"aria",skills:["Strategy"],type:"learning",scope:"internal",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:3, name:"Priya Shah", initials:"PS", role:"Senior Product Designer", status:"watch",
     load:84,  energy:"steady", context:2, pto:30, meetingLoad:"balanced",
     projects:[{n:"Kairos",c:"b"},{n:"Lumen",c:"e"}],
     skills:[["UI Design",4],["UX Design",2],["Product Design",3],["Art Direction",4],["Design System",4],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",2],["AI",1]],
-    achievements:[{id:"a5",title:"Shipped Kairos Dashboard v2 data visualization layer",month:"Sep",projectId:"kairos",skill:"UI Design",type:"craft",scope:"external",impact:"30% improvement in report readability"},{id:"a6",title:"Led visual identity for Lumen rebrand",month:"Aug",projectId:"lumen",skill:"Art Direction",type:"leadership",scope:"external",impact:""}],
+    achievements:[{id:"a5",title:"Shipped Kairos Dashboard v2 data visualization layer",month:"Sep",projectId:"kairos",skills:["UI Design"],type:"craft",scope:"external",impact:"30% improvement in report readability"},{id:"a6",title:"Led visual identity for Lumen rebrand",month:"Aug",projectId:"lumen",skills:["Art Direction"],type:"leadership",scope:"external",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:4, name:"Miguel Kato", initials:"MK", role:"Staff Designer", status:"watch",
     load:92,  energy:"steady", context:3, pto:45, meetingLoad:"heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"},{n:"Lumen",c:"e"}],
     skills:[["UI Design",3],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",4],["Motion Design",2],["Prototyping",4],["Presentation",4],["Strategy",4],["AI",3]],
-    achievements:[{id:"a7",title:"Established weekly design critique cadence",month:"Oct",projectId:null,skill:"Strategy",type:"leadership",scope:"internal",impact:"Improved quality feedback loop across 3 teams"},{id:"a8",title:"Architected Pax Design System v3 token structure",month:"Sep",projectId:"pax",skill:"Design System",type:"craft",scope:"cross-team",impact:""}],
+    achievements:[{id:"a7",title:"Established weekly design critique cadence",month:"Oct",projectId:null,skills:["Strategy"],type:"leadership",scope:"internal",impact:"Improved quality feedback loop across 3 teams"},{id:"a8",title:"Architected Pax Design System v3 token structure",month:"Sep",projectId:"pax",skills:["Design System"],type:"craft",scope:"cross-team",impact:""}],
     history:[4,4,4,3,3,4,3]
   },
   { id:5, name:"Ana Sørensen", initials:"AS", role:"Senior Product Designer", status:"steady",
     load:78,  energy:"high",   context:2, pto:18, meetingLoad:"low",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",4],["Design System",3],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",3],["AI",2]],
-    achievements:[{id:"a9",title:"Led Meridian checkout redesign end-to-end",month:"Oct",projectId:"meridian",skill:"Product Design",type:"leadership",scope:"external",impact:"Increased conversion by 12%"},{id:"a10",title:"Presented interaction patterns at team critique",month:"Nov",projectId:null,skill:"Presentation",type:"visibility",scope:"internal",impact:""}],
+    achievements:[{id:"a9",title:"Led Meridian checkout redesign end-to-end",month:"Oct",projectId:"meridian",skills:["Product Design"],type:"leadership",scope:"external",impact:"Increased conversion by 12%"},{id:"a10",title:"Presented interaction patterns at team critique",month:"Nov",projectId:null,skills:["Presentation"],type:"visibility",scope:"internal",impact:""}],
     history:[4,4,4,4,4,4,4]
   },
   { id:6, name:"Jonah Bekele", initials:"JB", role:"Product Designer", status:"steady",
@@ -2475,7 +2609,7 @@ function renderClaudeOutput(text, outputEl, onRefresh){
 // ---- Serialize helpers ----
 function serializeDesigner(d){
   const skillStr = d.skills.map(([s,l]) => `${s}:${['—','Learn','Apply','Lead','Teach'][l]}`).join(', ');
-  const achievStr = (d.achievements||[]).slice(0,3).map(a => `"${a.title}" (${a.month}${a.projectId ? ', '+a.projectId : ''})`).join('; ');
+  const achievStr = (d.achievements||[]).slice(0,3).map(a => `"${a.title}" [${(a.skills||[]).join(', ')}] (${a.month}${a.projectId ? ', '+a.projectId : ''})`).join('; ');
   return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Recent achievements:[${achievStr}]`;
 }
 
@@ -2856,7 +2990,7 @@ function openDrawer(id, _preloaded){
               <div class="achievement-body">
                 <div class="achievement-title">${a.title}</div>
                 <div class="achievement-meta">
-                  ${a.skill ? `<span class="achievement-tag skill-tag">${a.skill}</span>` : ''}
+                  ${(a.skills||[]).map(s=>`<span class="achievement-tag skill-tag">${s}</span>`).join('')}
                   ${a.type ? `<span class="achievement-tag type-tag type-${a.type}">${typeLabels[a.type]||a.type}</span>` : ''}
                   ${a.scope === 'external' ? `<span class="achievement-tag scope-tag">External</span>` : a.scope === 'cross-team' ? `<span class="achievement-tag scope-tag">Cross-team</span>` : ''}
                   ${proj ? `<span class="proj proj-a" style="cursor:pointer" onclick="event.stopPropagation();closeDrawer();openProjectDrawer('${proj.id}')">${proj.name}</span>` : ''}
@@ -2898,6 +3032,41 @@ function openDrawer(id, _preloaded){
 
   drawer.classList.add('open');
   overlay.classList.add('open');
+}
+
+async function assignDesignerToProject(designerId, projectId, evt){
+  const btn = evt.target;
+  const d = designers.find(x => x.id === designerId);
+  const p = projects.find(x => x.id === projectId);
+  if(!d || !p) return;
+  btn.disabled = true;
+  btn.textContent = 'Assigning…';
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('POST', 'designer_projects', {
+        designer_id: designerId,
+        project_id:  projectId,
+        color_code:  'a'
+      });
+    }
+    // Update local state
+    const colorMap = {fintech:'a',analytics:'b',healthcare:'c',internal:'d','b2c':'e','b2b-saas':'e'};
+    const c = colorMap[p.domain] || 'a';
+    if(!d.projects.find(dp => dp.n === p.name)){
+      d.projects.push({ n: p.name, c });
+      d.context = d.projects.length;
+    }
+    if(!p.teamIds.includes(designerId)) p.teamIds.push(designerId);
+    btn.textContent = '✓ Assigned';
+    btn.style.background = 'var(--ok)';
+    btn.style.color = 'var(--bg)';
+    refreshAll();
+    showToast(`${d.name} assigned to ${p.name}`);
+  } catch(e){
+    btn.disabled = false;
+    btn.textContent = 'Assign to project';
+    showToast(`Assign failed: ${e.message}`);
+  }
 }
 
 function closeDrawer(){
@@ -3210,6 +3379,10 @@ function openProjectDrawer(projId, _preloaded){
             </div>
           </div>
           ${noteText?`<div class="match-note">${noteText}</div>`:''}
+          ${(!ADMIN_PIN || adminUnlocked) ? `
+          <button class="btn assign-btn" onclick="assignDesignerToProject(${d.id},'${p.id}',event)">
+            Assign to project
+          </button>` : ''}
         </div>
         `;
       }).join('')}
@@ -3788,6 +3961,7 @@ function switchAdminPanel(name){
   if(name === 'people') renderPeopleTable();
   if(name === 'projects') renderProjectsAdminTable();
   if(name === 'archive') renderArchivePanel();
+  if(name === 'skills') renderSkillsPanel();
   if(name === 'settings'){
     renderSettingsPanel();
     // Wire save button if not already present
@@ -4073,12 +4247,12 @@ function editDesigner(id, focusSub){
               ${[...projects, ...archivedProjects].map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Skill demonstrated</label>
-            <select class="form-select" id="ach_skill">
-              <option value="">— None —</option>
-              ${['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'].map(s => `<option value="${s}">${s}</option>`).join('')}
-            </select>
+          <div class="form-group full">
+            <label class="form-label">Skills demonstrated <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+            <div class="skill-picker" id="ach_skills">
+              ${['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'].map(s =>
+                `<button type="button" class="skill-pick-btn" data-skill="${s}">${s}</button>`).join('')}
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Type</label>
@@ -4145,6 +4319,11 @@ function editDesigner(id, focusSub){
     const cancelBtn = document.getElementById('cancelAchievementBtn');
     const form      = document.getElementById('newAchievementForm');
 
+    // Skill picker toggle
+    document.querySelectorAll('#ach_skills .skill-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => btn.classList.toggle('selected'));
+    });
+
     if(addBtn) addBtn.addEventListener('click', () => {
       form.style.display = 'block';
       document.getElementById('ach_title').focus();
@@ -4157,6 +4336,7 @@ function editDesigner(id, focusSub){
     if(cancelBtn) cancelBtn.addEventListener('click', () => {
       form.style.display = 'none';
       if(addBtn) addBtn.style.display = '';
+      document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
     });
 
     if(saveBtn) saveBtn.addEventListener('click', () => {
@@ -4167,7 +4347,7 @@ function editDesigner(id, focusSub){
         title,
         month:     document.getElementById('ach_month').value,
         projectId: document.getElementById('ach_project').value || null,
-        skill:     document.getElementById('ach_skill').value || null,
+        skills:    Array.from(document.querySelectorAll('#ach_skills .skill-pick-btn.selected')).map(b=>b.dataset.skill),
         type:      document.getElementById('ach_type').value,
         scope:     document.getElementById('ach_scope').value,
         impact:    document.getElementById('ach_impact').value.trim() || null,
@@ -4180,6 +4360,7 @@ function editDesigner(id, focusSub){
       form.style.display = 'none';
       if(addBtn) addBtn.style.display = '';
       ['ach_title','ach_impact'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+      document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
     });
 
     // Expose remove function
@@ -4296,9 +4477,17 @@ async function archiveProject(id){
   const p = projects.find(x => x.id === id);
   if(!p) return;
   if(!confirm(`Archive "${p.name}"?\n\nIt will be removed from active lists but preserved in the Archive tab for reference.`)) return;
+
+  // Ask for a quick retro note
+  const retroNote = prompt(
+    `Optional: add a post-project note for "${p.name}"\n\nWhat went well, what was hard, key lessons? (leave blank to skip)`,
+    ''
+  );
+  p.retroNote = retroNote ? retroNote.trim() : '';
+
   try {
     if(persistenceMode === 'supabase'){
-      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: true });
+      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: true, retro_note: p.retroNote || null });
     }
     const idx = projects.findIndex(x => x.id === id);
     projects.splice(idx, 1);
@@ -4423,6 +4612,246 @@ function updateArchiveTabCount(){
 }
 
 // ---- Render archive panel ----
+// ── TEAM CAPACITY ──────────────────────────────────────────────
+function renderCapacity(){
+  const el = document.getElementById('capacityPanel');
+  if(!el) return;
+  const n = designers.length;
+  if(!n){ el.innerHTML = ''; return; }
+
+  const totalCapacity  = n * 100;
+  const committed      = designers.reduce((s,d) => s + d.load, 0);
+  const headroom       = totalCapacity - committed;
+  const headroomPct    = Math.round(headroom / totalCapacity * 100);
+  const availableDs    = designers.filter(d => d.load <= 80 && d.status !== 'alert');
+  const overloadedDs   = designers.filter(d => d.load > 95);
+  const commitPct      = Math.round(committed / totalCapacity * 100);
+  const fillCls        = commitPct > 95 ? 'crit' : commitPct > 85 ? 'warn' : '';
+
+  el.innerHTML = `
+    <div class="capacity-grid">
+      <div class="capacity-card">
+        <div class="capacity-card-label">Total capacity</div>
+        <div class="capacity-card-val">${totalCapacity}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
+        <div class="capacity-card-sub">${n} designers × 100%</div>
+      </div>
+      <div class="capacity-card">
+        <div class="capacity-card-label">Committed</div>
+        <div class="capacity-card-val" style="${commitPct>95?'color:var(--crit)':commitPct>85?'color:var(--warn)':''}">${commitPct}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
+        <div class="capacity-card-sub">${committed}% across all designers</div>
+        <div class="capacity-bar"><div class="capacity-bar-fill ${fillCls}" style="width:${Math.min(commitPct,100)}%"></div></div>
+      </div>
+      <div class="capacity-card">
+        <div class="capacity-card-label">Headroom</div>
+        <div class="capacity-card-val" style="${headroomPct<10?'color:var(--crit)':headroomPct<20?'color:var(--warn)':'color:var(--ok)'}">${headroomPct}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
+        <div class="capacity-card-sub">${headroom}% available for new work</div>
+      </div>
+      <div class="capacity-card">
+        <div class="capacity-card-label">Available for new work</div>
+        <div class="capacity-card-val">${availableDs.length}<span style="font-size:14px;font-weight:400;color:var(--muted)"> / ${n}</span></div>
+        <div class="capacity-card-sub">${overloadedDs.length > 0 ? `${overloadedDs.length} over ceiling` : 'None over ceiling'}</div>
+      </div>
+    </div>
+    <div class="panel" style="padding:14px 18px">
+      <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.04em">Load distribution</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${designers.slice().sort((a,b)=>b.load-a.load).map(d=>`
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:140px;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0">${d.name}</div>
+            <div style="flex:1;height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden">
+              <div style="height:100%;width:${Math.min(d.load,100)}%;border-radius:999px;background:${d.load>95?'var(--crit)':d.load>85?'var(--warn)':'var(--accent)'}"></div>
+            </div>
+            <div style="font-size:12px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right;color:${d.load>95?'var(--crit)':d.load>85?'var(--warn)':'var(--muted)'}">${d.load}%</div>
+            ${d.context===0?'<span class="bench-chip" style="font-size:10px;padding:1px 6px">Available</span>':''}
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ── PROJECT TIMELINE ──────────────────────────────────────────
+function renderTimeline(){
+  const el = document.getElementById('timelinePanel');
+  if(!el || !projects.length){ if(el) el.innerHTML=''; return; }
+
+  function parseProjectDate(str){
+    if(!str || str==='TBD'||str==='Rolling'||str==='Perpetual') return null;
+    const months={'Jan':0,'Feb':1,'Mar':2,'Apr':3,'May':4,'Jun':5,'Jul':6,'Aug':7,'Sep':8,'Oct':9,'Nov':10,'Dec':11};
+    const parts = str.trim().split(' ');
+    if(parts.length<2) return null;
+    const day = parseInt(parts[0]);
+    const mon = months[parts[1]];
+    if(isNaN(day)||mon===undefined) return null;
+    const now = new Date();
+    let year = now.getFullYear();
+    // If month is earlier than current month, assume next year
+    if(mon < now.getMonth()) year++;
+    return new Date(year, mon, day);
+  }
+
+  const now   = new Date();
+  const spans = projects.map(p => ({
+    p,
+    start:    parseProjectDate(p.startDate),
+    deadline: parseProjectDate(p.deadline)
+  })).filter(x => x.start || x.deadline);
+
+  if(!spans.length){
+    el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12.5px">No projects with valid dates to display.</div>';
+    return;
+  }
+
+  const allDates = spans.flatMap(x=>[x.start,x.deadline]).filter(Boolean);
+  let minDate = new Date(Math.min(...allDates));
+  let maxDate = new Date(Math.max(...allDates));
+  // Pad by 2 weeks on each side
+  minDate = new Date(minDate.getTime() - 14*864e5);
+  maxDate = new Date(maxDate.getTime() + 14*864e5);
+  const totalMs = maxDate - minDate;
+
+  // Build month labels
+  const monthLabels = [];
+  let cur = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  while(cur <= maxDate){
+    monthLabels.push({label: cur.toLocaleString('default',{month:'short'}), date: new Date(cur)});
+    cur = new Date(cur.getFullYear(), cur.getMonth()+1, 1);
+  }
+
+  const pct = d => d ? Math.max(0, Math.min(100, (d - minDate)/totalMs*100)) : null;
+  const todayPct = pct(now);
+
+  const monthsHtml = monthLabels.map(m =>
+    `<div class="timeline-month" style="left:${pct(m.date)}%;position:absolute">${m.label}</div>`
+  ).join('');
+
+  const rowsHtml = spans.map(({p, start, deadline}) => {
+    const s   = start    ? pct(start)    : pct(deadline)-5;
+    const e   = deadline ? pct(deadline) : pct(start)+5;
+    const w   = Math.max(2, e - s);
+    const cls = p.health;
+    const shortName = p.name.length > 22 ? p.name.slice(0,20)+'…' : p.name;
+    return `
+      <div class="timeline-row">
+        <div class="timeline-name" title="${p.name}">${p.name}</div>
+        <div class="timeline-track">
+          <div class="timeline-bar ${cls}" style="left:${s}%;width:${w}%"
+            onclick="openProjectDrawer('${p.id}')" title="${p.name} · ${p.startDate||'?'} → ${p.deadline||'?'}">
+            ${w > 8 ? shortName : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="timeline-wrap">
+      <div class="timeline-grid">
+        <div style="position:relative;height:22px;padding-left:140px;margin-bottom:4px">
+          ${monthsHtml}
+        </div>
+        <div style="position:relative">
+          <div class="timeline-today" style="left:calc(140px + ${todayPct}%)"></div>
+          ${rowsHtml}
+        </div>
+        <div style="padding-left:140px;font-size:10.5px;color:var(--muted);margin-top:8px;display:flex;gap:16px">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:6px;border-radius:2px;background:#DBEAFE;display:inline-block"></span>On track</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:6px;border-radius:2px;background:#FEF3C7;display:inline-block"></span>At risk</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:6px;border-radius:2px;background:#FCE7F3;display:inline-block"></span>Blocked</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:1px;height:12px;background:var(--crit);opacity:0.5;display:inline-block"></span>Today</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── TEAM SKILL MAP + SKILL GAP ────────────────────────────────
+function renderSkillsPanel(){
+  const SKILLS = ['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'];
+
+  // Skill map — for each skill, how many designers at each level
+  const mapEl = document.getElementById('skillMapGrid');
+  if(mapEl){
+    const rows = SKILLS.map(skill => {
+      const counts = [0,0,0,0]; // levels 1,2,3,4
+      designers.forEach(d => {
+        const entry = (d.skills||[]).find(([s])=>s===skill);
+        if(entry && entry[1] >= 1 && entry[1] <= 4) counts[entry[1]-1]++;
+      });
+      const lvlLabels = ['Learn','Apply','Lead','Teach'];
+      const lvlCls    = ['l1','l2','l3','l4'];
+      return `
+        <div class="skill-map-row">
+          <div class="skill-map-label">${skill}</div>
+          ${counts.map((c,i) => `
+            <div class="skill-map-cell">
+              ${c > 0 ? `<span class="skill-map-dot ${lvlCls[i]}">${c}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}
+            </div>`).join('')}
+        </div>`;
+    }).join('');
+
+    mapEl.innerHTML = `
+      <div class="skill-map-grid">
+        <div class="skill-map-head">Skill</div>
+        <div class="skill-map-head">Learning</div>
+        <div class="skill-map-head">Applying</div>
+        <div class="skill-map-head">Leading</div>
+        <div class="skill-map-head">Teaching</div>
+        ${rows}
+      </div>`;
+  }
+
+  // Skill gap — compare project needs vs team supply at Lead+ level
+  const gapEl = document.getElementById('skillGapGrid');
+  if(gapEl){
+    const teamSupply = {};
+    SKILLS.forEach(skill => {
+      teamSupply[skill] = designers.filter(d => {
+        const entry = (d.skills||[]).find(([s])=>s===skill);
+        return entry && entry[1] >= 3; // Lead or Teach
+      }).length;
+    });
+
+    const projectDemand = {};
+    SKILLS.forEach(skill => { projectDemand[skill] = 0; });
+    projects.forEach(p => {
+      (p.needs||[]).forEach(([skill, lvl]) => {
+        if(lvl >= 3 && projectDemand[skill] !== undefined) projectDemand[skill]++;
+      });
+    });
+
+    const gaps = SKILLS.map(skill => ({
+      skill,
+      demand: projectDemand[skill],
+      supply: teamSupply[skill],
+      gap:    projectDemand[skill] - teamSupply[skill]
+    })).filter(x => x.demand > 0).sort((a,b) => b.gap - a.gap);
+
+    if(!gaps.length){
+      gapEl.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12.5px">No active projects with defined skill needs.</div>';
+    } else {
+      gapEl.innerHTML = gaps.map(g => {
+        const isGap = g.gap > 0;
+        const barW  = Math.min(100, g.demand > 0 ? (g.supply/g.demand)*100 : 100);
+        return `
+          <div style="padding:12px 0;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:160px 60px 60px 1fr;gap:12px;align-items:center;font-size:13px">
+            <div style="font-weight:500">${g.skill}</div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Need</div>
+              <div style="font-weight:600;color:${isGap?'var(--crit)':'var(--ink)'}">${g.demand}</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Have</div>
+              <div style="font-weight:600;color:${isGap?'var(--warn)':'var(--ok)'}">${g.supply}</div>
+            </div>
+            <div>
+              <div style="height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden">
+                <div style="height:100%;width:${barW}%;background:${isGap?'var(--warn)':'var(--ok)'};border-radius:999px"></div>
+              </div>
+              ${isGap ? `<div style="font-size:11px;color:var(--crit);margin-top:3px">↑ ${g.gap} more Lead+ needed</div>` : `<div style="font-size:11px;color:var(--ok);margin-top:3px">✓ Covered</div>`}
+            </div>
+          </div>`;
+      }).join('');
+    }
+  }
+}
+
 function renderArchivePanel(){
   updateArchiveTabCount();
 
@@ -4461,6 +4890,7 @@ function renderArchivePanel(){
           <td>
             <div class="row-name">${p.name}</div>
             <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${p.type} · ${['Discovery','Design','Build','Ship'][p.phase]} phase</div>
+            ${p.retroNote ? `<div style="font-size:11.5px;color:var(--ink-2);margin-top:4px;font-style:italic">↳ ${p.retroNote}</div>` : ''}
           </td>
           <td>${p.client}</td>
           <td><span class="queue-tier ${tierClass}">${p.priority}</span></td>
@@ -5423,6 +5853,8 @@ function refreshAll(){
   renderList(document.querySelector('.chip[data-filter].active')?.dataset.filter || 'all');
   renderProjects();
   renderHealthBanner();
+  renderCapacity();
+  renderTimeline();
 }
 
 // ---- FIX: Two-way navigation — project chips in designer drawer ----
@@ -5769,6 +6201,8 @@ function refreshAll(){
   renderHealthBanner();
   updateHeaderCounts();
   updateArchiveTabCount();
+  renderCapacity();
+  renderTimeline();
 })();
 </script>
 

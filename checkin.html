@@ -256,8 +256,8 @@ select.form-input:focus,input.form-input:focus{border-color:var(--accent);}
 <script>
 // ── CONFIG — fill these in ──────────────────────────────────────────────────
 // Same values as in your main dashboard file.
-const SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co'; // 'https://xxxx.supabase.co'
-const SB_KEY = ''; /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w/ 'eyJhbGci...'
+const SB_URL = ''; // 'https://xxxx.supabase.co'
+const SB_KEY = ''; // 'eyJhbGci...'
 // ────────────────────────────────────────────────────────────────────────────
 
 let designers = [];
@@ -307,7 +307,7 @@ async function loadDesigners(){
     return;
   }
   try {
-    const rows = await sbXhr('GET', 'designers?archived=eq.false&order=name&select=id,name,initials,role,energy,load,pto,meeting_load');
+    const rows = await sbXhr('GET', 'designers?archived=eq.false&order=name&select=id,name,initials,role,energy,load,pto,meeting_load,history');
     designers = rows || [];
   } catch(e){
     document.getElementById('setupBox').style.display = 'block';
@@ -434,6 +434,13 @@ async function submit(){
     meeting_load: selectedMeeting,
   };
   if(ptoRaw !== '') payload.pto = parseInt(ptoRaw);
+
+  // Update energy history: shift oldest off, push new value
+  // high=4, steady=3, low=2 — maps to the 1-5 scale used in history bars
+  const energyVal = {high:4, steady:3, low:2}[selectedEnergy] || 3;
+  const currentHistory = selectedDesigner.history || [3,3,3,3,3,3,3];
+  const newHistory = [...currentHistory.slice(-6), energyVal]; // keep last 6, add new
+  payload.history = newHistory;
 
   try {
     await sbXhr('PATCH', `designers?id=eq.${selectedDesigner.id}`, payload);
