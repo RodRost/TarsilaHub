@@ -5613,37 +5613,34 @@ function renderCapacity(){
   const n = designers.length;
   if(!n){ el.innerHTML = ''; return; }
 
-  const totalCapacity  = n * 100;
-  const committed      = designers.reduce((s,d) => s + d.load, 0);
-  const headroom       = totalCapacity - committed;
-  const headroomPct    = Math.round(headroom / totalCapacity * 100);
+  const avgLoad        = Math.round(designers.reduce((s,d) => s + d.load, 0) / n);
+  const headroomPct    = Math.max(0, 100 - avgLoad);
   const availableDs    = designers.filter(d => d.load <= 80 && d.status !== 'alert');
   const overloadedDs   = designers.filter(d => d.load > 95);
-  const commitPct      = Math.round(committed / totalCapacity * 100);
-  const fillCls        = commitPct > 95 ? 'crit' : commitPct > 85 ? 'warn' : '';
+  const fillCls        = avgLoad > 95 ? 'crit' : avgLoad > 85 ? 'warn' : '';
 
   el.innerHTML = `
     <div class="capacity-grid">
       <div class="capacity-card">
-        <div class="capacity-card-label">Total capacity</div>
-        <div class="capacity-card-val">${totalCapacity}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
-        <div class="capacity-card-sub">${n} designers × 100%</div>
-      </div>
-      <div class="capacity-card">
-        <div class="capacity-card-label">Committed</div>
-        <div class="capacity-card-val" style="${commitPct>95?'color:var(--crit)':commitPct>85?'color:var(--warn)':''}">${commitPct}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
-        <div class="capacity-card-sub">${committed}% across all designers</div>
-        <div class="capacity-bar"><div class="capacity-bar-fill ${fillCls}" style="width:${Math.min(commitPct,100)}%"></div></div>
+        <div class="capacity-card-label">Average allocation</div>
+        <div class="capacity-card-val" style="${avgLoad>95?'color:var(--crit)':avgLoad>85?'color:var(--warn)':''}">${avgLoad}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
+        <div class="capacity-card-sub">Average across ${n} designers</div>
+        <div class="capacity-bar"><div class="capacity-bar-fill ${fillCls}" style="width:${Math.min(avgLoad,100)}%"></div></div>
       </div>
       <div class="capacity-card">
         <div class="capacity-card-label">Headroom</div>
         <div class="capacity-card-val" style="${headroomPct<10?'color:var(--crit)':headroomPct<20?'color:var(--warn)':'color:var(--ok)'}">${headroomPct}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
-        <div class="capacity-card-sub">${headroom}% available for new work</div>
+        <div class="capacity-card-sub">${headroomPct > 0 ? `${headroomPct}% average remaining` : 'Team at ceiling'}</div>
       </div>
       <div class="capacity-card">
         <div class="capacity-card-label">Available for new work</div>
         <div class="capacity-card-val">${availableDs.length}<span style="font-size:14px;font-weight:400;color:var(--muted)"> / ${n}</span></div>
-        <div class="capacity-card-sub">${overloadedDs.length > 0 ? `${overloadedDs.length} over ceiling` : 'None over ceiling'}</div>
+        <div class="capacity-card-sub">Load ≤ 80% and not in alert</div>
+      </div>
+      <div class="capacity-card">
+        <div class="capacity-card-label">Over ceiling</div>
+        <div class="capacity-card-val" style="${overloadedDs.length>0?'color:var(--crit)':'color:var(--ok)'}">${overloadedDs.length}<span style="font-size:14px;font-weight:400;color:var(--muted)"> / ${n}</span></div>
+        <div class="capacity-card-sub">${overloadedDs.length > 0 ? overloadedDs.map(d=>d.name.split(' ')[0]).join(', ') : 'Everyone within range'}</div>
       </div>
     </div>
     <div class="panel" style="padding:14px 18px">
