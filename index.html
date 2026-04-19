@@ -1188,6 +1188,33 @@ html,body{
 }
 .form-section-title{font-size:12px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:var(--ink-2)}
 
+/* ===== PHOTO UPLOAD WIDGET ===== */
+.photo-upload-row{display:flex;align-items:center;gap:16px;padding:12px 0 4px;}
+.photo-preview{
+  width:64px;height:64px;border-radius:50%;
+  border:2px solid var(--line);overflow:hidden;
+  flex-shrink:0;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:600;color:var(--muted);
+}
+.photo-preview img{width:100%;height:100%;object-fit:cover;}
+.photo-upload-btns{display:flex;flex-direction:column;gap:6px;}
+.photo-upload-label{
+  display:inline-block;padding:7px 14px;
+  font-size:12.5px;font-weight:500;font-family:inherit;
+  border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);color:var(--ink-2);
+  cursor:pointer;transition:background .1s;
+}
+.photo-upload-label:hover{background:var(--surface-2);}
+.photo-upload-label input[type="file"]{display:none;}
+.photo-remove-btn{
+  font-size:12px;color:var(--crit);background:none;border:none;
+  cursor:pointer;font-family:inherit;padding:0;text-align:left;
+}
+.photo-remove-btn:hover{text-decoration:underline;}
+.photo-upload-hint{font-size:12px;color:var(--muted);margin-top:2px;}
+
 /* PROJECT ASSIGNMENT CHECKLIST */
 .proj-checklist{display:flex;flex-direction:column;gap:6px}
 .proj-check-row{
@@ -2059,31 +2086,61 @@ function avatarUrl(name){
   return `${AVATAR_BASE}?seed=${seed}&${AVATAR_PARAMS}`;
 }
 
-// Renders an avatar <div> with an <img> inside (falls back to initials on error)
-function avatarEl(name, initials, sizeCls=''){
-  const url = avatarUrl(name);
+// Renders an avatar <div> — uses custom photo if available, else DiceBear
+function avatarEl(name, initials, sizeCls='', photo=''){
+  const url = photo || avatarUrl(name);
   return `<div class="avatar${sizeCls ? ' '+sizeCls : ''}">
     <img src="${url}" alt="${initials}" onerror="this.style.display='none';this.parentElement.dataset.initials='${initials}';this.parentElement.classList.add('av-fallback')" loading="lazy">
   </div>`;
 }
 
 // Mini (24px stacked) avatar — used in projects table
-function miniAvatarEl(name, initials){
-  const url = avatarUrl(name);
+function miniAvatarEl(name, initials, photo=''){
+  const url = photo || avatarUrl(name);
   return `<span class="mini">
     <img src="${url}" alt="${initials}" onerror="this.style.display='none';this.parentElement.textContent='${initials}'" loading="lazy">
   </span>`;
 }
 
 // Large photo for drawer header (64px)
-function drawerPhotoEl(name, initials){
-  const url = avatarUrl(name);
+function drawerPhotoEl(name, initials, photo=''){
+  const url = photo || avatarUrl(name);
   return `<div class="drawer-photo">
     <img src="${url}" alt="${initials}" onerror="this.style.display='none';this.parentElement.textContent='${initials}'" loading="lazy">
   </div>`;
 }
 
-// ===== INLINE SVG ICONS =====
+// ===== IMAGE COMPRESSION =====
+// Resize + compress a File to a base64 JPEG string (max 300px, 85% quality).
+// Keeps the stored string small enough for Supabase's text column (~15–25KB typical).
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const MAX = 300;
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.onload = () => {
+        const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+        const w = Math.round(img.width  * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // Fill white background (for transparent PNGs)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+
 // All Lucide icon paths inlined — zero CDN dependency, works offline.
 // stroke="currentColor" inherits colour from CSS; stroke-width set per context via CSS.
 const ICONS = {
@@ -2113,91 +2170,91 @@ function icon(name, cls=''){
 
 const designers = [
   { id:1, name:"Camila Ruiz", initials:"CR", role:"Senior Product Designer", status:"alert",
-    load:102, energy:"low",    context:3, pto:62,
+    load:102, energy:"low",    context:3, pto:62, meetingLoad:"heavy",
     projects:[{n:"Kairos Dashboard",c:"b"},{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["Interaction",4],["UX Research",3],["Visual",3],["Prototyping",4],["Systems",3],["Facilitation",3]],
     growth:[{g:"Lead a discovery sprint end-to-end",p:60,link:"via Kairos Dashboard"},{g:"Mentor a mid-level designer",p:40,link:"paired with N. Rivera"}],
     history:[3,3,3,3,2,2,2]
   },
   { id:2, name:"Tomás Leite", initials:"TL", role:"Product Designer", status:"alert",
-    load:88,  energy:"low",    context:2, pto:104,
+    load:88,  energy:"low",    context:2, pto:104, meetingLoad:"heavy",
     projects:[{n:"Aria Research",c:"c"},{n:"Vela",c:"e"}],
     skills:[["UX Research",4],["Interaction",3],["Visual",2],["Prototyping",3],["Facilitation",4],["Systems",2]],
     growth:[{g:"Publish a research methodology doc",p:30,link:"via Aria Research"},{g:"Take 2+ weeks of PTO this quarter",p:0,link:"blocker"}],
     history:[4,4,3,3,3,3,3]
   },
   { id:3, name:"Priya Shah", initials:"PS", role:"Senior Product Designer", status:"watch",
-    load:84,  energy:"steady", context:2, pto:30,
+    load:84,  energy:"steady", context:2, pto:30, meetingLoad:"balanced",
     projects:[{n:"Kairos",c:"b"},{n:"Lumen",c:"e"}],
     skills:[["Visual",4],["Interaction",3],["Systems",4],["Prototyping",3],["UX Research",2],["Facilitation",3]],
     growth:[{g:"Ship Kairos v2 with measurable impact",p:55,link:"via Kairos"},{g:"Deepen research craft",p:25,link:"stretch assignment"}],
     history:[4,4,3,3,3,3,3]
   },
   { id:4, name:"Miguel Kato", initials:"MK", role:"Staff Designer", status:"watch",
-    load:92,  energy:"steady", context:3, pto:45,
+    load:92,  energy:"steady", context:3, pto:45, meetingLoad:"heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"},{n:"Lumen",c:"e"}],
     skills:[["Systems",4],["Interaction",4],["Visual",3],["Prototyping",4],["Facilitation",4],["UX Research",3]],
     growth:[{g:"Establish design critique cadence across team",p:70,link:"ongoing"},{g:"Reduce to 2 projects",p:0,link:"in progress"}],
     history:[4,4,4,3,3,4,3]
   },
   { id:5, name:"Ana Sørensen", initials:"AS", role:"Senior Product Designer", status:"steady",
-    load:78,  energy:"high",   context:2, pto:18,
+    load:78,  energy:"high",   context:2, pto:18, meetingLoad:"low",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["Interaction",4],["Visual",4],["Systems",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
     growth:[{g:"Lead Meridian checkout end-to-end",p:80,link:"via Meridian"},{g:"Present at team critique",p:50,link:"scheduled Nov 14"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:6, name:"Jonah Bekele", initials:"JB", role:"Product Designer", status:"steady",
-    load:74,  energy:"high",   context:2, pto:12,
+    load:74,  energy:"high",   context:2, pto:12, meetingLoad:"low",
     projects:[{n:"Lumen",c:"e"},{n:"Pax DS",c:"d"}],
     skills:[["Visual",4],["Systems",3],["Interaction",3],["Prototyping",2],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Build visual system for Lumen",p:65,link:"via Lumen"},{g:"Improve prototyping skills",p:40,link:"course + practice"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:7, name:"Hana Fujimoto", initials:"HF", role:"Senior Product Designer", status:"steady",
-    load:81,  energy:"high",   context:2, pto:22,
+    load:81,  energy:"high",   context:2, pto:22, meetingLoad:"balanced",
     projects:[{n:"Vela",c:"e"},{n:"Orion",c:"c"}],
     skills:[["UX Research",4],["Interaction",3],["Facilitation",4],["Visual",2],["Systems",3],["Prototyping",3]],
     growth:[{g:"Run quarterly user research review",p:75,link:"via Vela"},{g:"Coach a junior on research methods",p:55,link:"paired with E. Duarte"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:8, name:"Nadia Rivera", initials:"NR", role:"Mid Designer", status:"steady",
-    load:72,  energy:"steady", context:1, pto:8,
+    load:72,  energy:"steady", context:1, pto:8, meetingLoad:"balanced",
     projects:[{n:"Lumen",c:"e"}],
     skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",2],["UX Research",2],["Facilitation",1]],
     growth:[{g:"Reach 'applying' in Interaction Design",p:60,link:"via Lumen"},{g:"Receive feedback from a senior weekly",p:80,link:"paired with C. Ruiz"}],
     history:[3,3,4,4,4,4,4]
   },
   { id:9, name:"Elena Duarte", initials:"ED", role:"Junior Designer", status:"steady",
-    load:68,  energy:"steady", context:1, pto:5,
+    load:68,  energy:"steady", context:1, pto:5, meetingLoad:"low",
     projects:[{n:"Vela",c:"e"}],
     skills:[["Visual",2],["Interaction",2],["Systems",1],["Prototyping",2],["UX Research",1],["Facilitation",1]],
     growth:[{g:"Ship 3 small features independently",p:66,link:"via Vela"},{g:"Build portfolio of research notes",p:40,link:"stretch"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:10, name:"Rafael Gómez", initials:"RG", role:"Product Designer", status:"steady",
-    load:70,  energy:"steady", context:2, pto:15,
+    load:70,  energy:"steady", context:2, pto:15, meetingLoad:"balanced",
     projects:[{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
     skills:[["Visual",3],["Interaction",3],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Lead Orion design",p:55,link:"via Orion"},{g:"Contribute 5 components to Pax",p:40,link:"via Pax DS"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:11, name:"Sofia Viana", initials:"SV", role:"Mid Designer", status:"steady",
-    load:66,  energy:"high",   context:2, pto:10,
+    load:66,  energy:"high",   context:2, pto:10, meetingLoad:"low",
     projects:[{n:"Orion",c:"c"},{n:"Lumen",c:"e"}],
     skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Reach 'applying' in Prototyping",p:70,link:"via Orion"},{g:"Own a feature end-to-end",p:50,link:"via Lumen"}],
     history:[4,4,3,4,4,4,4]
   },
   { id:12, name:"Lucas Tanaka", initials:"LT", role:"Senior Product Designer", status:"watch",
-    load:86,  energy:"steady", context:2, pto:38,
+    load:86,  energy:"steady", context:2, pto:38, meetingLoad:"very-heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Kairos",c:"b"}],
     skills:[["Interaction",4],["Systems",4],["Visual",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
     growth:[{g:"Lead architecture decisions on Kairos",p:50,link:"via Kairos"},{g:"Take ownership of team design system",p:30,link:"stretch"}],
     history:[4,4,4,3,3,3,3]
   },
   { id:13, name:"Isabela Nunes", initials:"IN", role:"Mid Designer", status:"watch",
-    load:89,  energy:"low",    context:3, pto:52,
+    load:89,  energy:"low",    context:3, pto:52, meetingLoad:"very-heavy",
     projects:[{n:"Kairos",c:"b"},{n:"Aria",c:"c"},{n:"Orion",c:"c"}],
     skills:[["Interaction",3],["Visual",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Reduce to 2 projects",p:0,link:"active intervention"},{g:"Deepen interaction craft",p:30,link:"stretch"}],
@@ -2216,7 +2273,7 @@ extra.forEach((e,i) => {
   designers.push({
     id: 14+i, name:e[0], initials:e[1], role:e[2], status:"steady",
     load: 65 + Math.floor(Math.random()*18),
-    energy: "steady",
+    energy: "steady", meetingLoad: "balanced",
     context: Math.random()>0.7 ? 1 : 2,
     pto: 5 + Math.floor(Math.random()*25),
     projects: Math.random()>0.5 ? [{n:"Lumen",c:"e"},{n:"Vela",c:"e"}] : [{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
@@ -2325,7 +2382,7 @@ function renderClaudeOutput(text, outputEl, onRefresh){
 function serializeDesigner(d){
   const skillStr = d.skills.map(([s,l]) => `${s}:${['—','Learn','Apply','Lead','Teach'][l]}`).join(', ');
   const growthStr = d.growth.map(g => `"${g.g}" (${g.p}%)`).join('; ');
-  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Growth:[${growthStr}]`;
+  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Growth:[${growthStr}]`;
 }
 
 function serializeProject(p){
@@ -2501,7 +2558,7 @@ function renderList(filter='all'){
   listEl.innerHTML = filtered.map(d => `
     <div class="designer" data-id="${d.id}">
       <div class="person">
-        ${avatarEl(d.name, d.initials)}
+        ${avatarEl(d.name, d.initials, '', d.photo||'')}
         <div class="person-meta">
           <div class="person-name">${d.name}</div>
           <div class="person-role">${shortRole(d.role)}</div>
@@ -2558,7 +2615,7 @@ function openDrawer(id, _preloaded){
   if(!d) return;
   document.getElementById('drawerName').textContent = d.name;
   document.getElementById('drawerRole').textContent = d.role;
-  document.getElementById('drawerPhoto').innerHTML = drawerPhotoEl(d.name, d.initials);
+  document.getElementById('drawerPhoto').innerHTML = drawerPhotoEl(d.name, d.initials, d.photo||'');
 
   drawerBody.innerHTML = `
     <div class="drawer-section">
@@ -2578,6 +2635,23 @@ function openDrawer(id, _preloaded){
           <div class="signal-card-label">Active projects</div>
           <div class="signal-card-val">${d.context}</div>
           <div class="signal-card-status ${signalClass('context',d.context)}">${d.context>=3?'Too many contexts':'Healthy'}</div>
+        </div>
+        <div class="signal-card">
+          <div class="signal-card-label">Meeting load</div>
+          <div class="signal-card-val" style="font-size:14px;padding-top:4px">${
+            d.meetingLoad==='very-heavy'?'Very heavy':
+            d.meetingLoad==='heavy'?'Heavy':
+            d.meetingLoad==='low'?'Low':'Balanced'
+          }</div>
+          <div class="signal-card-status ${
+            d.meetingLoad==='very-heavy'?'crit':
+            d.meetingLoad==='heavy'?'warn':
+            d.meetingLoad==='low'?'ok':'ok'
+          }">${
+            d.meetingLoad==='very-heavy'?'Almost no deep work':
+            d.meetingLoad==='heavy'?'Limited focus time':
+            d.meetingLoad==='low'?'Mostly deep work':'Balanced split'
+          }</div>
         </div>
       </div>
       <div class="pto-note">
@@ -2768,7 +2842,7 @@ function renderProjects(){
         <td>${p.client}</td>
         <td><span class="health-dot"><span class="dot ${p.health}"></span>${p.healthLabel}</span></td>
         <td><div class="mini-avatars">
-          ${shown.map(t => miniAvatarEl(t.name, t.initials)).join('')}
+          ${shown.map(t => miniAvatarEl(t.name, t.initials, t.photo||'')).join('')}
           ${more>0 ? `<span class="mini-more">+${more}</span>` : ''}
         </div></td>
         <td data-num>${p.teamLoad}%</td>
@@ -2908,7 +2982,7 @@ function openProjectDrawer(projId, _preloaded){
         const statusDot = t.status==='alert'?'crit':t.status==='watch'?'warn':'ok';
         return `
         <div class="team-member" data-designer-id="${t.id}">
-          ${avatarEl(t.name, t.initials)}
+          ${avatarEl(t.name, t.initials, '', t.photo||'')}
           <div class="team-member-body">
             <div class="team-member-name">${t.name}</div>
             <div class="team-member-role">${shortRole(t.role)}</div>
@@ -2939,7 +3013,7 @@ function openProjectDrawer(projId, _preloaded){
         return `
         <div class="match-card ${isBest?'best':''}" data-designer-id="${d.id}">
           <div class="match-head">
-            ${avatarEl(d.name, d.initials)}
+            ${avatarEl(d.name, d.initials, '', d.photo||'')}
             <div class="match-name-block">
               <div class="match-name">${d.name}</div>
               <div class="match-role">${shortRole(d.role)}</div>
@@ -2979,7 +3053,7 @@ function openProjectDrawer(projId, _preloaded){
         return `
         <div class="match-card anti" data-designer-id="${d.id}" style="margin-top:14px">
           <div class="match-head">
-            ${avatarEl(d.name, d.initials)}
+            ${avatarEl(d.name, d.initials, '', d.photo||'')}
             <div class="match-name-block">
               <div class="match-name">${d.name}<span class="do-not">Do not staff</span></div>
               <div class="match-role">Strong skill match but ${reason}</div>
@@ -3281,7 +3355,7 @@ function dbDesignerToApp(row, dpRows){
     .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a' }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
-    load: row.load, energy: row.energy || 'steady', context: row.context, pto: row.pto,
+    load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '',
     skills: row.skills || [], growth: row.growth || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
@@ -3326,7 +3400,7 @@ async function loadFromSupabase(){
 async function saveDesignerToSupabase(d){
   const payload = {
     name: d.name, initials: d.initials, role: d.role, status: d.status,
-    load: d.load, energy: d.energy, context: d.context, pto: d.pto,
+    load: d.load, energy: d.energy, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
     skills: d.skills, growth: d.growth, history: d.history, last_updated: d.lastUpdated
   };
   // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
@@ -3378,7 +3452,7 @@ async function persistDataLocally(){
   if(typeof window.storage === 'undefined') return;
   try {
     const payload = {
-      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, growth:d.growth, load:d.load, energy:d.energy, context:d.context, pto:d.pto, status:d.status, history:d.history })),
+      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, growth:d.growth, load:d.load, energy:d.energy, meetingLoad:d.meetingLoad, context:d.context, pto:d.pto, status:d.status, history:d.history, photo:d.photo })),
       projects:  projects.map(p  => ({ id:p.id, name:p.name, client:p.client, phase:p.phase, health:p.health, healthLabel:p.healthLabel, priority:p.priority, deadline:p.deadline, lastUpdated:p.lastUpdated, needs:p.needs, stakeholder:p.stakeholder, risks:p.risks, growthOps:p.growthOps })),
       savedAt: new Date().toISOString()
     };
@@ -3650,7 +3724,7 @@ function renderPeopleTable(){
       <tr>
         <td>
           <div style="display:flex;align-items:center;gap:10px">
-            ${avatarEl(d.name, d.initials)}
+            ${avatarEl(d.name, d.initials, '', d.photo||'')}
             <div class="row-name">${d.name}</div>
           </div>
         </td>
@@ -3678,7 +3752,7 @@ function editDesigner(id, focusSub){
   const d = isNew ? {
     id: 'NEW',
     name: '', role: 'Product Designer', initials: '', status: 'steady',
-    load: 70, energy: 'steady', context: 1, pto: 0,
+    load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
     projects: [],
     skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
     growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
@@ -3714,6 +3788,25 @@ function editDesigner(id, focusSub){
               `<option value="${r}" ${d.role === r ? 'selected' : ''}>${r}</option>`).join('')}
           </select>
         </div>
+        <div class="form-group full">
+          <label class="form-label">Photo</label>
+          <div class="photo-upload-row">
+            <div class="photo-preview" id="photoPreview">
+              ${d.photo
+                ? `<img src="${d.photo}" alt="${d.initials}" id="photoPreviewImg">`
+                : `<img src="${avatarUrl(d.name || 'default')}" alt="${d.initials}" id="photoPreviewImg" onerror="this.style.display='none'">`
+              }
+            </div>
+            <div class="photo-upload-btns">
+              <label class="photo-upload-label">
+                <input type="file" id="photoFileInput" accept="image/*">
+                ${d.photo ? 'Replace photo' : 'Upload photo'}
+              </label>
+              ${d.photo ? `<button type="button" class="photo-remove-btn" id="photoRemoveBtn">Remove custom photo</button>` : ''}
+              <span class="photo-upload-hint">JPG, PNG, WebP · max 5MB · resized to 300px</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -3740,6 +3833,13 @@ function editDesigner(id, focusSub){
         <div class="form-group">
           <label class="form-label">Load %</label>
           <input type="number" class="form-input" id="f_load" value="${d.load}" min="0" max="150" placeholder="70">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meeting load</label>
+          <select class="form-select" id="f_meeting_load">
+            ${[['low','Under 25% — mostly deep work'],['balanced','25–50% — balanced'],['heavy','50–75% — meeting-heavy'],['very-heavy','Over 75% — almost no deep work']].map(([v,l]) =>
+              `<option value="${v}" ${(d.meetingLoad||'balanced')===v?'selected':''}>${l}</option>`).join('')}
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Days since last PTO</label>
@@ -3817,6 +3917,45 @@ function editDesigner(id, focusSub){
   `;
 
   openModal();
+
+  // ── Photo upload wiring ──
+  let pendingPhoto = d.photo || null; // tracks the photo for this edit session
+
+  setTimeout(() => {
+    const fileInput    = document.getElementById('photoFileInput');
+    const preview      = document.getElementById('photoPreview');
+    const previewImg   = document.getElementById('photoPreviewImg');
+    const removeBtn    = document.getElementById('photoRemoveBtn');
+
+    if(fileInput){
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if(!file) return;
+        if(file.size > 5 * 1024 * 1024){
+          showToast('File too large — max 5MB');
+          return;
+        }
+        try {
+          const compressed = await compressImage(file);
+          pendingPhoto = compressed;
+          if(previewImg){ previewImg.src = compressed; previewImg.style.display = ''; }
+          // Store on the designer object so saveDesigner can read it
+          d.photo = compressed;
+        } catch(e){
+          showToast('Could not process image: ' + e.message);
+        }
+      });
+    }
+
+    if(removeBtn){
+      removeBtn.addEventListener('click', () => {
+        pendingPhoto = '';
+        d.photo = '';
+        if(previewImg){ previewImg.src = avatarUrl(d.name || 'default'); }
+        removeBtn.style.display = 'none';
+      });
+    }
+  }, 50);
 
   // Wire checkbox → toggle checked class on parent row
   setTimeout(() => {
@@ -4008,7 +4147,7 @@ function renderArchivePanel(){
       <tr>
         <td>
           <div style="display:flex;align-items:center;gap:10px">
-            ${avatarEl(d.name, d.initials)}
+            ${avatarEl(d.name, d.initials, '', d.photo||'')}
             <div>
               <div class="row-name">${d.name}</div>
               <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${d.projects.map(p=>p.n).join(', ') || 'No projects on record'}</div>
@@ -4387,7 +4526,7 @@ async function saveDesigner(){
     d = {
       id: null,
       status: 'steady',
-      load: 70, energy: 'steady', context: 1, pto: 0,
+      load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
       projects: [],
       skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
       growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
@@ -4400,10 +4539,11 @@ async function saveDesigner(){
   d.name     = document.getElementById('f_name').value.trim();
   d.initials = document.getElementById('f_initials').value.trim().toUpperCase();
   d.role     = document.getElementById('f_role').value;
-  d.status   = document.getElementById('f_status')?.value || d.status;
-  d.energy   = document.getElementById('f_energy')?.value || d.energy;
-  d.load     = parseInt(document.getElementById('f_load')?.value) || d.load;
-  d.pto      = parseInt(document.getElementById('f_pto')?.value) ?? d.pto;
+  d.status      = document.getElementById('f_status')?.value || d.status;
+  d.energy      = document.getElementById('f_energy')?.value || d.energy;
+  d.meetingLoad = document.getElementById('f_meeting_load')?.value || d.meetingLoad || 'balanced';
+  d.load        = parseInt(document.getElementById('f_load')?.value) || d.load;
+  d.pto         = parseInt(document.getElementById('f_pto')?.value) ?? d.pto;
   d.lastUpdated.profile = new Date().toISOString();
 
   document.querySelectorAll('[data-skill-idx]').forEach(el => {
@@ -5057,7 +5197,7 @@ function refreshAll(){
     const statusDot = `<span class="status ${d.status}" style="font-size:10px;padding:1px 7px">${d.status}</span>`;
     el.innerHTML = `
       <div class="palette-avatar">
-        <img src="${avatarUrl(d.name)}" alt="${d.initials}"
+        <img src="${d.photo || avatarUrl(d.name)}" alt="${d.initials}"
           onerror="this.style.display='none';this.parentElement.textContent='${d.initials}'" loading="lazy">
       </div>
       <div class="palette-item-body">
