@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarsila Hub — Weekly Check-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAFAF9;--surface:#FFFFFF;--surface-2:#F4F4F3;
+  --ink:#0A0A0A;--ink-2:#3A3A3A;--muted:#888;
+  --line:#E5E5E3;--line-soft:#EDEDE9;
+  --accent:#2563EB;--accent-soft:#EFF6FF;
+  --ok:#15803D;--ok-soft:#F0FDF4;
+  --warn:#B45309;--warn-soft:#FFFBEB;
+  --crit:#B91C1C;--crit-soft:#FEF2F2;
+  --r-sm:6px;--r-md:8px;--r-lg:12px;--r-xl:16px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+}
+[data-theme="dark"]{
+  --bg:#0F0F0E;--surface:#1A1A18;--surface-2:#222220;
+  --ink:#F5F5F3;--ink-2:#B0B0A8;--muted:#666;
+  --line:#2E2E2C;--line-soft:#252523;
+  --accent-soft:rgba(37,99,235,.15);
+  --ok-soft:rgba(21,128,61,.12);--warn-soft:rgba(180,83,9,.12);--crit-soft:rgba(185,28,28,.12);
+}
+body{font-family:'Geist',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px 80px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow);width:100%;max-width:480px;overflow:hidden;}
+.card-head{padding:24px 24px 0;border-bottom:1px solid var(--line-soft);padding-bottom:20px;}
+.brand{font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.card-title{font-size:20px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px;}
+.card-sub{font-size:13.5px;color:var(--muted);}
+.card-body{padding:24px;}
+.form-group{margin-bottom:20px;}
+.form-label{display:block;font-size:12px;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.form-hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+select.form-input,input.form-input{
+  width:100%;padding:10px 12px;font-size:14px;font-family:inherit;
+  background:var(--surface-2);color:var(--ink);
+  border:1px solid var(--line);border-radius:var(--r-md);
+  outline:none;transition:border-color .12s;
+}
+select.form-input:focus,input.form-input:focus{border-color:var(--accent);}
+
+/* Energy selector — big tap targets */
+.energy-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.energy-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;padding:16px 8px;
+  border:1.5px solid var(--line);border-radius:var(--r-lg);
+  background:var(--surface-2);cursor:pointer;
+  transition:all .12s;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.energy-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
+.energy-btn.selected.high{border-color:var(--ok);background:var(--ok-soft);}
+.energy-btn.selected.steady{border-color:var(--accent);background:var(--accent-soft);}
+.energy-btn.selected.low{border-color:var(--crit);background:var(--crit-soft);}
+.energy-icon{font-size:24px;line-height:1;}
+.energy-label{font-size:13px;font-weight:500;color:var(--ink);}
+.energy-desc{font-size:11px;color:var(--muted);text-align:center;line-height:1.3;}
+
+/* Load slider */
+.load-slider-row{display:flex;align-items:center;gap:12px;}
+.load-slider{flex:1;accent-color:var(--accent);}
+.load-val{font-size:18px;font-weight:600;letter-spacing:-0.01em;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;}
+.load-bands{display:flex;gap:0;margin-top:8px;border-radius:var(--r-sm);overflow:hidden;height:5px;}
+.load-band{flex:1;}
+.load-band.ok{background:var(--ok);}
+.load-band.warn{background:var(--warn);}
+.load-band.crit{background:var(--crit);}
+
+/* Designer selector */
+.designer-search{position:relative;}
+.designer-list{
+  max-height:200px;overflow-y:auto;
+  border:1px solid var(--line);border-radius:var(--r-md);
+  background:var(--surface);margin-top:4px;display:none;
+}
+.designer-list.open{display:block;}
+.designer-item{
+  padding:10px 12px;font-size:13.5px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  transition:background .1s;
+}
+.designer-item:hover{background:var(--surface-2);}
+.designer-item.selected{background:var(--accent-soft);}
+.d-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;color:var(--ink-2);flex-shrink:0;overflow:hidden;
+}
+.d-avatar img{width:100%;height:100%;object-fit:cover;}
+.d-info{flex:1;}
+.d-name{font-weight:500;font-size:13.5px;}
+.d-role{font-size:11.5px;color:var(--muted);}
+
+/* Submit button */
+.submit-btn{
+  width:100%;padding:13px;font-size:15px;font-weight:500;font-family:inherit;
+  background:var(--ink);color:white;border:none;border-radius:var(--r-lg);
+  cursor:pointer;transition:background .12s;letter-spacing:-0.01em;
+}
+.submit-btn:hover{opacity:0.88;}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* Success state */
+.success-view{text-align:center;padding:40px 24px;}
+.success-icon{font-size:48px;margin-bottom:16px;}
+.success-title{font-size:20px;font-weight:600;letter-spacing:-0.02em;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--muted);line-height:1.6;}
+.success-back{
+  display:inline-block;margin-top:20px;padding:10px 24px;
+  font-size:13.5px;font-weight:500;font-family:inherit;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:none;color:var(--ink);cursor:pointer;text-decoration:none;
+  transition:background .1s;
+}
+.success-back:hover{background:var(--surface-2);}
+
+/* Error / status */
+.status-msg{font-size:12.5px;margin-top:12px;padding:10px 12px;border-radius:var(--r-md);display:none;}
+.status-msg.error{display:block;background:var(--crit-soft);color:var(--crit);}
+.status-msg.info{display:block;background:var(--accent-soft);color:var(--accent);}
+
+/* Setup prompt */
+.setup-box{background:var(--warn-soft);border:1px solid #FDE68A;border-radius:var(--r-lg);padding:16px;margin-bottom:20px;font-size:13px;line-height:1.6;color:var(--warn);}
+.setup-box code{font-family:'Geist Mono',monospace;font-size:12px;background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+  <div class="card-head">
+    <div class="brand">Tarsila Hub</div>
+    <div class="card-title">Weekly check-in</div>
+    <div class="card-sub">Takes 30 seconds. Updates your signals on the dashboard.</div>
+  </div>
+  <div class="card-body" id="cardBody">
+    <div class="setup-box" id="setupBox" style="display:none">
+      Configure Supabase credentials by editing this file and filling in:<br>
+      <code>const SB_URL</code> and <code>const SB_KEY</code> near the top of the script.
+    </div>
+
+    <!-- Step 1: who are you? -->
+    <div class="form-group" id="stepWho">
+      <label class="form-label">Who are you?</label>
+      <input type="text" class="form-input" id="searchInput" placeholder="Start typing your name…" autocomplete="off">
+      <div class="designer-list" id="designerList"></div>
+      <div class="form-hint">Your name as it appears in the dashboard.</div>
+    </div>
+
+    <!-- Step 2: signals -->
+    <div id="stepSignals" style="display:none">
+      <div class="form-group">
+        <label class="form-label">How are you feeling this week?</label>
+        <div class="energy-options">
+          <button class="energy-btn high" data-value="high" onclick="selectEnergy('high')">
+            <span class="energy-icon">⚡</span>
+            <span class="energy-label">High</span>
+            <span class="energy-desc">Energised, clear-headed</span>
+          </button>
+          <button class="energy-btn steady" data-value="steady" onclick="selectEnergy('steady')">
+            <span class="energy-icon">〜</span>
+            <span class="energy-label">Steady</span>
+            <span class="energy-desc">Getting things done</span>
+          </button>
+          <button class="energy-btn low" data-value="low" onclick="selectEnergy('low')">
+            <span class="energy-icon">○</span>
+            <span class="energy-label">Low</span>
+            <span class="energy-desc">Stretched or depleted</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Approximate load this week</label>
+        <div class="load-slider-row">
+          <input type="range" class="load-slider" id="loadSlider" min="0" max="130" step="5" value="70"
+            oninput="updateLoad(this.value)">
+          <span class="load-val" id="loadVal">70<span style="font-size:13px;font-weight:400;color:var(--muted)">%</span></span>
+        </div>
+        <div class="load-bands">
+          <div class="load-band ok" style="flex:70"></div>
+          <div class="load-band warn" style="flex:15"></div>
+          <div class="load-band crit" style="flex:15"></div>
+        </div>
+        <div class="form-hint">70–85% is the healthy range. Above 95% is where quality and wellbeing suffer.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Days since your last PTO day</label>
+        <input type="number" class="form-input" id="ptoInput" min="0" max="365" placeholder="e.g., 14">
+        <div class="form-hint">Count calendar days. Leave blank to keep your current value.</div>
+      </div>
+
+      <div class="status-msg" id="statusMsg"></div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submit()">Submit check-in</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success view (hidden until submit) -->
+<div class="card" id="successCard" style="display:none">
+  <div class="success-view">
+    <div class="success-icon">✓</div>
+    <div class="success-title" id="successTitle">Check-in saved</div>
+    <div class="success-sub" id="successSub">Your signals have been updated on the dashboard. See you next week.</div>
+    <button class="success-back" onclick="resetForm()">Check in again</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG — fill these in ──────────────────────────────────────────────────
+// Same values as in your main dashboard file.
+const SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co'; // 'https://xxxx.supabase.co'
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w'; // 'eyJhbGci...'
+// ────────────────────────────────────────────────────────────────────────────
+
+let designers = [];
+let selectedDesigner = null;
+let selectedEnergy   = null;
+
+// ── Supabase XHR helper ──────────────────────────────────────────────────────
+function sbXhr(method, path, body){
+  return new Promise((resolve, reject) => {
+    if(!SB_URL || !SB_KEY){
+      reject(new Error('Supabase not configured — edit SB_URL and SB_KEY in this file.'));
+      return;
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, `${SB_URL}/rest/v1/${path}`, true);
+    xhr.setRequestHeader('apikey', SB_KEY);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/json');
+    if(method === 'POST' || method === 'PATCH')
+      xhr.setRequestHeader('Prefer', 'return=representation');
+    xhr.timeout = 10000;
+    xhr.onload = () => {
+      if(xhr.status >= 200 && xhr.status < 300){
+        try{ resolve(xhr.responseText ? JSON.parse(xhr.responseText) : null); }catch(e){ resolve(null); }
+      } else {
+        let msg = `HTTP ${xhr.status}`;
+        try{ const j = JSON.parse(xhr.responseText); msg = j.message || j.error || msg; }catch(e){}
+        reject(new Error(msg));
+      }
+    };
+    xhr.onerror   = () => reject(new Error('Network error — check your connection.'));
+    xhr.ontimeout = () => reject(new Error('Request timed out.'));
+    xhr.send(body ? JSON.stringify(body) : null);
+  });
+}
+
+// ── Dark mode ────────────────────────────────────────────────────────────────
+if(window.matchMedia('(prefers-color-scheme: dark)').matches)
+  document.documentElement.setAttribute('data-theme','dark');
+
+// ── Load designers from Supabase ─────────────────────────────────────────────
+async function loadDesigners(){
+  if(!SB_URL || !SB_KEY){
+    document.getElementById('setupBox').style.display = 'block';
+    return;
+  }
+  try {
+    const rows = await sbXhr('GET', 'designers?archived=eq.false&order=name&select=id,name,initials,role,energy,load,pto');
+    designers = rows || [];
+  } catch(e){
+    document.getElementById('setupBox').style.display = 'block';
+    document.getElementById('setupBox').textContent = `Could not load designers: ${e.message}`;
+  }
+}
+
+// ── Designer search ──────────────────────────────────────────────────────────
+const searchInput  = document.getElementById('searchInput');
+const designerList = document.getElementById('designerList');
+
+function avatarUrl(name){
+  return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(name)}&backgroundColor=f4f4f3&backgroundType=solid`;
+}
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){ designerList.classList.remove('open'); return; }
+  const matches = designers.filter(d => d.name.toLowerCase().includes(q));
+  if(!matches.length){ designerList.classList.remove('open'); return; }
+  designerList.innerHTML = matches.map(d => `
+    <div class="designer-item" onclick="selectDesigner(${d.id})">
+      <div class="d-avatar">
+        <img src="${avatarUrl(d.name)}" alt="${d.initials}"
+          onerror="this.style.display='none';this.parentElement.textContent='${d.initials}'">
+      </div>
+      <div class="d-info">
+        <div class="d-name">${d.name}</div>
+        <div class="d-role">${d.role}</div>
+      </div>
+    </div>
+  `).join('');
+  designerList.classList.add('open');
+});
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.designer-search') && !e.target.closest('#designerList'))
+    designerList.classList.remove('open');
+});
+
+function selectDesigner(id){
+  selectedDesigner = designers.find(d => d.id === id);
+  if(!selectedDesigner) return;
+  searchInput.value = selectedDesigner.name;
+  designerList.classList.remove('open');
+
+  // Pre-fill their current values
+  selectedEnergy = selectedDesigner.energy || 'steady';
+  document.querySelectorAll('.energy-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.value === selectedEnergy);
+  });
+  const slider = document.getElementById('loadSlider');
+  slider.value = selectedDesigner.load || 70;
+  updateLoad(slider.value);
+
+  if(selectedDesigner.pto != null)
+    document.getElementById('ptoInput').value = selectedDesigner.pto;
+
+  document.getElementById('stepSignals').style.display = 'block';
+  document.getElementById('stepSignals').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── Energy selection ─────────────────────────────────────────────────────────
+function selectEnergy(val){
+  selectedEnergy = val;
+  document.querySelectorAll('.energy-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.value === val);
+  });
+}
+
+// ── Load slider ──────────────────────────────────────────────────────────────
+function updateLoad(val){
+  const n = parseInt(val);
+  const el = document.getElementById('loadVal');
+  el.innerHTML = `${n}<span style="font-size:13px;font-weight:400;color:var(--muted)">%</span>`;
+  const color = n > 95 ? 'var(--crit)' : n > 85 ? 'var(--warn)' : 'var(--ok)';
+  el.style.color = color;
+}
+
+// ── Submit ───────────────────────────────────────────────────────────────────
+async function submit(){
+  const statusEl = document.getElementById('statusMsg');
+  const btn      = document.getElementById('submitBtn');
+  statusEl.className = 'status-msg';
+
+  if(!selectedDesigner){
+    statusEl.textContent = 'Please select your name first.';
+    statusEl.className = 'status-msg error';
+    return;
+  }
+  if(!selectedEnergy){
+    statusEl.textContent = 'Please select your energy level.';
+    statusEl.className = 'status-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const ptoRaw = document.getElementById('ptoInput').value;
+  const payload = {
+    energy: selectedEnergy,
+    load:   parseInt(document.getElementById('loadSlider').value),
+  };
+  if(ptoRaw !== '') payload.pto = parseInt(ptoRaw);
+
+  try {
+    await sbXhr('PATCH', `designers?id=eq.${selectedDesigner.id}`, payload);
+    // Show success
+    document.getElementById('mainCard').style.display = 'none';
+    document.getElementById('successCard').style.display = 'block';
+    document.getElementById('successTitle').textContent = `Thanks, ${selectedDesigner.name.split(' ')[0]}!`;
+    document.getElementById('successSub').textContent =
+      `Your signals — ${selectedEnergy} energy, ${payload.load}% load${payload.pto != null ? ', '+payload.pto+' days PTO' : ''} — are live on the dashboard.`;
+  } catch(e){
+    statusEl.textContent = `Save failed: ${e.message}`;
+    statusEl.className = 'status-msg error';
+    btn.disabled = false;
+    btn.textContent = 'Submit check-in';
+  }
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+function resetForm(){
+  selectedDesigner = null;
+  selectedEnergy   = null;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('stepSignals').style.display = 'none';
+  document.getElementById('statusMsg').className = 'status-msg';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = 'Submit check-in';
+  document.getElementById('mainCard').style.display = 'block';
+  document.getElementById('successCard').style.display = 'none';
+  document.getElementById('loadSlider').value = 70;
+  updateLoad(70);
+  document.querySelectorAll('.energy-btn').forEach(b => b.classList.remove('selected'));
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+loadDesigners();
+</script>
+</body>
+</html>
