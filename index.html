@@ -5656,16 +5656,20 @@ function renderPulse(){
   const lowE    = designers.filter(d=>d.energy==='low').length;
   const avgLoad   = Math.round(designers.reduce((s,d)=>s+d.load,0)/n);
   const atSafe    = designers.filter(d=>d.context<=2).length;
-  const over3     = n - atSafe;
   const benchN    = designers.filter(d => d.context === 0).length;
   const benchAvail = designers.filter(d => d.context === 0 && d.pto <= 14).length;
   const alertN    = designers.filter(d=>d.status==='alert').length;
+
+  const multiN  = designers.filter(d => d.context >= 2).length;
+  const over3   = designers.filter(d => d.context >= 3).length;
 
   const energyCls = lowE > 0 ? 'trend-down' : highE >= n/2 ? 'trend-up' : 'trend-warn';
   const energyLbl = lowE > 0 ? `↓ ${lowE} reporting low` : highE >= n/2 ? '↑ mostly high' : '→ mostly steady';
   const loadCls   = avgLoad > 90 ? 'trend-down' : avgLoad > 85 ? 'trend-warn' : 'trend-flat';
   const loadLbl   = avgLoad > 90 ? '↑ above ceiling' : avgLoad > 85 ? '↑ near target' : '→ within target';
   const alertCls  = alertN === 0 ? 'trend-up' : alertN <= 2 ? 'trend-warn' : 'trend-down';
+  const multiCls  = over3 > 0 ? 'trend-down' : multiN > n/2 ? 'trend-warn' : 'trend-flat';
+  const multiLbl  = over3 > 0 ? `↑ ${over3} on 3+ projects` : multiN > 0 ? `${n - multiN} on 1 or fewer` : '→ all on single projects';
 
   document.getElementById('pulseStrip').innerHTML = `
     <div class="strip-cell">
@@ -5679,6 +5683,12 @@ function renderPulse(){
       <div class="strip-label">Average capacity</div>
       <div class="strip-value">${avgLoad}<span class="unit">%</span></div>
       <div class="strip-trend ${loadCls}">${loadLbl}</div>
+    </div>
+    <div class="strip-cell">
+      <div class="strip-icon context"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6" rx="1"/><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="12" width="6" height="6" rx="1"/><rect x="9" y="12" width="6" height="6" rx="1"/></svg></div>
+      <div class="strip-label">On 2+ projects</div>
+      <div class="strip-value" style="${over3 > 0 ? 'color:var(--crit)' : multiN > n/2 ? 'color:var(--warn)' : ''}">${multiN}<span class="unit"> / ${n}</span></div>
+      <div class="strip-trend ${multiCls}">${multiLbl}</div>
     </div>
     <div class="strip-cell" onclick="document.querySelector('.chip[data-filter=bench]').click()" style="cursor:pointer" title="Click to filter bench designers">
       <div class="strip-icon bench"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="12" y1="20" x2="12" y2="16"/></svg></div>
