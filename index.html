@@ -3146,6 +3146,11 @@ function openDrawer(id, _preloaded){
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><polyline points="9 15 12 18 15 15"/></svg>
           Download full self-assessment PDF
         </a>` : ''}
+      ${d.workdayUrl ? `
+        <a href="${d.workdayUrl}" target="_blank" rel="noopener" class="assessment-download-link" style="margin-top:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          View Workday profile
+        </a>` : ''}
     </div>
 
     <div class="drawer-section">
@@ -3921,7 +3926,7 @@ function dbDesignerToApp(row, dpRows){
     .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a', alloc: dp.allocation || null }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
-    load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '',
+    load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '', workdayUrl: row.workday_url || '',
     skills: row.skills || [], achievements: row.achievements || [], pastProjects: row.past_projects || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
@@ -3968,7 +3973,7 @@ async function saveDesignerToSupabase(d){
     name: d.name, initials: d.initials, role: d.role, status: d.status,
     load: d.load, energy: d.energy, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
     skills: d.skills, achievements: d.achievements || [], past_projects: d.pastProjects || [], history: d.history,
-    assessment_url: d.assessmentUrl || null, last_updated: d.lastUpdated
+    assessment_url: d.assessmentUrl || null, workday_url: d.workdayUrl || null, last_updated: d.lastUpdated
   };
   // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
   const existingId = d.id && d.id !== null && d.id !== 'NEW' ? d.id : null;
@@ -4454,6 +4459,11 @@ function editDesigner(id, focusSub){
           <span id="assessmentUploadStatus" style="font-size:12px;color:var(--muted)">Or paste a link above</span>
         </div>
         <div class="form-hint" style="margin-top:8px">Uploading sends the file to Supabase Storage and fills the link automatically. Requires Supabase Storage to be enabled on your project.</div>
+      </div>
+      <div class="form-group full" style="margin-top:14px">
+        <label class="form-label">Workday profile link</label>
+        <input type="text" class="form-input" id="f_workday_url" value="${d.workdayUrl||''}" placeholder="https://wd3.myworkday.com/…">
+        <div class="form-hint" style="margin-top:4px">Link to the designer's profile in Workday for the allocation team.</div>
       </div>
     </div>
 
@@ -5954,6 +5964,7 @@ async function saveDesigner(){
   d.load        = parseInt(document.getElementById('f_load')?.value) || d.load;
   d.pto         = parseInt(document.getElementById('f_pto')?.value) ?? d.pto;
   d.assessmentUrl = (document.getElementById('f_assessment_url')?.value || '').trim() || d.assessmentUrl || '';
+  d.workdayUrl    = (document.getElementById('f_workday_url')?.value || '').trim() || d.workdayUrl || '';
   d.lastUpdated.profile = new Date().toISOString();
 
   document.querySelectorAll('[data-skill-idx]').forEach(el => {
