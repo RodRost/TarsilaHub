@@ -907,11 +907,9 @@ html,body{
   margin-bottom:10px;
 }
 .strip-icon svg{width:16px;height:16px;stroke-width:1.75}
-.strip-icon.energy {background:#ECFDF3;color:var(--ok)}
-.strip-icon.load   {background:#EFF4FE;color:var(--accent)}
-.strip-icon.context{background:#FEF6EC;color:var(--warn)}
+.strip-icon.load   {background:var(--accent-soft);color:var(--accent)}
+.strip-icon.context{background:var(--warn-soft);color:var(--warn)}
 .strip-icon.focus  {background:var(--accent-soft);color:var(--accent)}
-[data-theme="dark"] .strip-icon.energy {background:#14291F}
 [data-theme="dark"] .strip-icon.load   {background:#0F2035}
 [data-theme="dark"] .strip-icon.context{background:#2A1F0A}
 [data-theme="dark"] .strip-icon.focus  {background:#1E1B30}
@@ -937,7 +935,7 @@ html,body{
 }
 .panel-title-icon .p-ic svg{width:13px;height:13px;stroke-width:2}
 .panel-title-icon .p-ic.alerts-ic {background:var(--crit-soft);color:var(--crit)}
-.panel-title-icon .p-ic.dist-ic   {background:#EFF4FE;color:var(--accent)}
+.panel-title-icon .p-ic.dist-ic   {background:var(--accent-soft);color:var(--accent)}
 [data-theme="dark"] .panel-title-icon .p-ic.dist-ic{background:#0F2035}
 .panel-title-icon .p-ic.queue-ic  {background:var(--ok-soft);color:var(--ok)}
 
@@ -1776,7 +1774,7 @@ html,body{
   .drawer-body { padding:0 !important; }
   .app, .main-view { display:none !important; }
   body { background:white !important; color:black !important; }
-  .panel { box-shadow:none !important; border:1px solid #ddd !important; }
+  .panel { box-shadow:none !important; border:1px solid var(--line) !important; }
 }
 
 /* ===== HEADER NAV TABS ===== */
@@ -1861,7 +1859,7 @@ html,body{
 .avail-badge{font-size:10.5px;padding:2px 8px;border-radius:999px;font-weight:500;white-space:nowrap}
 .avail-badge.free{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-border,#BBF7D0)}
 .avail-badge.partial{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-border,#FDE68A)}
-.avail-badge.full{background:var(--crit-soft);color:var(--crit);border:1px solid #FECACA}
+.avail-badge.full{background:var(--crit-soft);color:var(--crit);border:1px solid var(--crit)}
 [data-theme="dark"] .avail-badge.full{border-color:#5A1E1E}
 
 /* ===== BENCH ===== */
@@ -3054,7 +3052,7 @@ function renderDigestButton(){
   const triggerFn = () => {
     const btn = container.querySelector('.claude-btn');
     if(btn){ btn.disabled = true; btn.textContent = 'Generating digest…'; }
-    let outputEl = document.getElementById('digest-output');
+    let outputEl = document.querySelector('.digest-output');
     if(!outputEl){
       outputEl = document.createElement('div');
       outputEl.id = 'digest-output';
@@ -3826,7 +3824,7 @@ function openProjectDrawer(projId, _preloaded){
     <div class="drawer-section">
       <div class="action-row">
         <button class="btn primary">${p.openRole?'Open staffing decision':'Open project brief'}</button>
-        <button class="btn">Export profile</button>
+        <button class="btn" onclick="window.open('profile.html?id='+currentEditId,'_blank')">Export profile</button>
       </div>
     </div>
   `;
@@ -5904,96 +5902,6 @@ function renderTimeline(){
 }
 
 // ── TEAM SKILL MAP + SKILL GAP ────────────────────────────────
-function renderSkillsPanel(){
-  const SKILLS = ['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'];
-
-  // Skill map — for each skill, how many designers at each level
-  const mapEl = document.getElementById('skillMapGrid');
-  if(mapEl){
-    const rows = SKILLS.map(skill => {
-      const counts = [0,0,0,0,0]; // levels 1,2,3,4,5
-      designers.forEach(d => {
-        const entry = (d.skills||[]).find(([s])=>s===skill);
-        if(entry && entry[1] >= 1 && entry[1] <= 4) counts[entry[1]-1]++;
-      });
-      const lvlLabels = ['Foundational','Developing','Consistent','Leading','Expert'];
-      const lvlCls    = ['l1','l2','l3','l4','l5'];
-      return `
-        <div class="skill-map-row">
-          <div class="skill-map-label">${skill}</div>
-          ${counts.map((c,i) => `
-            <div class="skill-map-cell">
-              ${c > 0 ? `<span class="skill-map-dot ${lvlCls[i]}">${c}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}
-            </div>`).join('')}
-        </div>`;
-    }).join('');
-
-    mapEl.innerHTML = `
-      <div class="skill-map-grid">
-        <div class="skill-map-head">Skill</div>
-        <div class="skill-map-head">Foundational</div>
-        <div class="skill-map-head">Developing</div>
-        <div class="skill-map-head">Consistent</div>
-        <div class="skill-map-head">Leading</div>
-        <div class="skill-map-head">Expert</div>
-        ${rows}
-      </div>`;
-  }
-
-  // Skill gap — compare project needs vs team supply at Lead+ level
-  const gapEl = document.getElementById('skillGapGrid');
-  if(gapEl){
-    const teamSupply = {};
-    SKILLS.forEach(skill => {
-      teamSupply[skill] = designers.filter(d => {
-        const entry = (d.skills||[]).find(([s])=>s===skill);
-        return entry && entry[1] >= 3; // Lead or Teach
-      }).length;
-    });
-
-    const projectDemand = {};
-    SKILLS.forEach(skill => { projectDemand[skill] = 0; });
-    projects.forEach(p => {
-      (p.needs||[]).forEach(([skill, lvl]) => {
-        if(lvl >= 3 && projectDemand[skill] !== undefined) projectDemand[skill]++;
-      });
-    });
-
-    const gaps = SKILLS.map(skill => ({
-      skill,
-      demand: projectDemand[skill],
-      supply: teamSupply[skill],
-      gap:    projectDemand[skill] - teamSupply[skill]
-    })).filter(x => x.demand > 0).sort((a,b) => b.gap - a.gap);
-
-    if(!gaps.length){
-      gapEl.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12.5px">No active projects with defined skill needs.</div>';
-    } else {
-      gapEl.innerHTML = `<div style="padding:0 16px">` + gaps.map(g => {
-        const isGap = g.gap > 0;
-        const barW  = Math.min(100, g.demand > 0 ? (g.supply/g.demand)*100 : 100);
-        return `
-          <div style="padding:12px 0;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:160px 60px 60px 1fr;gap:12px;align-items:center;font-size:13px">
-            <div style="font-weight:500">${g.skill}</div>
-            <div style="text-align:center">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Need</div>
-              <div style="font-weight:600;color:${isGap?'var(--crit)':'var(--ink)'}">${g.demand}</div>
-            </div>
-            <div style="text-align:center">
-              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Have</div>
-              <div style="font-weight:600;color:${isGap?'var(--warn)':'var(--ok)'}">${g.supply}</div>
-            </div>
-            <div>
-              <div style="height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden">
-                <div style="height:100%;width:${barW}%;background:${isGap?'var(--warn)':'var(--ok)'};border-radius:999px"></div>
-              </div>
-              ${isGap ? `<div style="font-size:11px;color:var(--crit);margin-top:3px">↑ ${g.gap} more Lead+ needed</div>` : `<div style="font-size:11px;color:var(--ok);margin-top:3px">✓ Covered</div>`}
-            </div>
-          </div>`;
-      }).join('') + '</div>';
-    }
-  }
-}
 
 function renderArchivePanel(){
   updateArchiveTabCount();
