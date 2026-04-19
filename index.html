@@ -4174,8 +4174,8 @@ async function persistDataLocally(){
   if(typeof window.storage === 'undefined') return;
   try {
     const payload = {
-      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, achievements:d.achievements||[], load:d.load, energy:d.energy, meetingLoad:d.meetingLoad, context:d.context, pto:d.pto, status:d.status, history:d.history, photo:d.photo })),
-      projects:  projects.map(p  => ({ id:p.id, name:p.name, client:p.client, phase:p.phase, health:p.health, healthLabel:p.healthLabel, priority:p.priority, deadline:p.deadline, lastUpdated:p.lastUpdated, needs:p.needs, stakeholder:p.stakeholder, risks:p.risks, growthOps:p.growthOps })),
+      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, achievements:d.achievements||[], pastProjects:d.pastProjects||[], load:d.load, meetingLoad:d.meetingLoad, context:d.context, pto:d.pto, status:d.status, history:d.history, photo:d.photo })),
+      projects:  projects.map(p  => ({ id:p.id, name:p.name, client:p.client, phase:p.phase, health:p.health, healthLabel:p.healthLabel, priority:p.priority, deadline:p.deadline, lastUpdated:p.lastUpdated, needs:p.needs, stakeholder:p.stakeholder, risks:p.risks, growthOps:p.growthOps, pastTeam:p.pastTeam||[] })),
       savedAt: new Date().toISOString()
     };
     await window.storage.set(LOCAL_STORE_KEY, JSON.stringify(payload));
