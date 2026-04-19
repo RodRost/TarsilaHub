@@ -1902,7 +1902,10 @@ html,body{
   </div>
   <div class="modal-body" id="modalBody"></div>
   <div class="modal-foot">
-    <div class="modal-foot-left" id="modalMeta"></div>
+    <div class="modal-foot-left">
+      <span id="modalMeta"></span>
+      <span id="modalError" style="font-size:12px;color:var(--crit);margin-left:8px"></span>
+    </div>
     <div class="modal-foot-right">
       <button class="btn" id="modalCancel">Cancel</button>
       <button class="btn primary" id="modalSave">Save changes</button>
@@ -3057,13 +3060,13 @@ const LOCAL_STORE_KEY = 'atelier_admin_data';
 // Once you've connected via the Settings panel, copy your URL and key
 // into these two constants so every visitor auto-connects without setup.
 // The anon key is safe to embed — RLS controls what anonymous users can do.
-const EMBEDDED_SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co'; // e.g. 'https://xxxx.supabase.co'
-const EMBEDDED_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w'; // e.g. 'eyJhbGci...'
+const EMBEDDED_SB_URL = ''; // e.g. 'https://xxxx.supabase.co'
+const EMBEDDED_SB_KEY = ''; // e.g. 'eyJhbGci...'
 
 // ---- ADMIN PIN ----
 // Set a PIN so only your team can edit data. Viewers can see everything.
 // Change this to any string your team will remember.
-const ADMIN_PIN = '079107'; // e.g. '2024ops' — leave empty to disable PIN lock
+const ADMIN_PIN = ''; // e.g. '2024ops' — leave empty to disable PIN lock
 
 let sbUrl = '', sbKey = '';
 let persistenceMode = 'memory'; // 'supabase' | 'local' | 'memory'
@@ -3094,7 +3097,7 @@ function sbXhr(method, path, body){
     xhr.setRequestHeader('Authorization', 'Bearer ' + sbKey);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
-    if(method === 'POST' || method === 'PATCH') {
+    if(method === 'POST' || method === 'PATCH'){
       xhr.setRequestHeader('Prefer', 'return=representation');
     }
     xhr.timeout = 12000;
@@ -3103,11 +3106,15 @@ function sbXhr(method, path, body){
         try { resolve(xhr.responseText ? JSON.parse(xhr.responseText) : null); }
         catch(e){ resolve(null); }
       } else {
-        reject(new Error(`HTTP ${xhr.status}: ${xhr.responseText || 'error'}`));
+        let msg = `HTTP ${xhr.status}`;
+        try { const j = JSON.parse(xhr.responseText); msg = j.message || j.error || msg; } catch(e){}
+        reject(new Error(msg));
       }
     };
-    xhr.onerror   = () => reject(new Error('Network error — check your Supabase URL and that the project is running.'));
-    xhr.ontimeout = () => reject(new Error('Request timed out.'));
+    xhr.onerror = () => reject(new Error(
+      'CORS or network error. In Supabase go to: Project Settings → API → CORS Allowed Origins → add https://rodrost.github.io'
+    ));
+    xhr.ontimeout = () => reject(new Error('Request timed out — check your Supabase URL.'));
     xhr.send(body ? JSON.stringify(body) : null);
   });
 }
@@ -3172,11 +3179,16 @@ async function saveDesignerToSupabase(d){
     load: d.load, energy: d.energy, context: d.context, focus: d.focus, pto: d.pto,
     skills: d.skills, growth: d.growth, history: d.history, last_updated: d.lastUpdated
   };
-  if(d.id && typeof d.id === 'number'){
-    await sbXhr('PATCH', `designers?id=eq.${d.id}`, payload);
+  // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
+  const existingId = d.id && d.id !== null && d.id !== 'NEW' ? d.id : null;
+  if(existingId){
+    // Update existing row
+    await sbXhr('PATCH', `designers?id=eq.${existingId}`, payload);
   } else {
+    // Insert new row — Supabase returns the created row with its real id
     const rows = await sbXhr('POST', 'designers', payload);
     if(Array.isArray(rows) && rows[0]) d.id = rows[0].id;
+    else if(rows && rows.id) d.id = rows.id;
   }
 }
 
@@ -3494,11 +3506,12 @@ let currentEditId = null;
 let currentEditType = null;
 
 function editDesigner(id, focusSub){
-  currentEditId = id;
+  // Use a string sentinel for new designers so saveDesigner can reliably detect isNew
+  currentEditId = id === null ? 'NEW' : id;
   currentEditType = 'designer';
   const isNew = id === null;
   const d = isNew ? {
-    id: Math.max(...designers.map(x=>x.id)) + 1,
+    id: 'NEW',
     name: '', role: 'Product Designer', initials: '', status: 'steady',
     load: 70, energy: 3.8, context: 1, focus: 12, pto: 0,
     projects: [],
@@ -3907,7 +3920,18 @@ function transitionReview(subId){
 const modal = document.getElementById('modal');
 const modalOverlay = document.getElementById('modalOverlay');
 function openModal(){ modal.classList.add('open'); modalOverlay.classList.add('open'); }
-function closeModal(){ modal.classList.remove('open'); modalOverlay.classList.remove('open'); currentEditId = null; currentEditType = null; transitionContext = null; }
+function closeModal(){
+  modal.classList.remove('open');
+  modalOverlay.classList.remove('open');
+  currentEditId = null;
+  currentEditType = null;
+  transitionContext = null;
+  // Reset button and error state
+  const saveBtn = document.getElementById('modalSave');
+  const errEl   = document.getElementById('modalError');
+  if(saveBtn){ saveBtn.disabled = false; saveBtn.textContent = 'Save changes'; }
+  if(errEl)  errEl.textContent = '';
+}
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('modalCancel').addEventListener('click', closeModal);
 modalOverlay.addEventListener('click', closeModal);
@@ -3919,47 +3943,57 @@ document.getElementById('modalSave').addEventListener('click', async () => {
 });
 
 async function saveDesigner(){
-  const isNew = !designers.find(x => x.id === currentEditId);
+  const isNew = currentEditId === 'NEW';
   let d = isNew ? null : designers.find(x => x.id === currentEditId);
   if(isNew){
     d = {
-      id: persistenceMode === 'supabase' ? null : currentEditId,
+      id: null,
       status: 'steady',
-      load: 70, energy: 3.8, context: 0, focus: 12, pto: 0,
+      load: 70, energy: 3.8, context: 1, focus: 12, pto: 0,
       projects: [],
+      skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
+      growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
       history: [4,4,4,4,4,4,4],
       lastUpdated: { profile: new Date().toISOString(), skills: new Date().toISOString(), growth: new Date().toISOString() }
     };
     designers.push(d);
   }
 
-  d.name = document.getElementById('f_name').value.trim();
+  d.name     = document.getElementById('f_name').value.trim();
   d.initials = document.getElementById('f_initials').value.trim().toUpperCase();
-  d.role = document.getElementById('f_role').value;
+  d.role     = document.getElementById('f_role').value;
   d.lastUpdated.profile = new Date().toISOString();
 
   document.querySelectorAll('[data-skill-idx]').forEach(el => {
     const i = parseInt(el.dataset.skillIdx);
-    d.skills[i][1] = parseInt(el.value);
+    if(d.skills[i]) d.skills[i][1] = parseInt(el.value);
   });
   d.lastUpdated.skills = new Date().toISOString();
 
   d.growth = d.growth.map((g, i) => ({
-    g: document.getElementById(`f_goal${i}`).value.trim(),
-    p: parseInt(document.getElementById(`f_gp${i}`).value) || 0,
-    link: document.getElementById(`f_gl${i}`).value.trim()
+    g:    (document.getElementById(`f_goal${i}`)?.value || '').trim(),
+    p:    parseInt(document.getElementById(`f_gp${i}`)?.value) || 0,
+    link: (document.getElementById(`f_gl${i}`)?.value  || '').trim()
   }));
   d.lastUpdated.growth = new Date().toISOString();
 
   if(!d.name || !d.initials){
-    alert('Name and initials are required');
+    document.getElementById('modalError').textContent = 'Name and initials are required.';
     if(isNew) designers.pop();
     return;
   }
 
+  const saveBtn = document.getElementById('modalSave');
+  const errEl   = document.getElementById('modalError');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  errEl.textContent = '';
+
   try {
     if(persistenceMode === 'supabase'){
       await saveDesignerToSupabase(d);
+    } else if(isNew){
+      d.id = Math.max(0, ...designers.filter(x => typeof x.id === 'number').map(x => x.id)) + 1;
     }
     designers.sort((a,b) => statusOrder[a.status] - statusOrder[b.status]);
     await persistData();
@@ -3969,10 +4003,13 @@ async function saveDesigner(){
     renderList('all');
     renderHealthBanner();
     updateHeaderCounts();
-    showToast((isNew ? `Added ${d.name}` : `Updated ${d.name}`) + (persistenceMode === 'supabase' ? ' · saved to Supabase' : ''));
+    showToast(isNew ? `Added ${d.name}` : `Updated ${d.name}`);
   } catch(e){
-    showToast(`Save failed: ${e.message}`);
+    errEl.textContent = `Save failed: ${e.message}`;
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save changes';
     console.error('saveDesigner error:', e);
+    if(isNew) designers.pop();
   }
 }
 
