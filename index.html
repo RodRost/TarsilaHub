@@ -3075,7 +3075,7 @@ function claudeBtnInner(label){
 const listEl = document.getElementById('designerList');
 
 function signalClass(signal, value){
-  if(signal==='load'){ if(value>95) return 'crit'; if(value>85) return 'warn'; return 'ok'; }
+  if(signal==='load'){ if(value>100) return 'crit'; if(value>85) return 'warn'; return 'ok'; }
   if(signal==='energy'){ if(value==='low') return 'crit'; if(value==='steady') return 'warn'; return 'ok'; }
   if(signal==='context'){ if(value>=3) return 'crit'; return 'ok'; }
 
@@ -5567,7 +5567,7 @@ function renderAvailability(){
     return { d, committed, headroom, activeProjs };
   });
 
-  const fillColor = pct => pct > 90 ? 'var(--crit)' : pct > 75 ? 'var(--warn)' : 'var(--accent)';
+  const fillColor = pct => pct > 100 ? 'var(--crit)' : pct > 85 ? 'var(--warn)' : 'var(--accent)';
   const badge = (h) => h >= 40 ? `<span class="avail-badge free">Available</span>` :
                         h >= 15 ? `<span class="avail-badge partial">${h}% free</span>` :
                         `<span class="avail-badge full">Full</span>`;
@@ -5616,14 +5616,14 @@ function renderCapacity(){
   const avgLoad        = Math.round(designers.reduce((s,d) => s + d.load, 0) / n);
   const headroomPct    = Math.max(0, 100 - avgLoad);
   const availableDs    = designers.filter(d => d.load <= 80 && d.status !== 'alert');
-  const overloadedDs   = designers.filter(d => d.load > 95);
-  const fillCls        = avgLoad > 95 ? 'crit' : avgLoad > 85 ? 'warn' : '';
+  const overloadedDs   = designers.filter(d => d.load > 100);
+  const fillCls        = avgLoad > 100 ? 'crit' : avgLoad > 85 ? 'warn' : '';
 
   el.innerHTML = `
     <div class="capacity-grid">
       <div class="capacity-card">
         <div class="capacity-card-label">Average allocation</div>
-        <div class="capacity-card-val" style="${avgLoad>95?'color:var(--crit)':avgLoad>85?'color:var(--warn)':''}">${avgLoad}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
+        <div class="capacity-card-val" style="${avgLoad>100?'color:var(--crit)':avgLoad>85?'color:var(--warn)':''}">${avgLoad}<span style="font-size:14px;font-weight:400;color:var(--muted)">%</span></div>
         <div class="capacity-card-sub">Average across ${n} designers</div>
         <div class="capacity-bar"><div class="capacity-bar-fill ${fillCls}" style="width:${Math.min(avgLoad,100)}%"></div></div>
       </div>
@@ -5650,9 +5650,9 @@ function renderCapacity(){
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:140px;font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0">${d.name}</div>
             <div style="flex:1;height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden">
-              <div style="height:100%;width:${Math.min(d.load,100)}%;border-radius:999px;background:${d.load>95?'var(--crit)':d.load>85?'var(--warn)':'var(--accent)'}"></div>
+              <div style="height:100%;width:${Math.min(d.load,100)}%;border-radius:999px;background:${d.load>100?'var(--crit)':d.load>85?'var(--warn)':'var(--accent)'}"></div>
             </div>
-            <div style="font-size:12px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right;color:${d.load>95?'var(--crit)':d.load>85?'var(--warn)':'var(--muted)'}">${d.load}%</div>
+            <div style="font-size:12px;font-variant-numeric:tabular-nums;min-width:36px;text-align:right;color:${d.load>100?'var(--crit)':d.load>85?'var(--warn)':'var(--muted)'}">${d.load}%</div>
             ${d.context===0?'<span class="bench-chip" style="font-size:10px;padding:1px 6px">Available</span>':''}
           </div>`).join('')}
       </div>
@@ -6817,8 +6817,8 @@ function renderPulse(){
 
   const multiN  = designers.filter(d => d.context >= 2).length;
   const over3   = designers.filter(d => d.context >= 3).length;
-  const loadCls   = avgLoad > 90 ? 'trend-down' : avgLoad > 85 ? 'trend-warn' : 'trend-flat';
-  const loadLbl   = avgLoad > 90 ? '↑ above ceiling' : avgLoad > 85 ? '↑ near target' : '→ within target';
+  const loadCls   = avgLoad > 100 ? 'trend-down' : avgLoad > 85 ? 'trend-warn' : 'trend-flat';
+  const loadLbl   = avgLoad > 100 ? '↑ above ceiling' : avgLoad > 85 ? '↑ near target' : '→ within target';
   const alertCls  = alertN === 0 ? 'trend-up' : alertN <= 2 ? 'trend-warn' : 'trend-down';
   const multiCls  = over3 > 0 ? 'trend-down' : multiN > n/2 ? 'trend-warn' : 'trend-flat';
   const multiLbl  = over3 > 0 ? `↑ ${over3} on 3+ projects` : multiN > 0 ? `${n - multiN} on 1 or fewer` : '→ all on single projects';
@@ -6915,7 +6915,7 @@ function renderSidebar(){
   document.getElementById('sidebarAlerts').innerHTML = shown.length ? shown.map(d => {
     const isAlert = d.status === 'alert';
     const reasons = [];
-    if(d.load > 95) reasons.push(`Load ${d.load}%`);
+    if(d.load > 100) reasons.push(`Load ${d.load}%`);
     if(d.context >= 3) reasons.push(`${d.context} active projects`);
     if(d.pto > 90) reasons.push(`${d.pto} days since PTO`);
     const reasonStr = reasons.length ? reasons.join(' · ') : `Status: ${d.status}`;
@@ -7011,7 +7011,7 @@ function renderSidebar(){
   // Distribution bars
   const loadOk   = designers.filter(d => d.load <= 85).length;
   const loadWarn = designers.filter(d => d.load > 85 && d.load <= 95).length;
-  const loadCrit = designers.filter(d => d.load > 95).length;
+  const loadCrit = designers.filter(d => d.load > 100).length;
   const ctxOk    = designers.filter(d => d.context <= 2).length;
   const ctxWarn  = designers.filter(d => d.context === 2 && d.load > 80).length; // high load + dual
   const ctxCrit  = designers.filter(d => d.context >= 3).length;
