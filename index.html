@@ -2461,14 +2461,32 @@ function build1on1Prompt(designer){
 
   return {
     system: `You are helping a design manager prepare for a 1:1 conversation. Write a practical prep note — not a performance review, not therapy notes. The goal is to help the manager walk in ready: knowing what to acknowledge, what to ask (open questions only), and what to watch. Format as three short sections: "Acknowledge", "Ask", "Watch for". Keep each section to 2-3 bullet points. Be specific — use the data. Never suggest the manager share the raw numbers with the designer.`,
-    user: `DESIGNER STATE:\n${dStr}\n\nENERGY TREND (7 weeks): ${historyStr}\n\nACTIVE PROJECTS: ${projectDetails}\n\nGenerate the 1:1 prep note for this manager. Status is ${designer.status.toUpperCase()}.`
+    user: `DESIGNER STATE:\n${dStr}\n\nENERGY TREND (7 weeks): ${historyStr}\n\nMEETING LOAD THIS WEEK: ${designer.meetingLoad||'balanced'}\n\nACTIVE PROJECTS: ${projectDetails}\n\nGenerate the 1:1 prep note for this manager. Status is ${designer.status.toUpperCase()}.`
   };
 }
 
 function render1on1Button(designer, containerEl){
+  // Check whether a proxy is configured — AI features need it outside Claude.ai
+  let proxyUrl = (typeof CLAUDE_PROXY_URL !== 'undefined' && CLAUDE_PROXY_URL) ? CLAUDE_PROXY_URL : '';
+  if(!proxyUrl) try { proxyUrl = localStorage.getItem(PROXY_URL_KEY) || ''; } catch(e){}
+  if(!proxyUrl && window._claudeProxyOverride) proxyUrl = window._claudeProxyOverride;
+
+  const isClaudeAi = window.location.hostname === 'claude.ai'
+                  || window.location.hostname === 'localhost'
+                  || window.location.protocol === 'file:';
+
   const outputEl = document.createElement('div');
   outputEl.id = `prep-output-${designer.id}`;
-  containerEl.appendChild(outputEl);
+
+  if(!proxyUrl && !isClaudeAi){
+    // Show setup prompt instead of a broken button
+    const notice = document.createElement('div');
+    notice.style.cssText = 'margin-top:10px;padding:10px 12px;background:var(--warn-soft);border:1px solid #FDE68A;border-radius:var(--r-md);font-size:12.5px;color:var(--warn);line-height:1.5';
+    notice.innerHTML = 'AI prep notes need a Claude proxy to work from this domain. Go to <b>Admin → Settings → Claude AI proxy</b> to set it up.';
+    containerEl.appendChild(notice);
+    containerEl.appendChild(outputEl);
+    return;
+  }
 
   const triggerFn = () => {
     const btn = containerEl.querySelector('.claude-btn');
@@ -2484,7 +2502,8 @@ function render1on1Button(designer, containerEl){
   btn.className = 'claude-btn';
   btn.innerHTML = claudeBtnInner('Generate 1:1 prep note');
   btn.addEventListener('click', triggerFn);
-  containerEl.insertBefore(btn, outputEl);
+  containerEl.appendChild(btn);
+  containerEl.appendChild(outputEl);
 }
 
 // ==============================================================
@@ -2739,10 +2758,6 @@ function openDrawer(id, _preloaded){
           `<b>Level 1 check-in.</b> Private 1:1 within the week. Understand the trend before adjusting the work. ${d.pto>60?'PTO is overdue — encourage scheduling.':''}`
         :
           `<b>Steady.</b> Monthly 1:1 on the regular cadence. Consider stretch work if growth signals are strong.`}
-      </div>
-      <div class="action-row">
-        <button class="btn primary">Open 1:1 prep</button>
-        <button class="btn">Reshuffle work</button>
       </div>
     </div>
   `;
