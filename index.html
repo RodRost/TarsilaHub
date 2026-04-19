@@ -1798,6 +1798,18 @@ html,body{
 .page{display:none}
 .page.active-page{display:block}
 
+/* ===== PULSE PERIOD SELECTOR ===== */
+.pulse-period-select{
+  font-family:inherit;font-size:12.5px;font-weight:500;
+  padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);
+  cursor:pointer;outline:none;
+  transition:border-color .12s;
+}
+.pulse-period-select:hover{border-color:var(--muted-2)}
+.pulse-period-select:focus{border-color:var(--accent)}
+
 /* ===== SKILL SUMMARY CARDS ===== */
 .skill-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:700px){.skill-summary-grid{grid-template-columns:1fr}}
@@ -1981,8 +1993,8 @@ html,body{
     <div class="section-title">
       <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
       <h2>Team Pulse</h2>
-      <span class="count">This week</span>
     </div>
+    <select id="teamPulsePeriod" class="pulse-period-select" onchange="renderPulse()"></select>
   </div>
 
   <div class="strip" id="pulseStrip"></div>
@@ -2099,8 +2111,8 @@ html,body{
     <div class="section-title">
       <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
       <h2>Project Pulse</h2>
-      <span class="count">This week</span>
     </div>
+    <select id="projectPulsePeriod" class="pulse-period-select" onchange="renderProjectPulse()"></select>
   </div>
   <div class="strip" id="projectPulseStrip" style="margin-bottom:32px"></div>
 
@@ -5659,6 +5671,53 @@ function renderCapacity(){
     </div>`;
 }
 
+// ── PERIOD SELECTOR HELPERS ────────────────────────────────────
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function initPeriodSelects(){
+  const now   = new Date();
+  const curM  = now.getMonth();
+  const curY  = now.getFullYear();
+  // Build 6 months: previous, current, next 4
+  const options = [];
+  for(let i = -1; i <= 4; i++){
+    let m = curM + i, y = curY;
+    if(m < 0){ m += 12; y--; }
+    if(m > 11){ m -= 12; y++; }
+    const val   = `${y}-${String(m).padStart(2,'0')}`;
+    const label = i === -1 ? `Last month (${MONTH_SHORT[m]})` :
+                  i === 0  ? `This month (${MONTH_SHORT[m]})` :
+                  i === 1  ? `Next month (${MONTH_SHORT[m]})` :
+                  `${MONTH_SHORT[m]} ${y}`;
+    options.push({ val, label, selected: i === 0 });
+  }
+  ['teamPulsePeriod','projectPulsePeriod'].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = options.map(o =>
+      `<option value="${o.val}"${o.selected?' selected':''}>${o.label}</option>`
+    ).join('');
+  });
+}
+
+function getPulsePeriod(selectId){
+  const el  = document.getElementById(selectId);
+  const val = el?.value || '';
+  const [y, m] = val.split('-').map(Number);
+  if(!y || isNaN(m)) return null;
+  return { year: y, month: m }; // month is 0-indexed
+}
+
+function inPeriodMonth(dateStr, period){
+  if(!dateStr || !period) return false;
+  // dateStr is "Mon YYYY" e.g. "Apr 2026"
+  const parts  = dateStr.trim().split(' ');
+  const mon    = MONTH_SHORT.indexOf(parts[0]);
+  const yr     = parseInt(parts[1]);
+  return mon === period.month && yr === period.year;
+}
+
 // ── PROJECT PULSE ──────────────────────────────────────────────
 function renderProjectPulse(){
   const el = document.getElementById('projectPulseStrip');
@@ -5667,21 +5726,24 @@ function renderProjectPulse(){
   const n         = projects.length;
   if(!n){ el.innerHTML = ''; return; }
 
+  const period    = getPulsePeriod('projectPulsePeriod');
+  const periodLabel = period ? `${MONTH_SHORT[period.month]} ${period.year}` : 'this month';
+
   const onTrack   = projects.filter(p => p.health === 'ok').length;
   const atRisk    = projects.filter(p => p.health === 'warn').length;
   const blocked   = projects.filter(p => p.health === 'crit').length;
   const openRoles = projects.filter(p => p.openRole).length;
 
-  // Near deadline: within 30 days
-  const now = Date.now();
+  // Deadlines in selected month
   const soon = projects.filter(p => {
-    if(!p.deadline || p.deadline === 'TBD') return false;
-    const months={'Jan':0,'Feb':1,'Mar':2,'Apr':3,'May':4,'Jun':5,'Jul':6,'Aug':7,'Sep':8,'Oct':9,'Nov':10,'Dec':11};
-    const parts = p.deadline.trim().split(' ');
+    if(!p.deadline || p.deadline === 'TBD' || p.deadline === 'Rolling' || p.deadline === 'Perpetual') return false;
+    const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const parts  = p.deadline.trim().split(' ');
     if(parts.length < 2) return false;
-    const d = new Date(new Date().getFullYear(), months[parts[1]], parseInt(parts[0]));
-    const diff = (d - now) / 864e5;
-    return diff >= 0 && diff <= 30;
+    const dMon = months[parts[1]]; const dDay = parseInt(parts[0]);
+    const yr   = period?.year  ?? new Date().getFullYear();
+    const mon  = period?.month ?? new Date().getMonth();
+    return dMon === mon && new Date(yr, dMon, dDay).getFullYear() === yr;
   }).length;
 
   const onTrackCls  = onTrack === n ? 'trend-up'   : onTrack >= n/2 ? 'trend-flat' : 'trend-warn';
@@ -5722,13 +5784,13 @@ function renderProjectPulse(){
       <div class="strip-value" style="${openRoles > 0 ? 'color:var(--accent)' : 'color:var(--ok)'}">${openRoles}</div>
       <div class="strip-trend ${roleCls}">${openRoles === 0 ? '✓ all staffed' : openRoles === 1 ? '↑ 1 role to fill' : `↑ ${openRoles} roles to fill`}</div>
     </div>
-    <div class="strip-cell" title="Projects with deadline within 30 days">
+    <div class="strip-cell" title="Projects with deadline in ${periodLabel}">
       <div class="strip-icon context" style="background:var(--warn-soft);color:var(--warn)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </div>
-      <div class="strip-label">Due in 30d</div>
+      <div class="strip-label">Due in ${periodLabel}</div>
       <div class="strip-value" style="${soon > 0 ? 'color:var(--warn)' : ''}">${soon}</div>
-      <div class="strip-trend ${soon > 2 ? 'trend-down' : soon > 0 ? 'trend-warn' : 'trend-up'}">${soon === 0 ? '→ nothing imminent' : soon === 1 ? '↑ 1 deadline soon' : `↑ ${soon} deadlines soon`}</div>
+      <div class="strip-trend ${soon > 2 ? 'trend-down' : soon > 0 ? 'trend-warn' : 'trend-up'}">${soon === 0 ? '→ none due this month' : soon === 1 ? '↑ 1 deadline this month' : `↑ ${soon} deadlines this month`}</div>
     </div>
   `;
 }
@@ -6823,49 +6885,34 @@ function renderPulse(){
   const multiCls  = over3 > 0 ? 'trend-down' : multiN > n/2 ? 'trend-warn' : 'trend-flat';
   const multiLbl  = over3 > 0 ? `↑ ${over3} on 3+ projects` : multiN > 0 ? `${n - multiN} on 1 or fewer` : '→ all on single projects';
 
-  // ── Ending-soon: designers with a project allocation ending within 30 days ──
-  const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-  function parseUntil(str){
-    if(!str) return null;
-    const parts = str.trim().split(/\s+/);
-    // Primary format from selects: "Jan 2025"
-    if(parts.length === 2){
-      const mon = MONTHS[parts[0]];
-      const yr  = parseInt(parts[1]);
-      if(mon !== undefined && yr >= 2000) return new Date(yr, mon+1, 0); // last day of month
-    }
-    // Fallback: try to extract a 4-digit year + 3-letter month anywhere in the string
-    const yearMatch = str.match(/\b(20\d\d)\b/);
-    const monMatch  = str.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i);
-    if(yearMatch && monMatch){
-      const mon = MONTHS[monMatch[1].charAt(0).toUpperCase() + monMatch[1].slice(1,3).toLowerCase()];
-      if(mon !== undefined) return new Date(parseInt(yearMatch[1]), mon+1, 0);
-    }
-    return null;
-  }
+  // ── Ending in selected month ──
+  const period = getPulsePeriod('teamPulsePeriod');
+  const periodLabel = period ? `${MONTH_SHORT[period.month]} ${period.year}` : 'this month';
 
-  const now = Date.now();
   const endingSoon = [];
   const endingSoonNames = [];
   designers.forEach(d => {
     (d.projects||[]).forEach(p => {
       if(!p.until) return;
-      const end = parseUntil(p.until);
-      if(!end) return;
-      const days = Math.round((end - now) / 864e5);
-      if(days >= 0 && days <= 30){
-        if(!endingSoon.find(x => x.id === d.id)){
-          endingSoon.push(d);
-          endingSoonNames.push(`${d.name} (${p.n}, ${p.until})`);
-        }
+      if(!inPeriodMonth(p.until, period)) return;
+      if(!endingSoon.find(x => x.id === d.id)){
+        endingSoon.push(d);
+        endingSoonNames.push(`${d.name} (${p.n}, ${p.until})`);
       }
     });
   });
 
+  // ── Projected bench: current bench + designers whose allocations end this month ──
+  const projectedBench = designers.filter(d => {
+    if(d.context === 0) return true; // already on bench
+    const allEnding = (d.projects||[]).every(p => p.until && inPeriodMonth(p.until, period));
+    return allEnding && d.projects.length > 0;
+  }).length;
+
   const endingN   = endingSoon.length;
   const endingCls = endingN > 2 ? 'trend-down' : endingN > 0 ? 'trend-warn' : 'trend-up';
-  const endingLbl = endingN === 0 ? '→ no allocations ending' : endingN === 1 ? `↑ ${endingSoonNames[0].split(' (')[0]}` : `↑ ${endingN} ending soon`;
-  const endingTitle = endingN > 0 ? endingSoonNames.join('\n') : 'No allocations ending in the next 30 days';
+  const endingLbl = endingN === 0 ? `→ no allocations ending in ${periodLabel}` : endingN === 1 ? `↑ ${endingSoonNames[0].split(' (')[0]}` : `↑ ${endingN} ending in ${periodLabel}`;
+  const endingTitle = endingN > 0 ? endingSoonNames.join('\n') : `No allocations ending in ${periodLabel}`;
 
   document.getElementById('pulseStrip').innerHTML = `
     <div class="strip-cell">
@@ -6880,15 +6927,15 @@ function renderPulse(){
       <div class="strip-value" style="${over3 > 0 ? 'color:var(--crit)' : multiN > n/2 ? 'color:var(--warn)' : ''}">${multiN}<span class="unit"> / ${n}</span></div>
       <div class="strip-trend ${multiCls}">${multiLbl}</div>
     </div>
-    <div class="strip-cell" onclick="document.querySelector('.chip[data-filter=bench]').click()" style="cursor:pointer" title="Click to filter bench designers">
+    <div class="strip-cell" onclick="document.querySelector('.chip[data-filter=bench]').click()" style="cursor:pointer" title="Currently on bench + those whose allocations end in ${periodLabel}">
       <div class="strip-icon bench"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="12" y1="20" x2="12" y2="16"/></svg></div>
-      <div class="strip-label">On bench</div>
-      <div class="strip-value" style="${benchN > 0 ? 'color:var(--ok)' : 'color:var(--muted)'}">${benchN}</div>
-      <div class="strip-trend ${benchN > 0 ? 'trend-up' : 'trend-flat'}">${benchN > 0 ? `↑ ${benchAvail} available · ${benchN - benchAvail} resting` : '→ everyone allocated'}</div>
+      <div class="strip-label">On bench in ${periodLabel}</div>
+      <div class="strip-value" style="${projectedBench > 0 ? 'color:var(--ok)' : 'color:var(--muted)'}">${projectedBench}</div>
+      <div class="strip-trend ${projectedBench > 0 ? 'trend-up' : 'trend-flat'}">${projectedBench > benchN ? `↑ ${projectedBench - benchN} freeing up` : projectedBench > 0 ? `↑ ${benchAvail} available now` : '→ everyone allocated'}</div>
     </div>
     <div class="strip-cell" title="${endingTitle}">
       <div class="strip-icon" style="background:var(--warn-soft);color:var(--warn)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="18"/></svg></div>
-      <div class="strip-label">Ending in 30d</div>
+      <div class="strip-label">Ending in ${periodLabel}</div>
       <div class="strip-value" style="${endingN > 0 ? 'color:var(--warn)' : ''}">${endingN}</div>
       <div class="strip-trend ${endingCls}">${endingLbl}</div>
     </div>
@@ -7052,6 +7099,7 @@ function updateFilterBadges(){
 
 // ---- MASTER REFRESH — call after any data mutation ----
 function refreshAll(){
+  initPeriodSelects();
   renderPulse();
   renderSidebar();
   updateFilterBadges();
@@ -7415,6 +7463,7 @@ function refreshAll(){
   renderAvailability();
   renderSkillSummary();
   renderProjectPulse();
+  initPeriodSelects();
 })();
 </script>
 
