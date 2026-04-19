@@ -2411,35 +2411,35 @@ const designers = [
     load:102, energy:"low",    context:3, pto:62, meetingLoad:"heavy",
     projects:[{n:"Kairos Dashboard",c:"b"},{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",3],["Motion Design",1],["Prototyping",4],["Presentation",3],["Strategy",2],["AI",2]],
-    achievements:[{id:"a1",title:"Led end-to-end discovery for Kairos Dashboard",month:"Oct",projectId:"kairos",skills:["Product Design"],type:"leadership",scope:"cross-team",impact:"Shaped Q4 roadmap priorities"},{id:"a2",title:"Started mentoring Nadia Rivera on interaction craft",month:"Sep",projectId:null,skills:["UI Design"],type:"collaboration",scope:"internal",impact:""}],
+    achievements:[{id:"a1",title:"Led end-to-end discovery for Kairos Dashboard",month:"Oct",projectIds:["kairos"],skills:["Product Design"],type:"leadership",scope:"cross-team",impact:"Shaped Q4 roadmap priorities"},{id:"a2",title:"Started mentoring Nadia Rivera on interaction craft",month:"Sep",projectIds:[],skills:["UI Design"],type:"collaboration",scope:"internal",impact:""}],
     history:[3,3,3,3,2,2,2]
   },
   { id:2, name:"Tomás Leite", initials:"TL", role:"Senior", status:"alert",
     load:88,  energy:"low",    context:2, pto:104, meetingLoad:"heavy",
     projects:[{n:"Aria Research",c:"c"},{n:"Vela",c:"e"}],
     skills:[["UI Design",2],["UX Design",4],["Product Design",3],["Art Direction",2],["Design System",2],["Motion Design",1],["Prototyping",3],["Presentation",4],["Strategy",3],["AI",2]],
-    achievements:[{id:"a3",title:"Conducted solo research sprint for Aria Health",month:"Nov",projectId:"aria",skills:["UX Design"],type:"craft",scope:"external",impact:"Unblocked clinical approval process"},{id:"a4",title:"Documented research protocol for healthcare projects",month:"Oct",projectId:"aria",skills:["Strategy"],type:"learning",scope:"internal",impact:""}],
+    achievements:[{id:"a3",title:"Conducted solo research sprint for Aria Health",month:"Nov",projectIds:["aria"],skills:["UX Design"],type:"craft",scope:"external",impact:"Unblocked clinical approval process"},{id:"a4",title:"Documented research protocol for healthcare projects",month:"Oct",projectIds:["aria"],skills:["Strategy"],type:"learning",scope:"internal",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:3, name:"Priya Shah", initials:"PS", role:"Senior", status:"watch",
     load:84,  energy:"steady", context:2, pto:30, meetingLoad:"balanced",
     projects:[{n:"Kairos",c:"b"},{n:"Lumen",c:"e"}],
     skills:[["UI Design",4],["UX Design",2],["Product Design",3],["Art Direction",4],["Design System",4],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",2],["AI",1]],
-    achievements:[{id:"a5",title:"Shipped Kairos Dashboard v2 data visualization layer",month:"Sep",projectId:"kairos",skills:["UI Design"],type:"craft",scope:"external",impact:"30% improvement in report readability"},{id:"a6",title:"Led visual identity for Lumen rebrand",month:"Aug",projectId:"lumen",skills:["Art Direction"],type:"leadership",scope:"external",impact:""}],
+    achievements:[{id:"a5",title:"Shipped Kairos Dashboard v2 data visualization layer",month:"Sep",projectIds:["kairos"],skills:["UI Design"],type:"craft",scope:"external",impact:"30% improvement in report readability"},{id:"a6",title:"Led visual identity for Lumen rebrand",month:"Aug",projectIds:["lumen"],skills:["Art Direction"],type:"leadership",scope:"external",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:4, name:"Miguel Kato", initials:"MK", role:"Lead", status:"watch",
     load:92,  energy:"steady", context:3, pto:45, meetingLoad:"heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"},{n:"Lumen",c:"e"}],
     skills:[["UI Design",3],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",4],["Motion Design",2],["Prototyping",4],["Presentation",4],["Strategy",4],["AI",3]],
-    achievements:[{id:"a7",title:"Established weekly design critique cadence",month:"Oct",projectId:null,skills:["Strategy"],type:"leadership",scope:"internal",impact:"Improved quality feedback loop across 3 teams"},{id:"a8",title:"Architected Pax Design System v3 token structure",month:"Sep",projectId:"pax",skills:["Design System"],type:"craft",scope:"cross-team",impact:""}],
+    achievements:[{id:"a7",title:"Established weekly design critique cadence",month:"Oct",projectIds:[],skills:["Strategy"],type:"leadership",scope:"internal",impact:"Improved quality feedback loop across 3 teams"},{id:"a8",title:"Architected Pax Design System v3 token structure",month:"Sep",projectIds:["pax"],skills:["Design System"],type:"craft",scope:"cross-team",impact:""}],
     history:[4,4,4,3,3,4,3]
   },
   { id:5, name:"Ana Sørensen", initials:"AS", role:"Senior", status:"steady",
     load:78,  energy:"high",   context:2, pto:18, meetingLoad:"low",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",4],["Design System",3],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",3],["AI",2]],
-    achievements:[{id:"a9",title:"Led Meridian checkout redesign end-to-end",month:"Oct",projectId:"meridian",skills:["Product Design"],type:"leadership",scope:"external",impact:"Increased conversion by 12%"},{id:"a10",title:"Presented interaction patterns at team critique",month:"Nov",projectId:null,skills:["Presentation"],type:"visibility",scope:"internal",impact:""}],
+    achievements:[{id:"a9",title:"Led Meridian checkout redesign end-to-end",month:"Oct",projectIds:["meridian"],skills:["Product Design"],type:"leadership",scope:"external",impact:"Increased conversion by 12%"},{id:"a10",title:"Presented interaction patterns at team critique",month:"Nov",projectIds:[],skills:["Presentation"],type:"visibility",scope:"internal",impact:""}],
     history:[4,4,4,4,4,4,4]
   },
   { id:6, name:"Jonah Bekele", initials:"JB", role:"Senior", status:"steady",
@@ -2999,7 +2999,7 @@ function openDrawer(id, _preloaded){
         return achievements
           .slice().reverse()
           .map(a => {
-            const proj = projects.find(p => p.id === a.projectId);
+            const achProjs = (a.projectIds||[]).map(id => [...projects,...archivedProjects].find(p=>p.id===id)).filter(Boolean);
             return `<div class="achievement-item">
               <div class="achievement-month">${a.month || '—'}</div>
               <div class="achievement-body">
@@ -3008,7 +3008,7 @@ function openDrawer(id, _preloaded){
                   ${(a.skills||[]).map(s=>`<span class="achievement-tag skill-tag">${s}</span>`).join('')}
                   ${a.type ? `<span class="achievement-tag type-tag type-${a.type}">${typeLabels[a.type]||a.type}</span>` : ''}
                   ${a.scope === 'external' ? `<span class="achievement-tag scope-tag">External</span>` : a.scope === 'cross-team' ? `<span class="achievement-tag scope-tag">Cross-team</span>` : ''}
-                  ${proj ? `<span class="proj proj-a" style="cursor:pointer" onclick="event.stopPropagation();closeDrawer();openProjectDrawer('${proj.id}')">${proj.name}</span>` : ''}
+                  ${achProjs.map(proj=>`<span class="proj proj-a" style="cursor:pointer" onclick="event.stopPropagation();closeDrawer();openProjectDrawer('${proj.id}')">${proj.name}</span>`).join('')}
                 </div>
                 ${a.impact ? `<div class="achievement-impact">${a.impact}</div>` : ''}
               </div>
@@ -4256,12 +4256,12 @@ function editDesigner(id, focusSub){
               ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(m => `<option value="${m}">${m}</option>`).join('')}
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Project</label>
-            <select class="form-select" id="ach_project">
-              <option value="">— None —</option>
-              ${[...projects, ...archivedProjects].map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-            </select>
+          <div class="form-group full">
+            <label class="form-label">Projects <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
+            <div class="skill-picker" id="ach_projects">
+              ${[...projects, ...archivedProjects].map(p =>
+                `<button type="button" class="skill-pick-btn" data-project-id="${p.id}">${p.name}</button>`).join('')}
+            </div>
           </div>
           <div class="form-group full">
             <label class="form-label">Skills demonstrated <span style="font-weight:400;color:var(--muted)">(select all that apply)</span></label>
@@ -4348,6 +4348,10 @@ function editDesigner(id, focusSub){
     document.querySelectorAll('#ach_skills .skill-pick-btn').forEach(btn => {
       btn.addEventListener('click', () => btn.classList.toggle('selected'));
     });
+    // Project picker toggle
+    document.querySelectorAll('#ach_projects .skill-pick-btn').forEach(btn => {
+      btn.addEventListener('click', () => btn.classList.toggle('selected'));
+    });
 
     if(addBtn) addBtn.addEventListener('click', () => {
       form.style.display = 'block';
@@ -4362,6 +4366,7 @@ function editDesigner(id, focusSub){
       form.style.display = 'none';
       if(addBtn) addBtn.style.display = '';
       document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      document.querySelectorAll('#ach_projects .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
     });
 
     if(saveBtn) saveBtn.addEventListener('click', () => {
@@ -4371,7 +4376,7 @@ function editDesigner(id, focusSub){
         id:        'ach_' + Date.now().toString(36),
         title,
         month:     document.getElementById('ach_month').value,
-        projectId: document.getElementById('ach_project').value || null,
+        projectIds: Array.from(document.querySelectorAll('#ach_projects .skill-pick-btn.selected')).map(b=>b.dataset.projectId),
         skills:    Array.from(document.querySelectorAll('#ach_skills .skill-pick-btn.selected')).map(b=>b.dataset.skill),
         type:      document.getElementById('ach_type').value,
         scope:     document.getElementById('ach_scope').value,
@@ -4386,6 +4391,7 @@ function editDesigner(id, focusSub){
       if(addBtn) addBtn.style.display = '';
       ['ach_title','ach_impact'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
       document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      document.querySelectorAll('#ach_projects .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
     });
 
     // Expose remove function
