@@ -1487,6 +1487,14 @@ html,body{
 }
 .pin-btn:hover{background:var(--ink-2)}
 
+/* ===== LOADING DOTS ===== */
+.load-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);opacity:0.3;
+  animation:loadpulse 1s ease-in-out infinite;
+}
+@keyframes loadpulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
 /* TOAST */
 .toast{
   position:fixed;bottom:24px;left:50%;
@@ -1546,11 +1554,27 @@ html,body{
     </div>
   </header>
 
+  <!-- ===== LOADING OVERLAY ===== -->
+  <div id="loadingOverlay" style="
+    display:none;position:fixed;inset:0;
+    background:var(--bg);z-index:999;
+    flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  ">
+    <div style="font-size:22px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)">Tarsila Hub</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <div class="load-dot" style="animation-delay:0s"></div>
+      <div class="load-dot" style="animation-delay:.15s"></div>
+      <div class="load-dot" style="animation-delay:.3s"></div>
+    </div>
+    <div id="loadingMsg" style="font-size:13px;color:var(--muted)">Loading your team data…</div>
+  </div>
+
   <!-- ===== MAIN DASHBOARD VIEW ===== -->
   <div class="main-view" id="mainView">
 
   <!-- ===== DATA HEALTH BANNER (rendered dynamically) ===== -->
   <div id="healthBannerContainer"></div>
+  <div id="dbErrorBanner" style="display:none;margin-bottom:16px"></div>
 
   <!-- ===== SECTION 1: PULSE ===== -->
   <div class="section-head">
@@ -1851,6 +1875,30 @@ html,body{
             <button class="btn" id="sbClearBtn" style="flex:none;padding:9px 16px">Clear credentials</button>
             <span id="sbConnectStatus" style="font-size:12.5px;color:var(--muted);align-self:center"></span>
           </div>
+        </div>
+      </div>
+
+      <!-- CLAUDE AI PROXY -->
+      <div class="config-form" id="claudeProxyForm">
+        <h3>Claude AI proxy</h3>
+        <p class="config-form-desc">Required for AI features (1:1 prep, staffing assistant, digest) to work from your public domain. The proxy is a Supabase Edge Function that forwards requests to Anthropic's API securely.</p>
+        <div class="config-steps">
+          <ol>
+            <li>Go to <b>Supabase → Edge Functions → New function</b>, name it <code>claude-proxy</code></li>
+            <li>Paste the Edge Function code (see the instructions above this settings panel)</li>
+            <li>Go to <b>Edge Functions → Manage secrets</b> → add secret <code>ANTHROPIC_API_KEY</code> with your key from <b>console.anthropic.com</b></li>
+            <li>Deploy the function and paste its URL below</li>
+          </ol>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Edge Function URL</label>
+          <input type="text" class="form-input" id="proxyUrlInput" placeholder="https://xxxx.supabase.co/functions/v1/claude-proxy">
+          <div class="form-hint">After saving, AI features will route through this URL instead of calling Anthropic directly.</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn primary" id="proxySaveBtn" style="flex:none;padding:9px 20px">Save proxy URL</button>
+          <button class="btn" id="proxyClearBtn" style="flex:none;padding:9px 16px">Clear</button>
+          <span id="proxyStatus" style="font-size:12.5px;color:var(--muted);align-self:center"></span>
         </div>
       </div>
 
@@ -2188,7 +2236,30 @@ designers.sort((a,b) => statusOrder[a.status] - statusOrder[b.status]);
 
 // ---- Shared API call ----
 async function callClaude(systemPrompt, userMessage, outputEl, onDone){
-  // Show loading state
+  // Determine the endpoint to use:
+  // 1. CLAUDE_PROXY_URL (Edge Function) — works from any domain
+  // 2. Direct Anthropic API — only works inside Claude.ai's artifact sandbox
+  // Determine the endpoint: hardcoded constant → localStorage → window override → direct API
+  let proxyUrl = (typeof CLAUDE_PROXY_URL !== 'undefined' && CLAUDE_PROXY_URL) ? CLAUDE_PROXY_URL : '';
+  if(!proxyUrl) try { proxyUrl = localStorage.getItem(PROXY_URL_KEY) || ''; } catch(e){}
+  if(!proxyUrl && window._claudeProxyOverride) proxyUrl = window._claudeProxyOverride;
+
+  // If no proxy configured and we're not on Claude.ai, show setup message
+  const isClaudeAi = window.location.hostname === 'claude.ai' ||
+                     window.location.hostname === 'localhost' ||
+                     window.location.protocol === 'file:';
+
+  if(!proxyUrl && !isClaudeAi){
+    outputEl.innerHTML = `<div class="claude-output">
+      <div class="claude-output-head"><div class="claude-output-label">Setup required</div></div>
+      <div class="claude-output-body">
+        <p>AI features need a Supabase Edge Function to work from external domains.</p>
+        <p>Go to <strong>Admin → Settings → Claude AI proxy</strong> and follow the setup steps. It takes about 5 minutes.</p>
+      </div>
+    </div>`;
+    return;
+  }
+
   outputEl.innerHTML = `
     <div class="claude-loading">
       <div class="claude-loading-label">Claude is thinking…</div>
@@ -2197,24 +2268,28 @@ async function callClaude(systemPrompt, userMessage, outputEl, onDone){
       <div class="claude-loading-bar"></div>
     </div>`;
 
+  const endpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
+  const payload  = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }]
+  };
+
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }]
-      })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
+    if(data.error) throw new Error(data.error.message || data.error);
     const text = data.content?.find(b => b.type === 'text')?.text || 'No response.';
     onDone(text, outputEl);
   } catch(e) {
     outputEl.innerHTML = `<div class="claude-output">
       <div class="claude-output-head"><div class="claude-output-label">Error</div></div>
-      <div class="claude-output-body"><p>Could not reach Claude. Check your connection and try again.</p></div>
+      <div class="claude-output-body"><p>${e.message || 'Could not reach Claude. Check your connection and try again.'}</p></div>
     </div>`;
   }
 }
@@ -3122,6 +3197,7 @@ function computeProjectFreshness(p){
 
 const SB_URL_KEY      = 'tarsila_sb_url';
 const SB_KEY_KEY      = 'tarsila_sb_key';
+const PROXY_URL_KEY   = 'tarsila_proxy_url';
 const LOCAL_STORE_KEY = 'atelier_admin_data';
 
 // ---- EMBED YOUR CREDENTIALS HERE for public deployment ----
@@ -3130,6 +3206,12 @@ const LOCAL_STORE_KEY = 'atelier_admin_data';
 // The anon key is safe to embed — RLS controls what anonymous users can do.
 const EMBEDDED_SB_URL = ''; // e.g. 'https://xxxx.supabase.co'
 const EMBEDDED_SB_KEY = ''; // e.g. 'eyJhbGci...'
+
+// ---- CLAUDE PROXY URL ----
+// After creating the claude-proxy Edge Function in Supabase, paste its URL here.
+// Format: 'https://xxxx.supabase.co/functions/v1/claude-proxy'
+// Leave empty to disable AI features (they only work with a proxy from external domains).
+const CLAUDE_PROXY_URL = ''; // paste your Edge Function URL here
 
 // ---- ADMIN PIN ----
 // Set a PIN so only your team can edit data. Viewers can see everything.
@@ -3342,6 +3424,20 @@ async function loadPersistedData(){
       console.warn('Supabase load failed, falling back:', e.message);
       persistenceMode = typeof window.storage !== 'undefined' ? 'local' : 'memory';
       if(persistenceMode === 'local') await loadFromLocalStorage();
+      // Show a visible banner so the user knows something is wrong
+      setTimeout(() => {
+        const banner = document.getElementById('dbErrorBanner');
+        if(banner){
+          banner.style.display = 'block';
+          banner.innerHTML = `<div class="health-banner crit">
+            <div class="health-banner-icon">!</div>
+            <div class="health-banner-body">
+              <div class="health-banner-title">Could not connect to Supabase</div>
+              <div class="health-banner-desc">Showing sample data. Error: <b>${e.message}</b> — go to Admin → Settings to reconnect.</div>
+            </div>
+          </div>`;
+        }
+      }, 100);
     }
   } else if(persistenceMode === 'local'){
     await loadFromLocalStorage();
@@ -4511,6 +4607,9 @@ function wireSupabaseConfigForm(){
         refreshAll();
         renderDbStatusBar();
         if(form) form.style.display = 'none';
+        // Clear any boot-time error banner
+        const errBanner = document.getElementById('dbErrorBanner');
+        if(errBanner) errBanner.style.display = 'none';
         showToast('Connected to Supabase — data loaded');
       } catch(e){
         status.textContent = `Connection failed: ${e.message}`;
@@ -4529,6 +4628,45 @@ function wireSupabaseConfigForm(){
   }
 }
 
+function wireProxyConfigForm(){
+  const input      = document.getElementById('proxyUrlInput');
+  const saveBtn    = document.getElementById('proxySaveBtn');
+  const clearBtn   = document.getElementById('proxyClearBtn');
+  const statusEl   = document.getElementById('proxyStatus');
+  if(!input || !saveBtn) return;
+
+  // Pre-fill saved or embedded proxy URL
+  let savedProxy = '';
+  try { savedProxy = localStorage.getItem(PROXY_URL_KEY) || ''; } catch(e){}
+  const effectiveProxy = (typeof CLAUDE_PROXY_URL !== 'undefined' && CLAUDE_PROXY_URL)
+    ? CLAUDE_PROXY_URL : savedProxy;
+  if(effectiveProxy) input.value = effectiveProxy;
+
+  if(effectiveProxy){
+    statusEl.textContent = '✓ Proxy configured — AI features enabled';
+    statusEl.style.color = 'var(--ok)';
+  }
+
+  saveBtn.onclick = () => {
+    const url = input.value.trim();
+    if(!url){ statusEl.textContent = 'Enter a URL first.'; statusEl.style.color='var(--warn)'; return; }
+    try { localStorage.setItem(PROXY_URL_KEY, url); } catch(e){}
+    // Update the runtime constant by redefining the module-level variable
+    window._claudeProxyOverride = url;
+    statusEl.textContent = '✓ Saved — AI features will use this proxy';
+    statusEl.style.color = 'var(--ok)';
+    showToast('Claude proxy saved');
+  };
+
+  clearBtn.onclick = () => {
+    try { localStorage.removeItem(PROXY_URL_KEY); } catch(e){}
+    window._claudeProxyOverride = '';
+    input.value = '';
+    statusEl.textContent = 'Proxy cleared';
+    statusEl.style.color = 'var(--muted)';
+  };
+}
+
 function disconnectSupabase(){
   if(!confirm('Disconnect from Supabase? The dashboard will switch to local/in-memory mode. Your Supabase data is unaffected.')) return;
   try { localStorage.removeItem(SB_URL_KEY); localStorage.removeItem(SB_KEY_KEY); } catch(e){}
@@ -4544,6 +4682,7 @@ function renderSettingsPanel(){
   // Supabase connection UI
   renderDbStatusBar();
   wireSupabaseConfigForm();
+  wireProxyConfigForm();
 
   // Thresholds
   const thresholds = [
@@ -5084,7 +5223,19 @@ function refreshAll(){
 
 // ---------- INITIAL BOOT ----------
 (async function init(){
+  // Show loading overlay only when Supabase credentials are configured
+  // — no point showing it for in-memory/local mode since it's instant
+  loadSbCredentials();
+  const overlay = document.getElementById('loadingOverlay');
+  if(persistenceMode === 'supabase' && overlay){
+    overlay.style.display = 'flex';
+  }
+
   await loadPersistedData();
+
+  // Hide overlay and render everything
+  if(overlay) overlay.style.display = 'none';
+
   renderPulse();
   renderSidebar();
   updateFilterBadges();
