@@ -256,15 +256,31 @@ html,body{
   font-feature-settings:"ss01","cv11";
 }
 
-.app{max-width:1400px;margin:0 auto;padding:24px 32px 64px}
+.app{max-width:1400px;margin:0 auto;padding:0 32px 64px}
 
 /* ===== HEADER ===== */
-.header{display:flex;justify-content:space-between;align-items:center;padding:12px 0 24px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 24px;
+  margin:20px 0 32px;
+  background:rgba(255,255,255,0.7);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.5);
+  border-radius:999px;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+  position:sticky;top:16px;z-index:50;
+}
+[data-theme="dark"] .header{
+  background:rgba(26,26,24,0.75);
+  border-color:rgba(255,255,255,0.08);
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
 .brand{display:flex;align-items:center;gap:10px}
 .brand-mark{width:28px;height:28px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:13px;letter-spacing:-0.02em}
-.brand-name{font-size:15px;font-weight:600;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:5px}
-.brand-name .brand-word-main{font-size:19px;font-weight:700;letter-spacing:-0.02em}
-.brand-name .brand-word-sub{font-size:13px;font-weight:500;color:var(--muted-2)}
+.brand-name{font-size:20px;font-weight:600;letter-spacing:-0.02em;display:flex;align-items:baseline;gap:0}
+.brand-name .brand-word-main{color:var(--ink)}
+.brand-name .brand-word-sub{color:var(--muted)}
 .brand-sub{font-size:12px;color:var(--muted);margin-left:2px}
 .header-meta{display:flex;gap:20px;align-items:center;font-size:12px;color:var(--muted)}
 .header-meta b{color:var(--ink);font-weight:500}
@@ -1754,10 +1770,8 @@ html,body{
   <!-- ===== HEADER ===== -->
   <header class="header">
     <div class="brand">
-      <div class="brand-mark">T</div>
       <div>
         <div class="brand-name"><span class="brand-word-main">Tarsila</span><span class="brand-word-sub">Hub</span></div>
-        <div class="brand-sub">Design Team Operations</div>
       </div>
     </div>
     <div class="header-meta">
@@ -1844,7 +1858,7 @@ html,body{
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
           <span class="filter-label">Sort</span>
           <button class="chip active" data-sort="status">Status</button>
-          <button class="chip" data-sort="load">Load</button>
+          <button class="chip" data-sort="load">Capacity</button>
           <button class="chip" data-sort="energy">Energy</button>
         </div>
       </div>
@@ -2826,7 +2840,7 @@ function renderList(filter='all'){
       </div>
       <div class="signals">
         <div class="signal">
-          <div class="signal-name">Load</div>
+          <div class="signal-name">Capacity</div>
           <div class="signal-bar ${signalClass('load',d.load)}"><div class="fill" style="width:${signalWidth('load',d.load)}%"></div></div>
         </div>
         <div class="signal">
@@ -2834,12 +2848,10 @@ function renderList(filter='all'){
           <div class="signal-bar ${signalClass('energy',d.energy)} energy-pill"></div>
         </div>
         <div class="signal">
-          <div class="signal-name">Contexts</div>
-          <div class="signal-bar ${signalClass('context',d.context)}"><div class="fill" style="width:${signalWidth('context',d.context)}%"></div></div>
-        </div>
-        <div class="signal">
-          <div class="signal-name">Focus</div>
-
+          <div class="signal-name">Projects</div>
+          <div style="height:4px;display:flex;align-items:center;overflow:visible">
+            <span style="font-size:10px;font-weight:500;letter-spacing:0.03em;color:${d.context>=3?'var(--crit)':d.context>=2?'var(--warn)':'var(--ink)'}">${d.context}</span>
+          </div>
         </div>
       </div>
       <div class="projects-cell">
@@ -2906,7 +2918,7 @@ function openDrawer(id, _preloaded){
       <h4>Wellbeing signals · this week</h4>
       <div class="signal-grid">
         <div class="signal-card">
-          <div class="signal-card-label">Load</div>
+          <div class="signal-card-label">Capacity</div>
           <div class="signal-card-val">${d.load}<span class="unit">%</span></div>
           <div class="signal-card-status ${signalClass('load',d.load)}">${d.load>95?'Above ceiling':d.load>85?'Near ceiling':'Within band'}</div>
         </div>
@@ -3370,7 +3382,7 @@ function openProjectDrawer(projId, _preloaded){
               <div class="match-factor-val ${fitClass(m.capacity)}">${fitLabel(m.capacity)}</div>
             </div>
             <div class="match-factor">
-              <div class="match-factor-label">Context</div>
+              <div class="match-factor-label">Projects</div>
               <div class="match-factor-val ${fitClass(m.contextFit)}">${fitLabel(m.contextFit)}</div>
             </div>
             <div class="match-factor">
@@ -4176,7 +4188,7 @@ function editDesigner(id, focusSub){
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Load %</label>
+          <label class="form-label">Capacity</label>
           <input type="number" class="form-input" id="f_load" value="${d.load}" min="0" max="150" placeholder="70">
         </div>
         <div class="form-group">
@@ -5567,7 +5579,7 @@ function renderSettingsPanel(){
 
   // Thresholds
   const thresholds = [
-    { label: 'Load %', hint: 'Watch and alert ceilings', watch: 85, alert: 95, unit: '%' },
+    { label: 'Capacity %', hint: 'Watch and alert ceilings', watch: 85, alert: 95, unit: '%' },
     { label: 'Energy 1–5', hint: 'Watch and alert floors (lower is worse)', watch: 3.5, alert: 3.0, unit: '' },
     { label: 'Active projects', hint: 'Max contexts before alert', watch: 2, alert: 3, unit: '' },
 
@@ -5664,7 +5676,7 @@ function renderPulse(){
     </div>
     <div class="strip-cell">
       <div class="strip-icon load"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 0 0-10-10"/></svg></div>
-      <div class="strip-label">Average load</div>
+      <div class="strip-label">Average capacity</div>
       <div class="strip-value">${avgLoad}<span class="unit">%</span></div>
       <div class="strip-trend ${loadCls}">${loadLbl}</div>
     </div>
@@ -5805,7 +5817,7 @@ function renderSidebar(){
   document.getElementById('distSubLabel').textContent = `${n} designers`;
   document.getElementById('distBody').innerHTML = `
     <div class="dist-row">
-      <div class="dist-label"><b>Load %</b><span>Healthy ≤85%</span></div>
+      <div class="dist-label"><b>Capacity</b><span>Healthy ≤85%</span></div>
       <div class="dist-bar">
         ${loadOk   > 0 ? `<div class="dist-seg ok"   style="flex:${loadOk}">${loadOk}</div>`   : ''}
         ${loadWarn > 0 ? `<div class="dist-seg warn" style="flex:${loadWarn}">${loadWarn}</div>` : ''}
