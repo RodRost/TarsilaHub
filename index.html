@@ -3240,8 +3240,12 @@ function openDrawer(id, _preloaded){
     </div>
 <div class="drawer-section">
       <h4>Current projects</h4>
-      <div class="projects-cell" style="gap:6px">
-        ${d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}${p.alloc ? ` <span style="font-size:10px;font-weight:600;opacity:0.75">${p.alloc}%</span>` : ''}</span>`).join('')}
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${d.projects.map(p=>`
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="proj proj-${p.c}">${p.n}${p.alloc ? ` <span style="font-size:10px;font-weight:600;opacity:0.75">${p.alloc}%</span>` : ''}</span>
+            ${(p.since || p.until) ? `<span style="font-size:11.5px;color:var(--muted)">${p.since||'?'} → ${p.until||'ongoing'}</span>` : ''}
+          </div>`).join('')}
       </div>
     </div>
 
@@ -4056,7 +4060,7 @@ async function testSupabaseConnection(url, key){
 function dbDesignerToApp(row, dpRows){
   const myProjects = (dpRows || [])
     .filter(dp => dp.designer_id === row.id)
-    .map(dp => ({ n: dp.project_name || dp.project_id, c: projectColor(dp.project_id), alloc: dp.allocation || null }));
+    .map(dp => ({ n: dp.project_name || dp.project_id, c: projectColor(dp.project_id), alloc: dp.allocation || null, since: dp.since || null, until: dp.until || null }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
     load: row.load, meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '', workdayUrl: row.workday_url || '',
@@ -4079,12 +4083,12 @@ function dbProjectToApp(row){
 // ---- Load all data from Supabase ----
 async function loadFromSupabase(){
   const dbDesigners = await sbXhr('GET', 'designers?archived=eq.false&order=id&select=*');
-  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,projects(name)');
+  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,since,until,projects(name)');
   const dbProjects  = await sbXhr('GET', 'project_with_team?archived=eq.false&order=priority');
 
   const dpRows = (dbDPs || []).map(dp => ({
     designer_id: dp.designer_id, project_id: dp.project_id,
-    color_code: dp.color_code, project_name: dp.projects?.name || dp.project_id, allocation: dp.allocation || null
+    color_code: dp.color_code, project_name: dp.projects?.name || dp.project_id, allocation: dp.allocation || null, since: dp.since || null, until: dp.until || null
   }));
 
   designers.length = 0;
@@ -4682,7 +4686,7 @@ function editDesigner(id, focusSub){
                 <input type="checkbox" class="proj-checkbox" data-project-id="${p.id}" data-project-name="${p.name}" data-project-color="${c}" ${checked ? 'checked' : ''}>
                 <span class="proj proj-${c}">${p.name}</span>
                 <span style="font-size:11.5px;color:var(--muted);margin-left:4px">· ${p.client}</span>
-                <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+                <div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                   <input type="number" class="proj-alloc-input" data-project-id="${p.id}"
                     min="0" max="100" step="5" placeholder="—"
                     value="${(d.projects.find(dp => dp.n === p.name)?.alloc) || ''}"
@@ -4690,6 +4694,18 @@ function editDesigner(id, focusSub){
                     title="Allocation % on this project"
                     onclick="event.preventDefault();event.stopPropagation()">
                   <span style="font-size:11px;color:var(--muted);display:${checked?'inline':'none'}" class="proj-alloc-pct">%</span>
+                  <input type="text" class="proj-since-input" data-project-id="${p.id}"
+                    placeholder="Since"
+                    value="${(d.projects.find(dp => dp.n === p.name)?.since) || ''}"
+                    style="width:70px;padding:3px 6px;font-size:12px;font-family:inherit;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);display:${checked?'block':'none'}"
+                    title="Start date (e.g. Jan 2025)"
+                    onclick="event.preventDefault();event.stopPropagation()">
+                  <input type="text" class="proj-until-input" data-project-id="${p.id}"
+                    placeholder="Until"
+                    value="${(d.projects.find(dp => dp.n === p.name)?.until) || ''}"
+                    style="width:70px;padding:3px 6px;font-size:12px;font-family:inherit;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);display:${checked?'block':'none'}"
+                    title="End date (e.g. Mar 2025 or leave blank for ongoing)"
+                    onclick="event.preventDefault();event.stopPropagation()">
                   <span class="health-dot"><span class="dot ${p.health}"></span></span>
                 </div>
               </label>
@@ -5001,6 +5017,10 @@ function editDesigner(id, focusSub){
       const allocPct   = allocInput?.nextElementSibling;
       if(allocInput){ allocInput.style.display = cb.checked ? 'block' : 'none'; }
       if(allocPct && allocPct.classList.contains('proj-alloc-pct')){ allocPct.style.display = cb.checked ? 'inline' : 'none'; }
+      const sinceInput = document.querySelector(`.proj-since-input[data-project-id="${cb.dataset.projectId}"]`);
+      const untilInput = document.querySelector(`.proj-until-input[data-project-id="${cb.dataset.projectId}"]`);
+      if(sinceInput) sinceInput.style.display = cb.checked ? 'block' : 'none';
+      if(untilInput) untilInput.style.display = cb.checked ? 'block' : 'none';
       });
     });
   }, 50);
@@ -6376,15 +6396,19 @@ async function saveDesigner(){
   document.querySelectorAll('.proj-checkbox:checked').forEach(cb => {
     const allocEl = document.querySelector(`.proj-alloc-input[data-project-id="${cb.dataset.projectId}"]`);
     const alloc   = allocEl && allocEl.value !== '' ? parseInt(allocEl.value) : null;
+    const sinceEl = document.querySelector(`.proj-since-input[data-project-id="${cb.dataset.projectId}"]`);
+    const untilEl = document.querySelector(`.proj-until-input[data-project-id="${cb.dataset.projectId}"]`);
     selectedProjects.push({
       id:    cb.dataset.projectId,
       name:  cb.dataset.projectName,
       color: projectColor(cb.dataset.projectId),
-      alloc
+      alloc,
+      since: sinceEl?.value?.trim() || null,
+      until: untilEl?.value?.trim() || null,
     });
   });
   // Update local projects array for immediate display
-  d.projects = selectedProjects.map(p => ({ n: p.name, c: p.color, alloc: p.alloc }));
+  d.projects = selectedProjects.map(p => ({ n: p.name, c: p.color, alloc: p.alloc, since: p.since, until: p.until }));
   d.context  = selectedProjects.length;
   // Auto-compute load from allocations if all projects have one set
   const allocValues = selectedProjects.map(p => p.alloc).filter(a => a !== null);
@@ -6416,7 +6440,9 @@ async function saveDesigner(){
           designer_id: d.id,
           project_id:  proj.id,
           color_code:  proj.color,
-          allocation:  proj.alloc || null
+          allocation:  proj.alloc || null,
+          since:       proj.since || null,
+          until:       proj.until || null,
         });
       }
     } else if(isNew){
