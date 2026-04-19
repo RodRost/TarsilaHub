@@ -121,6 +121,15 @@ a{color:inherit;text-decoration:none}
 .selector-item:hover{background:var(--surface-2)}
 .sel-avatar{width:28px;height:28px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--muted)}
 .sel-avatar img{width:100%;height:100%;object-fit:cover}
+@media print {
+  .header, .home-link, .selector-wrap,
+  button:not(.profile-status) { display:none !important; }
+  body { background:white !important; color:black !important; padding:0; }
+  .page { padding:16px; max-width:100%; }
+  .card { box-shadow:none !important; border:1px solid #ddd !important; break-inside:avoid; }
+  .section { margin-bottom:16px; }
+  a { color:inherit !important; }
+}
 </style>
 </head>
 <body>
@@ -142,7 +151,8 @@ a{color:inherit;text-decoration:none}
 
 <script>
 const SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w
+';
 
 let allDesigners = [];
 let currentDesigner = null;
