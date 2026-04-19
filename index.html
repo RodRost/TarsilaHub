@@ -1777,6 +1777,56 @@ html,body{
   .panel { box-shadow:none !important; border:1px solid #ddd !important; }
 }
 
+/* ===== HEADER NAV TABS ===== */
+.header-nav{
+  display:flex;align-items:center;gap:4px;
+  flex:1;justify-content:center;
+}
+.header-nav-btn{
+  font-family:inherit;font-size:13px;font-weight:500;
+  padding:6px 16px;border-radius:999px;
+  border:none;background:transparent;
+  color:var(--muted);cursor:pointer;
+  transition:all .12s;letter-spacing:-0.005em;
+}
+.header-nav-btn:hover{color:var(--ink);background:rgba(0,0,0,0.06)}
+[data-theme="dark"] .header-nav-btn:hover{background:rgba(255,255,255,0.08)}
+.header-nav-btn.active{background:var(--ink);color:var(--bg)}
+[data-theme="dark"] .header-nav-btn.active{color:var(--bg)}
+
+/* ===== PAGES ===== */
+.page{display:none}
+.page.active-page{display:block}
+
+/* ===== SKILL SUMMARY CARDS ===== */
+.skill-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.skill-summary-grid{grid-template-columns:1fr}}
+.skill-summary-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:16px 18px;
+  cursor:pointer;transition:border-color .12s;
+}
+.skill-summary-card:hover{border-color:var(--muted-2)}
+.skill-summary-card-title{
+  font-size:11px;font-weight:600;letter-spacing:0.05em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:6px;
+}
+.skill-summary-card-title svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+.skill-summary-row{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 0;border-bottom:1px solid var(--line-soft);
+}
+.skill-summary-row:last-child{border-bottom:none;padding-bottom:0}
+.skill-summary-name{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skill-summary-bar-wrap{width:80px;flex-shrink:0;height:5px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.skill-summary-bar-fill{height:100%;border-radius:999px}
+.skill-summary-count{font-size:12px;font-variant-numeric:tabular-nums;min-width:28px;text-align:right;font-weight:500}
+.skill-summary-badge{
+  font-size:10.5px;font-weight:500;padding:2px 7px;border-radius:999px;
+  white-space:nowrap;flex-shrink:0;
+}
+
 /* ===== AVAILABILITY PANEL ===== */
 .avail-controls{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .avail-controls label{font-size:12.5px;color:var(--muted)}
@@ -1867,6 +1917,11 @@ html,body{
         <div class="brand-name"><span class="brand-word-main">Tarsila</span><span class="brand-word-sub">Hub</span></div>
       </div>
     </div>
+    <nav class="header-nav">
+      <button class="header-nav-btn active" data-page="team">Team</button>
+      <button class="header-nav-btn" data-page="projects">Projects</button>
+      <button class="header-nav-btn" data-page="skills">Skills</button>
+    </nav>
     <div class="header-meta">
       <div class="header-stat">
         <span class="header-stat-val" id="hdrTeamCount">—</span>
@@ -1917,6 +1972,9 @@ html,body{
   <!-- ===== DATA HEALTH BANNER (rendered dynamically) ===== -->
   <div id="healthBannerContainer"></div>
   <div id="dbErrorBanner" style="display:none;margin-bottom:16px"></div>
+
+  <!-- ===== PAGE: TEAM ===== -->
+  <div class="page page-team active-page">
 
   <!-- ===== SECTION 1: PULSE ===== -->
   <div class="section-head">
@@ -2020,12 +2078,17 @@ html,body{
   </div>
   <div id="availabilityPanel"></div>
 
+  </div><!-- /page-team -->
+
+  <!-- ===== PAGE: PROJECTS ===== -->
+  <div class="page page-projects">
+
   <!-- ===== SECTION 3: PROJECTS ===== -->
   <div class="section-head">
     <div class="section-title">
       <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
       <h2>Projects</h2>
-      <span class="count">7 active</span>
+      <span class="count" id="projectCountLabel">—</span>
     </div>
     <p class="section-desc">Click any row to open its profile — needs, team, and match engine for open roles.</p>
   </div>
@@ -2057,6 +2120,46 @@ html,body{
     </div>
   </div>
   <div class="panel" id="timelinePanel"></div>
+
+  </div><!-- /page-projects -->
+
+  <!-- ===== PAGE: SKILLS ===== -->
+  <div class="page page-skills">
+
+  <!-- ===== SKILL SUMMARY CARDS ===== -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+      <h2>Team skills overview</h2>
+    </div>
+  </div>
+  <div id="skillSummaryPanel"></div>
+
+  <!-- ===== FULL SKILL MAP ===== -->
+  <div class="section-head" style="margin-top:40px">
+    <div class="section-title">
+      <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+      <h2>Skill map</h2>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-head">
+      <div class="panel-title">Merkle Self-Assessment Skills</div>
+      <span class="panel-sub">Level 1 = Foundational · 2 = Developing · 3 = Consistent · 4 = Leading · 5 = Expert</span>
+    </div>
+    <div id="skillMapGridMain"></div>
+  </div>
+
+  <!-- ===== SKILL GAP ===== -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">Skill gap — active projects vs team supply</div>
+      <span class="panel-sub">Skills your current projects need that your team is thin on</span>
+    </div>
+    <div id="skillGapGridMain"></div>
+  </div>
+
+  </div><!-- /page-skills -->
 
   <footer class="footer">
     <div>Tarsila Hub · Design Team Operations</div>
@@ -2091,9 +2194,6 @@ html,body{
       <button class="admin-tab" data-admin-tab="projects">
         <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Projects</span>
         <span class="tab-count" id="projectsTabCount">0</span>
-      </button>
-      <button class="admin-tab" data-admin-tab="skills">
-        <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M6 20V10l6-6 6 6v10"/><path d="M10 20v-5h4v5"/></svg>Team skills</span>
       </button>
       <button class="admin-tab" data-admin-tab="settings">
         <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</span>
@@ -2271,23 +2371,6 @@ html,body{
     </div>
 
     <!-- TEAM SKILLS -->
-    <div class="admin-panel" data-admin-panel="skills">
-      <div class="panel" style="margin-bottom:16px">
-        <div class="panel-head">
-          <div class="panel-title">Skill map</div>
-          <span class="panel-sub">1 = Foundational · 2 = Developing · 3 = Consistent · 4 = Leading · 5 = Expert · 5 = Expert</span>
-        </div>
-        <div id="skillMapGrid"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <div class="panel-title">Skill gap — active projects vs team supply</div>
-          <span class="panel-sub">Skills your current projects need that your team is thin on</span>
-        </div>
-        <div id="skillGapGrid"></div>
-      </div>
-    </div>
-
     <!-- ARCHIVE -->
     <div class="admin-panel" data-admin-panel="archive">
 
@@ -3291,6 +3374,20 @@ document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 overlay.addEventListener('click', closeDrawer);
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
 
+// ── PAGE NAV ──────────────────────────────────────────────────
+function switchPage(name){
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active-page', p.classList.contains('page-'+name)));
+  document.querySelectorAll('.header-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+  // Render page-specific content on first visit
+  if(name === 'skills'){ renderSkillSummary(); renderSkillsPageFull(); }
+  if(name === 'projects'){ renderTimeline(); }
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.header-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchPage(btn.dataset.page));
+});
+
 const projects = [
   {
     id:'meridian', name:'Meridian Checkout', client:'Fintech Co.', domain:'fintech',
@@ -3396,6 +3493,8 @@ function renderProjects(){
   document.querySelectorAll('#projectsTable tr').forEach(tr => {
     tr.addEventListener('click', () => openProjectDrawer(tr.dataset.id));
   });
+  const pcl = document.getElementById('projectCountLabel');
+  if(pcl) pcl.textContent = projects.length + ' active';
 }
 
 function scoreMatch(designer, project){
@@ -4190,7 +4289,6 @@ function switchAdminPanel(name){
   if(name === 'people') renderPeopleTable();
   if(name === 'projects') renderProjectsAdminTable();
   if(name === 'archive') renderArchivePanel();
-  if(name === 'skills') renderSkillsPanel();
   if(name === 'settings'){
     renderSettingsPanel();
     // Wire save button if not already present
@@ -5142,6 +5240,191 @@ function openTimelinePopover(evt, projId){
   }, 10);
 }
 
+// ── FULL SKILL MAP + GAP for Skills page ──────────────────────
+function renderSkillsPageFull(){
+  const SKILLS = ['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'];
+
+  // ── Skill map ──
+  const mapEl = document.getElementById('skillMapGridMain');
+  if(mapEl){
+    const rows = SKILLS.map(skill => {
+      const counts = [0,0,0,0,0];
+      designers.forEach(d => {
+        const entry = (d.skills||[]).find(([s])=>s===skill);
+        if(entry && entry[1] >= 1 && entry[1] <= 5) counts[entry[1]-1]++;
+      });
+      const lvlCls = ['l1','l2','l3','l4','l5'];
+      return `
+        <div class="skill-map-row">
+          <div class="skill-map-label">${skill}</div>
+          ${counts.map((c,i) => `
+            <div class="skill-map-cell">
+              ${c > 0 ? `<span class="skill-map-dot ${lvlCls[i]}">${c}</span>` : '<span style="color:var(--muted);font-size:11px">—</span>'}
+            </div>`).join('')}
+        </div>`;
+    }).join('');
+    mapEl.innerHTML = `
+      <div class="skill-map-grid" style="grid-template-columns:140px 1fr 1fr 1fr 1fr 1fr">
+        <div class="skill-map-head">Skill</div>
+        <div class="skill-map-head">Foundational</div>
+        <div class="skill-map-head">Developing</div>
+        <div class="skill-map-head">Consistent</div>
+        <div class="skill-map-head">Leading</div>
+        <div class="skill-map-head">Expert</div>
+        ${rows}
+      </div>`;
+
+  }
+
+  // ── Skill gap ──
+  const gapEl = document.getElementById('skillGapGridMain');
+  if(gapEl){
+    const teamSupply = {};
+    SKILLS.forEach(skill => {
+      teamSupply[skill] = designers.filter(d => {
+        const e = (d.skills||[]).find(([s])=>s===skill);
+        return e && e[1] >= 3;
+      }).length;
+    });
+    const projectDemand = {};
+    SKILLS.forEach(s => { projectDemand[s] = 0; });
+    projects.forEach(p => {
+      (p.needs||[]).forEach(([skill,lvl]) => {
+        if(lvl >= 3 && projectDemand[skill] !== undefined) projectDemand[skill]++;
+      });
+    });
+    const gaps = SKILLS.map(skill => ({
+      skill, demand: projectDemand[skill], supply: teamSupply[skill],
+      gap: projectDemand[skill] - teamSupply[skill]
+    })).filter(x => x.demand > 0).sort((a,b) => b.gap - a.gap);
+
+    if(!gaps.length){
+      gapEl.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12.5px">No active projects with defined skill needs.</div>';
+    } else {
+      gapEl.innerHTML = '<div style="padding:0 16px">' + gaps.map(g => {
+        const isGap = g.gap > 0;
+        const barW = Math.min(100, g.demand > 0 ? (g.supply/g.demand)*100 : 100);
+        return `
+          <div style="padding:12px 0;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:160px 60px 60px 1fr;gap:12px;align-items:center;font-size:13px">
+            <div style="font-weight:500">${g.skill}</div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Need</div>
+              <div style="font-weight:600;color:${isGap?'var(--crit)':'var(--ink)'}">${g.demand}</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Have</div>
+              <div style="font-weight:600;color:${isGap?'var(--warn)':'var(--ok)'}">${g.supply}</div>
+            </div>
+            <div>
+              <div style="height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden">
+                <div style="height:100%;width:${barW}%;background:${isGap?'var(--warn)':'var(--ok)'};border-radius:999px"></div>
+              </div>
+              ${isGap ? `<div style="font-size:11px;color:var(--crit);margin-top:3px">↑ ${g.gap} more Lead+ needed</div>` : `<div style="font-size:11px;color:var(--ok);margin-top:3px">✓ Covered</div>`}
+            </div>
+          </div>`;
+      }).join('') + '</div>';
+    }
+
+  }
+}
+
+// ── SKILL SUMMARY (homepage cards) ────────────────────────────
+function renderSkillSummary(){
+  const el = document.getElementById('skillSummaryPanel');
+  if(!el) return;
+
+  const SKILLS = ['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'];
+
+  // ── Card 1: Team strengths — avg skill level per skill, top 5 ──
+  const skillAvgs = SKILLS.map(skill => {
+    const vals = designers
+      .map(d => (d.skills||[]).find(([s])=>s===skill)?.[1] || 0)
+      .filter(v => v > 0);
+    const avg = vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
+    const lead = designers.filter(d => {
+      const e = (d.skills||[]).find(([s])=>s===skill);
+      return e && e[1] >= 3;
+    }).length;
+    return { skill, avg, lead, count: vals.length };
+  }).filter(x => x.avg > 0).sort((a,b) => b.avg - a.avg);
+
+  const top5 = skillAvgs.slice(0,5);
+  const maxAvg = top5[0]?.avg || 1;
+
+  const strengthsHtml = top5.map(({skill, avg, lead}) => {
+    const lvlLabel = avg >= 4.5 ? 'Expert' : avg >= 3.5 ? 'Leading' : avg >= 2.5 ? 'Consistent' : avg >= 1.5 ? 'Developing' : 'Foundational';
+    const barColor = avg >= 3.5 ? 'var(--ok)' : avg >= 2.5 ? 'var(--accent)' : 'var(--warn)';
+    return `
+      <div class="skill-summary-row">
+        <div class="skill-summary-name">${skill}</div>
+        <div class="skill-summary-bar-wrap">
+          <div class="skill-summary-bar-fill" style="width:${(avg/5)*100}%;background:${barColor}"></div>
+        </div>
+        <div class="skill-summary-count" style="color:${barColor}">${avg.toFixed(1)}</div>
+        <span class="skill-summary-badge" style="background:var(--surface-2);color:var(--muted)">${lead} Lead+</span>
+      </div>`;
+  }).join('');
+
+  // ── Card 2: Skill gaps — project demand vs team supply at Lead+ ──
+  const demand = {};
+  SKILLS.forEach(s => { demand[s] = 0; });
+  projects.forEach(p => {
+    (p.needs||[]).forEach(([skill, lvl]) => {
+      if(lvl >= 3 && demand[skill] !== undefined) demand[skill]++;
+    });
+  });
+
+  const supply = {};
+  SKILLS.forEach(skill => {
+    supply[skill] = designers.filter(d => {
+      const e = (d.skills||[]).find(([s])=>s===skill);
+      return e && e[1] >= 3;
+    }).length;
+  });
+
+  const gaps = SKILLS
+    .filter(s => demand[s] > 0)
+    .map(s => ({ skill: s, demand: demand[s], supply: supply[s], gap: demand[s] - supply[s] }))
+    .sort((a,b) => b.gap - a.gap)
+    .slice(0, 5);
+
+  const gapsHtml = gaps.length ? gaps.map(({skill, demand: d, supply: s, gap}) => {
+    const isGap  = gap > 0;
+    const fillW  = Math.min(100, s > 0 ? (s/d)*100 : 0);
+    const color  = isGap ? 'var(--crit)' : 'var(--ok)';
+    const badge  = isGap
+      ? `<span class="skill-summary-badge" style="background:var(--crit-soft);color:var(--crit)">↑ ${gap} short</span>`
+      : `<span class="skill-summary-badge" style="background:var(--ok-soft);color:var(--ok)">✓ Covered</span>`;
+    return `
+      <div class="skill-summary-row">
+        <div class="skill-summary-name">${skill}</div>
+        <div class="skill-summary-bar-wrap">
+          <div class="skill-summary-bar-fill" style="width:${fillW}%;background:${color}"></div>
+        </div>
+        <div class="skill-summary-count" style="color:var(--muted);font-size:11px">${s}/${d}</div>
+        ${badge}
+      </div>`;
+  }).join('') : `<div style="font-size:12.5px;color:var(--muted);padding:8px 0;font-style:italic">No active projects with defined skill needs.</div>`;
+
+  el.innerHTML = `
+    <div class="skill-summary-grid">
+      <div class="skill-summary-card" onclick="switchPage('skills')" title="Open Skills page">
+        <div class="skill-summary-card-title">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Team strengths
+        </div>
+        ${strengthsHtml || '<div style="font-size:12.5px;color:var(--muted)">No skill data yet.</div>'}
+      </div>
+      <div class="skill-summary-card" onclick="switchPage('skills')" title="Open Skills page">
+        <div class="skill-summary-card-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Project skill gaps
+        </div>
+        ${gapsHtml}
+      </div>
+    </div>`;
+}
+
 // ── TEAM AVAILABILITY ──────────────────────────────────────────
 function renderAvailability(){
   const el = document.getElementById('availabilityPanel');
@@ -5458,7 +5741,7 @@ function renderSkillsPanel(){
     if(!gaps.length){
       gapEl.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:12.5px">No active projects with defined skill needs.</div>';
     } else {
-      gapEl.innerHTML = gaps.map(g => {
+      gapEl.innerHTML = `<div style="padding:0 16px">` + gaps.map(g => {
         const isGap = g.gap > 0;
         const barW  = Math.min(100, g.demand > 0 ? (g.supply/g.demand)*100 : 100);
         return `
@@ -5479,7 +5762,7 @@ function renderSkillsPanel(){
               ${isGap ? `<div style="font-size:11px;color:var(--crit);margin-top:3px">↑ ${g.gap} more Lead+ needed</div>` : `<div style="font-size:11px;color:var(--ok);margin-top:3px">✓ Covered</div>`}
             </div>
           </div>`;
-      }).join('');
+      }).join('') + '</div>';
     }
   }
 }
@@ -6582,6 +6865,7 @@ function refreshAll(){
   renderCapacity();
   renderTimeline();
   renderAvailability();
+  renderSkillSummary();
 }
 
 // ---- FIX: Two-way navigation — project chips in designer drawer ----
@@ -6931,6 +7215,7 @@ function refreshAll(){
   renderCapacity();
   renderTimeline();
   renderAvailability();
+  renderSkillSummary();
 })();
 </script>
 
