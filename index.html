@@ -270,6 +270,9 @@ html,body{
 .header-meta b{color:var(--ink);font-weight:500}
 .header-meta span{display:flex;align-items:center;gap:6px}
 .header-meta .sep{width:1px;height:12px;background:var(--line)}
+.header-stat{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:32px}
+.header-stat-val{font-size:20px;font-weight:600;letter-spacing:-0.03em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.header-stat-label{font-size:10px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)}
 
 /* ===== SECTION HEADERS ===== */
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:40px 0 16px}
@@ -1265,6 +1268,49 @@ html,body{
 }
 [data-theme="dark"] .proj-check-row.checked{background:rgba(37,99,235,0.15);border-color:rgba(37,99,235,0.4)}
 
+/* ===== ACHIEVEMENTS ===== */
+.achievement-item{
+  display:flex;gap:14px;padding:12px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.achievement-item:last-child{border-bottom:none;padding-bottom:0}
+.achievement-month{
+  font-size:11px;font-weight:500;letter-spacing:0.03em;
+  text-transform:uppercase;color:var(--muted);
+  min-width:28px;padding-top:2px;
+}
+.achievement-body{flex:1;min-width:0}
+.achievement-title{font-size:13px;font-weight:500;letter-spacing:-0.005em;margin-bottom:5px;line-height:1.35}
+.achievement-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.achievement-tag{
+  font-size:10.5px;font-weight:500;padding:2px 7px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+}
+.skill-tag{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+[data-theme="dark"] .skill-tag{border-color:rgba(59,130,246,0.4)}
+.type-tag.type-craft{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.type-tag.type-leadership{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-border,#BBF7D0)}
+.type-tag.type-learning{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-border,#FDE68A)}
+.type-tag.type-visibility{background:var(--crit-soft);color:var(--crit);border-color:#FECACA}
+.type-tag.type-collaboration{background:var(--surface-2);color:var(--ink-2);border-color:var(--line)}
+[data-theme="dark"] .type-tag.type-craft{border-color:rgba(59,130,246,0.4)}
+[data-theme="dark"] .type-tag.type-leadership{border-color:#14532D}
+[data-theme="dark"] .type-tag.type-learning{border-color:#5A3A0A}
+[data-theme="dark"] .type-tag.type-visibility{border-color:#5A1E1E}
+.scope-tag{background:var(--surface-2);color:var(--muted);border-color:var(--line)}
+.achievement-impact{
+  font-size:12px;color:var(--muted);margin-top:4px;
+  padding-left:10px;border-left:2px solid var(--line);
+}
+.achievement-empty{font-size:12.5px;color:var(--muted);padding:8px 0;font-style:italic}
+.achievement-edit-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:var(--r-md);
+  background:var(--surface-2);margin-bottom:6px;
+}
+.achievement-edit-month{font-size:11px;font-weight:500;color:var(--muted);min-width:24px}
+.achievement-edit-title{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* SKILL EDITOR */
 .skill-editor-row{
   display:grid;grid-template-columns:140px 1fr 44px;
@@ -1549,6 +1595,32 @@ html,body{
 }
 .pin-btn:hover{background:var(--ink-2)}
 
+
+/* ===== BENCH ===== */
+.bench-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:2px 8px;border-radius:999px;
+  font-size:11px;font-weight:500;
+  background:var(--ok-soft);color:var(--ok);
+  border:1px solid var(--ok-border,#BBF7D0);
+}
+.bench-chip::before{
+  content:'';width:5px;height:5px;border-radius:50%;
+  background:var(--ok);flex-shrink:0;
+}
+.strip-icon.bench{background:var(--ok-soft);color:var(--ok)}
+[data-theme="dark"] .strip-icon.bench{background:#14291F}
+
+/* Bench filter chip */
+.chip[data-filter="bench"].active{background:var(--ok);color:white;border-color:var(--ok)}
+
+/* Intake best match hint */
+.intake-match{
+  font-size:11px;color:var(--ok);margin-top:3px;
+  display:flex;align-items:center;gap:4px;
+}
+.intake-match::before{content:'↗';font-size:10px}
+
 /* ===== LOADING DOTS ===== */
 .load-dot{
   width:7px;height:7px;border-radius:50%;
@@ -1594,9 +1666,15 @@ html,body{
       </div>
     </div>
     <div class="header-meta">
-      <span>Team <b id="hdrTeamCount">22</b></span>
+      <div class="header-stat">
+        <span class="header-stat-val" id="hdrTeamCount">—</span>
+        <span class="header-stat-label">Designers</span>
+      </div>
       <span class="sep"></span>
-      <span>Projects <b id="hdrProjectCount">7</b></span>
+      <div class="header-stat">
+        <span class="header-stat-val" id="hdrProjectCount">—</span>
+        <span class="header-stat-label">Projects</span>
+      </div>
       <span class="sep"></span>
       <span>Updated <b>Mon 09:14</b></span>
       <span class="sep"></span>
@@ -1645,7 +1723,6 @@ html,body{
       <h2>Team Pulse</h2>
       <span class="count">This week</span>
     </div>
-    <p class="section-desc">Five signals, computed live from team data. Trends matter more than absolutes.</p>
   </div>
 
   <div class="strip" id="pulseStrip"></div>
@@ -1657,7 +1734,6 @@ html,body{
       <h2>Designers</h2>
       <span class="count" id="designerCount">—</span>
     </div>
-    <p class="section-desc">Sorted by status — alerts first, not alphabetical.</p>
   </div>
 
   <div class="main-grid">
@@ -1669,10 +1745,13 @@ html,body{
         <button class="chip" data-filter="alert">Alert<span class="badge" id="badge-alert">—</span></button>
         <button class="chip" data-filter="watch">Watch<span class="badge" id="badge-watch">—</span></button>
         <button class="chip" data-filter="steady">Steady<span class="badge" id="badge-steady">—</span></button>
-        <span class="filter-label" style="margin-left:12px">Sort</span>
-        <button class="chip active">Status</button>
-        <button class="chip">Load</button>
-        <button class="chip">Energy</button>
+        <button class="chip" data-filter="bench">Bench<span class="badge" id="badge-bench">—</span></button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <span class="filter-label">Sort</span>
+          <button class="chip active" data-sort="status">Status</button>
+          <button class="chip" data-sort="load">Load</button>
+          <button class="chip" data-sort="energy">Energy</button>
+        </div>
       </div>
       <div class="designer-list" id="designerList"></div>
     </div>
@@ -2180,92 +2259,92 @@ const designers = [
   { id:1, name:"Camila Ruiz", initials:"CR", role:"Senior Product Designer", status:"alert",
     load:102, energy:"low",    context:3, pto:62, meetingLoad:"heavy",
     projects:[{n:"Kairos Dashboard",c:"b"},{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
-    skills:[["Interaction",4],["UX Research",3],["Visual",3],["Prototyping",4],["Systems",3],["Facilitation",3]],
-    growth:[{g:"Lead a discovery sprint end-to-end",p:60,link:"via Kairos Dashboard"},{g:"Mentor a mid-level designer",p:40,link:"paired with N. Rivera"}],
+    skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",3],["Motion Design",1],["Prototyping",4],["Presentation",3],["Strategy",2],["AI",2]],
+    achievements:[{id:"a1",title:"Led end-to-end discovery for Kairos Dashboard",month:"Oct",projectId:"kairos",skill:"Product Design",type:"leadership",scope:"cross-team",impact:"Shaped Q4 roadmap priorities"},{id:"a2",title:"Started mentoring Nadia Rivera on interaction craft",month:"Sep",projectId:null,skill:"UI Design",type:"collaboration",scope:"internal",impact:""}],
     history:[3,3,3,3,2,2,2]
   },
   { id:2, name:"Tomás Leite", initials:"TL", role:"Product Designer", status:"alert",
     load:88,  energy:"low",    context:2, pto:104, meetingLoad:"heavy",
     projects:[{n:"Aria Research",c:"c"},{n:"Vela",c:"e"}],
-    skills:[["UX Research",4],["Interaction",3],["Visual",2],["Prototyping",3],["Facilitation",4],["Systems",2]],
-    growth:[{g:"Publish a research methodology doc",p:30,link:"via Aria Research"},{g:"Take 2+ weeks of PTO this quarter",p:0,link:"blocker"}],
+    skills:[["UI Design",2],["UX Design",4],["Product Design",3],["Art Direction",2],["Design System",2],["Motion Design",1],["Prototyping",3],["Presentation",4],["Strategy",3],["AI",2]],
+    achievements:[{id:"a3",title:"Conducted solo research sprint for Aria Health",month:"Nov",projectId:"aria",skill:"UX Design",type:"craft",scope:"external",impact:"Unblocked clinical approval process"},{id:"a4",title:"Documented research protocol for healthcare projects",month:"Oct",projectId:"aria",skill:"Strategy",type:"learning",scope:"internal",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:3, name:"Priya Shah", initials:"PS", role:"Senior Product Designer", status:"watch",
     load:84,  energy:"steady", context:2, pto:30, meetingLoad:"balanced",
     projects:[{n:"Kairos",c:"b"},{n:"Lumen",c:"e"}],
-    skills:[["Visual",4],["Interaction",3],["Systems",4],["Prototyping",3],["UX Research",2],["Facilitation",3]],
-    growth:[{g:"Ship Kairos v2 with measurable impact",p:55,link:"via Kairos"},{g:"Deepen research craft",p:25,link:"stretch assignment"}],
+    skills:[["UI Design",4],["UX Design",2],["Product Design",3],["Art Direction",4],["Design System",4],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",2],["AI",1]],
+    achievements:[{id:"a5",title:"Shipped Kairos Dashboard v2 data visualization layer",month:"Sep",projectId:"kairos",skill:"UI Design",type:"craft",scope:"external",impact:"30% improvement in report readability"},{id:"a6",title:"Led visual identity for Lumen rebrand",month:"Aug",projectId:"lumen",skill:"Art Direction",type:"leadership",scope:"external",impact:""}],
     history:[4,4,3,3,3,3,3]
   },
   { id:4, name:"Miguel Kato", initials:"MK", role:"Staff Designer", status:"watch",
     load:92,  energy:"steady", context:3, pto:45, meetingLoad:"heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"},{n:"Lumen",c:"e"}],
-    skills:[["Systems",4],["Interaction",4],["Visual",3],["Prototyping",4],["Facilitation",4],["UX Research",3]],
-    growth:[{g:"Establish design critique cadence across team",p:70,link:"ongoing"},{g:"Reduce to 2 projects",p:0,link:"in progress"}],
+    skills:[["UI Design",3],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",4],["Motion Design",2],["Prototyping",4],["Presentation",4],["Strategy",4],["AI",3]],
+    achievements:[{id:"a7",title:"Established weekly design critique cadence",month:"Oct",projectId:null,skill:"Strategy",type:"leadership",scope:"internal",impact:"Improved quality feedback loop across 3 teams"},{id:"a8",title:"Architected Pax Design System v3 token structure",month:"Sep",projectId:"pax",skill:"Design System",type:"craft",scope:"cross-team",impact:""}],
     history:[4,4,4,3,3,4,3]
   },
   { id:5, name:"Ana Sørensen", initials:"AS", role:"Senior Product Designer", status:"steady",
     load:78,  energy:"high",   context:2, pto:18, meetingLoad:"low",
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
-    skills:[["Interaction",4],["Visual",4],["Systems",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
-    growth:[{g:"Lead Meridian checkout end-to-end",p:80,link:"via Meridian"},{g:"Present at team critique",p:50,link:"scheduled Nov 14"}],
+    skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",4],["Design System",3],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",3],["AI",2]],
+    achievements:[{id:"a9",title:"Led Meridian checkout redesign end-to-end",month:"Oct",projectId:"meridian",skill:"Product Design",type:"leadership",scope:"external",impact:"Increased conversion by 12%"},{id:"a10",title:"Presented interaction patterns at team critique",month:"Nov",projectId:null,skill:"Presentation",type:"visibility",scope:"internal",impact:""}],
     history:[4,4,4,4,4,4,4]
   },
   { id:6, name:"Jonah Bekele", initials:"JB", role:"Product Designer", status:"steady",
     load:74,  energy:"high",   context:2, pto:12, meetingLoad:"low",
     projects:[{n:"Lumen",c:"e"},{n:"Pax DS",c:"d"}],
-    skills:[["Visual",4],["Systems",3],["Interaction",3],["Prototyping",2],["UX Research",2],["Facilitation",2]],
-    growth:[{g:"Build visual system for Lumen",p:65,link:"via Lumen"},{g:"Improve prototyping skills",p:40,link:"course + practice"}],
+    skills:[["UI Design",4],["UX Design",2],["Product Design",3],["Art Direction",4],["Design System",3],["Motion Design",3],["Prototyping",2],["Presentation",2],["Strategy",2],["AI",1]],
+    achievements:[],
     history:[4,4,4,4,4,4,4]
   },
   { id:7, name:"Hana Fujimoto", initials:"HF", role:"Senior Product Designer", status:"steady",
     load:81,  energy:"high",   context:2, pto:22, meetingLoad:"balanced",
     projects:[{n:"Vela",c:"e"},{n:"Orion",c:"c"}],
-    skills:[["UX Research",4],["Interaction",3],["Facilitation",4],["Visual",2],["Systems",3],["Prototyping",3]],
-    growth:[{g:"Run quarterly user research review",p:75,link:"via Vela"},{g:"Coach a junior on research methods",p:55,link:"paired with E. Duarte"}],
+    skills:[["UI Design",2],["UX Design",4],["Product Design",3],["Art Direction",2],["Design System",3],["Motion Design",1],["Prototyping",3],["Presentation",4],["Strategy",4],["AI",2]],
+    achievements:[],
     history:[4,4,4,4,4,4,4]
   },
   { id:8, name:"Nadia Rivera", initials:"NR", role:"Mid Designer", status:"steady",
     load:72,  energy:"steady", context:1, pto:8, meetingLoad:"balanced",
     projects:[{n:"Lumen",c:"e"}],
-    skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",2],["UX Research",2],["Facilitation",1]],
-    growth:[{g:"Reach 'applying' in Interaction Design",p:60,link:"via Lumen"},{g:"Receive feedback from a senior weekly",p:80,link:"paired with C. Ruiz"}],
+    skills:[["UI Design",3],["UX Design",2],["Product Design",2],["Art Direction",2],["Design System",2],["Motion Design",1],["Prototyping",2],["Presentation",1],["Strategy",1],["AI",1]],
+    achievements:[],
     history:[3,3,4,4,4,4,4]
   },
   { id:9, name:"Elena Duarte", initials:"ED", role:"Junior Designer", status:"steady",
     load:68,  energy:"steady", context:1, pto:5, meetingLoad:"low",
     projects:[{n:"Vela",c:"e"}],
-    skills:[["Visual",2],["Interaction",2],["Systems",1],["Prototyping",2],["UX Research",1],["Facilitation",1]],
-    growth:[{g:"Ship 3 small features independently",p:66,link:"via Vela"},{g:"Build portfolio of research notes",p:40,link:"stretch"}],
+    skills:[["UI Design",2],["UX Design",1],["Product Design",2],["Art Direction",2],["Design System",1],["Motion Design",1],["Prototyping",2],["Presentation",1],["Strategy",1],["AI",1]],
+    achievements:[],
     history:[4,4,4,4,4,4,4]
   },
   { id:10, name:"Rafael Gómez", initials:"RG", role:"Product Designer", status:"steady",
     load:70,  energy:"steady", context:2, pto:15, meetingLoad:"balanced",
     projects:[{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
-    skills:[["Visual",3],["Interaction",3],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
-    growth:[{g:"Lead Orion design",p:55,link:"via Orion"},{g:"Contribute 5 components to Pax",p:40,link:"via Pax DS"}],
+    skills:[["UI Design",3],["UX Design",2],["Product Design",3],["Art Direction",3],["Design System",2],["Motion Design",2],["Prototyping",3],["Presentation",2],["Strategy",2],["AI",1]],
+    achievements:[],
     history:[4,4,4,4,4,4,4]
   },
   { id:11, name:"Sofia Viana", initials:"SV", role:"Mid Designer", status:"steady",
     load:66,  energy:"high",   context:2, pto:10, meetingLoad:"low",
     projects:[{n:"Orion",c:"c"},{n:"Lumen",c:"e"}],
-    skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
-    growth:[{g:"Reach 'applying' in Prototyping",p:70,link:"via Orion"},{g:"Own a feature end-to-end",p:50,link:"via Lumen"}],
+    skills:[["UI Design",3],["UX Design",2],["Product Design",2],["Art Direction",3],["Design System",2],["Motion Design",2],["Prototyping",3],["Presentation",2],["Strategy",1],["AI",1]],
+    achievements:[],
     history:[4,4,3,4,4,4,4]
   },
   { id:12, name:"Lucas Tanaka", initials:"LT", role:"Senior Product Designer", status:"watch",
     load:86,  energy:"steady", context:2, pto:38, meetingLoad:"very-heavy",
     projects:[{n:"Meridian",c:"a"},{n:"Kairos",c:"b"}],
-    skills:[["Interaction",4],["Systems",4],["Visual",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
-    growth:[{g:"Lead architecture decisions on Kairos",p:50,link:"via Kairos"},{g:"Take ownership of team design system",p:30,link:"stretch"}],
+    skills:[["UI Design",4],["UX Design",3],["Product Design",4],["Art Direction",3],["Design System",4],["Motion Design",2],["Prototyping",3],["Presentation",3],["Strategy",3],["AI",2]],
+    achievements:[],
     history:[4,4,4,3,3,3,3]
   },
   { id:13, name:"Isabela Nunes", initials:"IN", role:"Mid Designer", status:"watch",
     load:89,  energy:"low",    context:3, pto:52, meetingLoad:"very-heavy",
     projects:[{n:"Kairos",c:"b"},{n:"Aria",c:"c"},{n:"Orion",c:"c"}],
-    skills:[["Interaction",3],["Visual",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
-    growth:[{g:"Reduce to 2 projects",p:0,link:"active intervention"},{g:"Deepen interaction craft",p:30,link:"stretch"}],
+    skills:[["UI Design",3],["UX Design",2],["Product Design",3],["Art Direction",2],["Design System",2],["Motion Design",1],["Prototyping",3],["Presentation",2],["Strategy",2],["AI",1]],
+    achievements:[],
     history:[3,4,3,3,3,3,3]
   }
 ];
@@ -2285,7 +2364,7 @@ extra.forEach((e,i) => {
     context: Math.random()>0.7 ? 1 : 2,
     pto: 5 + Math.floor(Math.random()*25),
     projects: Math.random()>0.5 ? [{n:"Lumen",c:"e"},{n:"Vela",c:"e"}] : [{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
-    skills: [["Visual",2+Math.floor(Math.random()*3)],["Interaction",2+Math.floor(Math.random()*3)],["Systems",1+Math.floor(Math.random()*3)],["Prototyping",2+Math.floor(Math.random()*3)],["UX Research",1+Math.floor(Math.random()*3)],["Facilitation",1+Math.floor(Math.random()*3)]],
+    skills: [["UI Design",2+Math.floor(Math.random()*3)],["UX Design",1+Math.floor(Math.random()*3)],["Product Design",2+Math.floor(Math.random()*3)],["Art Direction",1+Math.floor(Math.random()*3)],["Design System",1+Math.floor(Math.random()*3)],["Motion Design",1+Math.floor(Math.random()*2)],["Prototyping",1+Math.floor(Math.random()*3)],["Presentation",1+Math.floor(Math.random()*3)],["Strategy",1+Math.floor(Math.random()*2)],["AI",1+Math.floor(Math.random()*2)]],
     growth:[{g:"Quarterly craft goal",p:40+Math.floor(Math.random()*40),link:"on track"},{g:"Quarterly collaboration goal",p:30+Math.floor(Math.random()*50),link:"on track"}],
     history:[4,4,4,4,4,4,4]
   });
@@ -2396,8 +2475,8 @@ function renderClaudeOutput(text, outputEl, onRefresh){
 // ---- Serialize helpers ----
 function serializeDesigner(d){
   const skillStr = d.skills.map(([s,l]) => `${s}:${['—','Learn','Apply','Lead','Teach'][l]}`).join(', ');
-  const growthStr = d.growth.map(g => `"${g.g}" (${g.p}%)`).join('; ');
-  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Growth:[${growthStr}]`;
+  const achievStr = (d.achievements||[]).slice(0,3).map(a => `"${a.title}" (${a.month}${a.projectId ? ', '+a.projectId : ''})`).join('; ');
+  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Recent achievements:[${achievStr}]`;
 }
 
 function serializeProject(p){
@@ -2587,8 +2666,21 @@ function shortRole(r){
   return r.replace('Senior Product Designer','Senior').replace('Product Designer','Designer').replace('Staff Designer','Staff').replace('Mid Designer','Mid').replace('Junior Designer','Junior');
 }
 
+let currentSort = 'status';
+
 function renderList(filter='all'){
-  const filtered = filter==='all' ? designers : designers.filter(d=>d.status===filter);
+  const filtered = filter==='bench'
+    ? [...designers].filter(d => d.context === 0)
+    : filter==='all' ? [...designers] : designers.filter(d=>d.status===filter);
+
+  // Sort
+  const energyOrder = {low:0, steady:1, high:2};
+  filtered.sort((a,b) => {
+    if(currentSort === 'load')   return b.load - a.load;
+    if(currentSort === 'energy') return (energyOrder[a.energy]??1) - (energyOrder[b.energy]??1);
+    // default: status (alert → watch → steady)
+    return ({alert:0,watch:1,steady:2}[a.status]??2) - ({alert:0,watch:1,steady:2}[b.status]??2);
+  });
   listEl.innerHTML = filtered.map(d => `
     <div class="designer" data-id="${d.id}">
       <div class="person">
@@ -2617,7 +2709,11 @@ function renderList(filter='all'){
         </div>
       </div>
       <div class="projects-cell">
-        ${d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}</span>`).join('')}
+        ${d.context === 0 && d.pto <= 14
+          ? '<span class="bench-chip">Available</span>'
+          : d.context === 0 && d.pto > 14
+          ? '<span class="bench-chip" style="background:var(--warn-soft);color:var(--warn);border-color:var(--warn-border,#FDE68A)">On PTO / Resting</span>'
+          : d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}</span>`).join('')}
       </div>
       <div class="status-cell">
         <span class="status ${d.status}">${d.status}</span>
@@ -2637,6 +2733,17 @@ document.querySelectorAll('.chip[data-filter]').forEach(c=>{
     document.querySelectorAll('.chip[data-filter]').forEach(x=>x.classList.remove('active'));
     c.classList.add('active');
     renderList(c.dataset.filter);
+  });
+});
+
+document.querySelectorAll('.chip[data-sort]').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip[data-sort]').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    currentSort = c.dataset.sort;
+    // Re-render with current filter
+    const activeFilter = document.querySelector('.chip[data-filter].active');
+    renderList(activeFilter ? activeFilter.dataset.filter : 'all');
   });
 });
 
@@ -2734,17 +2841,31 @@ function openDrawer(id, _preloaded){
     </div>
 
     <div class="drawer-section">
-      <h4>Growth · this quarter</h4>
-      ${d.growth.map(g=>`
-        <div class="growth-item">
-          <div class="growth-goal">${g.g}</div>
-          <div class="growth-progress">
-            <div class="skill-bar"><div class="fill" style="width:${g.p}%"></div></div>
-            <span class="pct">${g.p}%</span>
-          </div>
-          <div class="growth-link">${g.link}</div>
-        </div>
-      `).join('')}
+      <h4>Year's achievements</h4>
+      ${(() => {
+        const achievements = d.achievements || [];
+        if(!achievements.length) return '<div class="achievement-empty">No achievements recorded yet. Add them through the Edit panel.</div>';
+        const typeColors = {craft:'accent',leadership:'ok',learning:'warn',visibility:'crit',collaboration:'muted'};
+        const typeLabels = {craft:'Craft',leadership:'Leadership',learning:'Learning',visibility:'Visibility',collaboration:'Collaboration'};
+        return achievements
+          .slice().reverse()
+          .map(a => {
+            const proj = projects.find(p => p.id === a.projectId);
+            return `<div class="achievement-item">
+              <div class="achievement-month">${a.month || '—'}</div>
+              <div class="achievement-body">
+                <div class="achievement-title">${a.title}</div>
+                <div class="achievement-meta">
+                  ${a.skill ? `<span class="achievement-tag skill-tag">${a.skill}</span>` : ''}
+                  ${a.type ? `<span class="achievement-tag type-tag type-${a.type}">${typeLabels[a.type]||a.type}</span>` : ''}
+                  ${a.scope === 'external' ? `<span class="achievement-tag scope-tag">External</span>` : a.scope === 'cross-team' ? `<span class="achievement-tag scope-tag">Cross-team</span>` : ''}
+                  ${proj ? `<span class="proj proj-a" style="cursor:pointer" onclick="event.stopPropagation();closeDrawer();openProjectDrawer('${proj.id}')">${proj.name}</span>` : ''}
+                </div>
+                ${a.impact ? `<div class="achievement-impact">${a.impact}</div>` : ''}
+              </div>
+            </div>`;
+          }).join('');
+      })()}
     </div>
 
     <div class="drawer-section" data-section="recommended-action">
@@ -2797,7 +2918,7 @@ const projects = [
     deadline:'21 Nov', duration:'8 weeks', startDate:'29 Sep', teamLoad:78,
     teamIds:[5,12,4],
     openRole: { seniority:'mid', hours:20, reason:'Backfill as LT phases out' },
-    needs:[ ['Interaction',4],['Systems',3],['UX Research',3],['Visual',3],['Prototyping',3],['Facilitation',2] ],
+    needs:[ ['UI Design',3],['UX Design',3],['Product Design',4],['Art Direction',3],['Design System',3],['Motion Design',1],['Prototyping',3],['Presentation',2],['Strategy',2],['AI',1] ],
     stakeholder: { name:'Rita Monteiro', role:'Head of Product, Fintech Co.', style:'Async-first · weekly sync · detailed specs', friction:'Tight legal review cycle — budget 2 extra days per sign-off' },
     growthOps:[ 'Lead a high-traffic production flow','Partner with legal/compliance','Ship measurable conversion lift' ],
     risks:[]
@@ -2808,7 +2929,7 @@ const projects = [
     deadline:'08 Dec', duration:'10 weeks', startDate:'22 Sep', teamLoad:94,
     teamIds:[1,3,12,13],
     openRole: null,
-    needs:[ ['Visual',3],['Interaction',4],['Systems',4],['Prototyping',3],['UX Research',2],['Facilitation',3] ],
+    needs:[ ['UI Design',4],['UX Design',2],['Product Design',4],['Art Direction',3],['Design System',4],['Motion Design',1],['Prototyping',3],['Presentation',3],['Strategy',3],['AI',2] ],
     stakeholder: { name:'Daniel Oyelaran', role:'VP Analytics', style:'Sync-heavy · twice-weekly calls · visual thinker', friction:'Scope expansion pressure — hold the line on the roadmap' },
     growthOps:[ 'Data visualization depth','Architecture decisions at scale' ],
     risks:[ 'Team load at 94% — above ceiling','CR in alert status on this project','Kairos + 2 other projects for IN (context overload)' ]
@@ -2819,7 +2940,7 @@ const projects = [
     deadline:'15 Jan', duration:'14 weeks', startDate:'06 Oct', teamLoad:71,
     teamIds:[6,8,3,11],
     openRole: null,
-    needs:[ ['Visual',4],['Systems',3],['Prototyping',3],['Interaction',2],['UX Research',2],['Facilitation',2] ],
+    needs:[ ['UI Design',4],['UX Design',2],['Product Design',2],['Art Direction',4],['Design System',3],['Motion Design',2],['Prototyping',3],['Presentation',2],['Strategy',2],['AI',1] ],
     stakeholder: { name:'Clara Beaumont', role:'Creative Director, Lumen', style:'Collaborative · daily Figma reviews · high craft bar', friction:'Strong aesthetic opinions — bring options, not solutions' },
     growthOps:[ 'Visual systems craft','Mentorship pairing (JB → NR)','Client-facing presentations' ],
     risks:[]
@@ -2830,7 +2951,7 @@ const projects = [
     deadline:'30 Nov', duration:'6 weeks', startDate:'20 Oct', teamLoad:68,
     teamIds:[7,9,2],
     openRole: null,
-    needs:[ ['UX Research',4],['Interaction',3],['Facilitation',3],['Prototyping',2],['Visual',2],['Systems',2] ],
+    needs:[ ['UI Design',2],['UX Design',4],['Product Design',3],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',3],['Strategy',3],['AI',1] ],
     stakeholder: { name:'Ben Asante', role:'PM, Vela SaaS', style:'Metrics-driven · weekly standup · trusts the team', friction:'Needs research rigor — be explicit about methodology' },
     growthOps:[ 'Research leadership (HF)','First-time research ownership (ED)','Methodology documentation' ],
     risks:[ 'TL in alert — PTO overdue, consider rotating out' ]
@@ -2841,7 +2962,7 @@ const projects = [
     deadline:'24 Nov', duration:'3 weeks', startDate:'03 Nov', teamLoad:101,
     teamIds:[2],
     openRole: { seniority:'senior', hours:30, reason:'Solo staffing critical — TL in alert' },
-    needs:[ ['UX Research',4],['Facilitation',4],['Interaction',2],['Visual',2],['Systems',2],['Prototyping',2] ],
+    needs:[ ['UI Design',1],['UX Design',4],['Product Design',2],['Art Direction',1],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',4],['Strategy',3],['AI',1] ],
     stakeholder: { name:'Dr. Amelia Voss', role:'Clinical Lead, Aria Health', style:'Formal · scheduled calls · requires clinical framing', friction:'HIPAA compliance — research protocols need legal approval' },
     growthOps:[ 'Healthcare domain exposure','Clinical research methodology' ],
     risks:[ 'Single-designer project — bus factor of 1','TL at 88% load already','Tight deadline + clinical approval cycles' ]
@@ -2852,7 +2973,7 @@ const projects = [
     deadline:'20 Dec', duration:'7 weeks', startDate:'03 Nov', teamLoad:64,
     teamIds:[10,11,7],
     openRole: null,
-    needs:[ ['Visual',3],['Prototyping',3],['Interaction',2],['Systems',2],['UX Research',2],['Facilitation',2] ],
+    needs:[ ['UI Design',3],['UX Design',2],['Product Design',2],['Art Direction',3],['Design System',2],['Motion Design',2],['Prototyping',3],['Presentation',2],['Strategy',1],['AI',1] ],
     stakeholder: { name:'Priya Ramanathan', role:'Marketing Director, Orion', style:'Lightweight · biweekly check-ins · design-trusting', friction:'Copy lags design — buffer for content delays' },
     growthOps:[ 'Motion and interaction polish','Solo ownership (RG)','Marketing craft' ],
     risks:[]
@@ -2863,7 +2984,7 @@ const projects = [
     deadline:'Rolling', duration:'Ongoing', startDate:'Perpetual', teamLoad:88,
     teamIds:[4,5,6,10],
     openRole: null,
-    needs:[ ['Systems',4],['Prototyping',3],['Interaction',3],['Visual',3],['Facilitation',2],['UX Research',1] ],
+    needs:[ ['UI Design',3],['UX Design',1],['Product Design',3],['Art Direction',3],['Design System',4],['Motion Design',1],['Prototyping',3],['Presentation',2],['Strategy',2],['AI',1] ],
     stakeholder: { name:'Design Leadership', role:'Internal', style:'Self-directed · biweekly critique · open contribution', friction:'Prioritization tension vs. client work — protect 20% time' },
     growthOps:[ 'Design systems leadership (MK)','Component contribution (NR, SV)','Documentation craft' ],
     risks:[ 'Team spread across 3+ concurrent projects','Risk of fragmentation without owner focus time' ]
@@ -3406,7 +3527,7 @@ function dbDesignerToApp(row, dpRows){
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
     load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '',
-    skills: row.skills || [], growth: row.growth || [], history: row.history || [4,4,4,4,4,4,4],
+    skills: row.skills || [], achievements: row.achievements || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
 }
@@ -3451,7 +3572,7 @@ async function saveDesignerToSupabase(d){
   const payload = {
     name: d.name, initials: d.initials, role: d.role, status: d.status,
     load: d.load, energy: d.energy, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
-    skills: d.skills, growth: d.growth, history: d.history, last_updated: d.lastUpdated
+    skills: d.skills, achievements: d.achievements || [], history: d.history, last_updated: d.lastUpdated
   };
   // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
   const existingId = d.id && d.id !== null && d.id !== 'NEW' ? d.id : null;
@@ -3502,7 +3623,7 @@ async function persistDataLocally(){
   if(typeof window.storage === 'undefined') return;
   try {
     const payload = {
-      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, growth:d.growth, load:d.load, energy:d.energy, meetingLoad:d.meetingLoad, context:d.context, pto:d.pto, status:d.status, history:d.history, photo:d.photo })),
+      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, achievements:d.achievements||[], load:d.load, energy:d.energy, meetingLoad:d.meetingLoad, context:d.context, pto:d.pto, status:d.status, history:d.history, photo:d.photo })),
       projects:  projects.map(p  => ({ id:p.id, name:p.name, client:p.client, phase:p.phase, health:p.health, healthLabel:p.healthLabel, priority:p.priority, deadline:p.deadline, lastUpdated:p.lastUpdated, needs:p.needs, stakeholder:p.stakeholder, risks:p.risks, growthOps:p.growthOps })),
       savedAt: new Date().toISOString()
     };
@@ -3804,8 +3925,8 @@ function editDesigner(id, focusSub){
     name: '', role: 'Product Designer', initials: '', status: 'steady',
     load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
     projects: [],
-    skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
-    growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
+    skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
+    achievements: [],
     history: [4,4,4,4,4,4,4],
     lastUpdated: { profile: new Date().toISOString(), skills: new Date().toISOString(), growth: new Date().toISOString() }
   } : designers.find(x => x.id === id);
@@ -3915,29 +4036,78 @@ function editDesigner(id, focusSub){
       `).join('')}
     </div>
 
-    <div class="form-section" id="growthSection">
+    <div class="form-section" id="achievementsSection">
       <div class="form-section-head">
-        <div class="form-section-title">Growth goals · this quarter</div>
-        <span class="stale-pill ${isNew ? 'fresh' : staleLevel(daysSince(d.lastUpdated.growth), CADENCES.designer.growth)}">
-          ${isNew ? 'new' : formatDaysAgo(daysSince(d.lastUpdated.growth))}
-        </span>
+        <div class="form-section-title">Year's achievements</div>
+        <button type="button" class="btn" id="addAchievementBtn" style="padding:4px 12px;font-size:12px">+ Add</button>
       </div>
-      ${d.growth.map((g, i) => `
-        <div class="form-grid" style="margin-bottom:10px">
+      <div id="achievementsList">
+        ${(d.achievements||[]).length === 0
+          ? '<div class="form-hint" style="margin-bottom:12px">No achievements yet. Click + Add to record one.</div>'
+          : (d.achievements||[]).map((a,i) => `
+            <div class="achievement-edit-row" data-idx="${i}">
+              <div class="achievement-edit-summary">
+                <span class="achievement-edit-month">${a.month||'?'}</span>
+                <span class="achievement-edit-title">${a.title||'Untitled'}</span>
+                ${a.type ? `<span class="achievement-tag type-tag type-${a.type}" style="font-size:10px">${a.type}</span>` : ''}
+              </div>
+              <button type="button" class="photo-remove-btn" onclick="removeAchievement(${i})" style="margin-left:auto;flex-shrink:0">Remove</button>
+            </div>`).join('')}
+      </div>
+      <div id="newAchievementForm" style="display:none;margin-top:12px;padding:14px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--line)">
+        <div class="form-grid">
           <div class="form-group full">
-            <label class="form-label">Goal ${i+1}</label>
-            <input type="text" class="form-input" id="f_goal${i}" value="${g.g}" placeholder="e.g., Lead a discovery sprint end-to-end">
+            <label class="form-label">Achievement</label>
+            <input type="text" class="form-input" id="ach_title" placeholder="e.g., Led the AI workflow presentation for the Meridian team">
           </div>
           <div class="form-group">
-            <label class="form-label">Progress %</label>
-            <input type="number" class="form-input" id="f_gp${i}" value="${g.p}" min="0" max="100">
+            <label class="form-label">Month</label>
+            <select class="form-select" id="ach_month">
+              ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map(m => `<option value="${m}">${m}</option>`).join('')}
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Link / context</label>
-            <input type="text" class="form-input" id="f_gl${i}" value="${g.link}" placeholder="e.g., via Project X">
+            <label class="form-label">Project</label>
+            <select class="form-select" id="ach_project">
+              <option value="">— None —</option>
+              ${[...projects, ...archivedProjects].map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Skill demonstrated</label>
+            <select class="form-select" id="ach_skill">
+              <option value="">— None —</option>
+              ${['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'].map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="ach_type">
+              <option value="craft">Craft — quality work shipped</option>
+              <option value="leadership">Leadership — led people or process</option>
+              <option value="learning">Learning — first time doing X</option>
+              <option value="visibility">Visibility — external or senior exposure</option>
+              <option value="collaboration">Collaboration — cross-team work</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Scope</label>
+            <select class="form-select" id="ach_scope">
+              <option value="internal">Internal — within design team</option>
+              <option value="cross-team">Cross-team — with product, eng, etc.</option>
+              <option value="external">External — client or public facing</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Impact <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+            <input type="text" class="form-input" id="ach_impact" placeholder="e.g., Adopted by 3 teams · Led to new research framework">
           </div>
         </div>
-      `).join('')}
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" class="btn primary" id="saveAchievementBtn" style="padding:7px 16px;font-size:12.5px">Save achievement</button>
+          <button type="button" class="btn" id="cancelAchievementBtn" style="padding:7px 12px;font-size:12.5px">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <div class="form-section" id="projectsSection">
@@ -3968,7 +4138,73 @@ function editDesigner(id, focusSub){
 
   openModal();
 
-  // ── Photo upload wiring ──
+  // ── Achievement form wiring ──
+  setTimeout(() => {
+    const addBtn    = document.getElementById('addAchievementBtn');
+    const saveBtn   = document.getElementById('saveAchievementBtn');
+    const cancelBtn = document.getElementById('cancelAchievementBtn');
+    const form      = document.getElementById('newAchievementForm');
+
+    if(addBtn) addBtn.addEventListener('click', () => {
+      form.style.display = 'block';
+      document.getElementById('ach_title').focus();
+      addBtn.style.display = 'none';
+      // Set month to current month
+      const monthEl = document.getElementById('ach_month');
+      if(monthEl) monthEl.value = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][new Date().getMonth()];
+    });
+
+    if(cancelBtn) cancelBtn.addEventListener('click', () => {
+      form.style.display = 'none';
+      if(addBtn) addBtn.style.display = '';
+    });
+
+    if(saveBtn) saveBtn.addEventListener('click', () => {
+      const title = document.getElementById('ach_title').value.trim();
+      if(!title){ document.getElementById('ach_title').focus(); return; }
+      const achievement = {
+        id:        'ach_' + Date.now().toString(36),
+        title,
+        month:     document.getElementById('ach_month').value,
+        projectId: document.getElementById('ach_project').value || null,
+        skill:     document.getElementById('ach_skill').value || null,
+        type:      document.getElementById('ach_type').value,
+        scope:     document.getElementById('ach_scope').value,
+        impact:    document.getElementById('ach_impact').value.trim() || null,
+      };
+      if(!d.achievements) d.achievements = [];
+      d.achievements.push(achievement);
+      // Re-render the list
+      renderAchievementsList(d);
+      // Reset form
+      form.style.display = 'none';
+      if(addBtn) addBtn.style.display = '';
+      ['ach_title','ach_impact'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    });
+
+    // Expose remove function
+    window.removeAchievement = (idx) => {
+      if(!d.achievements) return;
+      d.achievements.splice(idx, 1);
+      renderAchievementsList(d);
+    };
+  }, 50);
+
+  function renderAchievementsList(d){
+    const listEl = document.getElementById('achievementsList');
+    if(!listEl) return;
+    const achievements = d.achievements || [];
+    const typeLabels = {craft:'Craft',leadership:'Leadership',learning:'Learning',visibility:'Visibility',collaboration:'Collaboration'};
+    listEl.innerHTML = achievements.length === 0
+      ? '<div class="form-hint" style="margin-bottom:12px">No achievements yet. Click + Add to record one.</div>'
+      : achievements.map((a,i) => `
+          <div class="achievement-edit-row" data-idx="${i}">
+            <span class="achievement-edit-month">${a.month||'?'}</span>
+            <span class="achievement-edit-title">${a.title||'Untitled'}</span>
+            ${a.type ? `<span class="achievement-tag type-tag type-${a.type}" style="font-size:10px">${typeLabels[a.type]||a.type}</span>` : ''}
+            <button type="button" class="photo-remove-btn" onclick="removeAchievement(${i})" style="margin-left:auto;flex-shrink:0">Remove</button>
+          </div>`).join('');
+  }
   let pendingPhoto = d.photo || null; // tracks the photo for this edit session
 
   setTimeout(() => {
@@ -4308,7 +4544,7 @@ function editProject(id, focusSub){
     type: 'Build', phase: 0, priority: 'P1', health: 'ok', healthLabel: 'On track',
     deadline: '', duration: '', startDate: '', teamLoad: 70,
     teamIds: [], openRole: null,
-    needs: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
+    needs: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
     stakeholder: { name: '', role: '', style: '', friction: '' },
     growthOps: [], risks: [],
     lastUpdated: Object.fromEntries(Object.keys(CADENCES.project).map(k => [k, new Date().toISOString()]))
@@ -4578,8 +4814,8 @@ async function saveDesigner(){
       status: 'steady',
       load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
       projects: [],
-      skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
-      growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
+      skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
+      achievements: [],
       history: [4,4,4,4,4,4,4],
       lastUpdated: { profile: new Date().toISOString(), skills: new Date().toISOString(), growth: new Date().toISOString() }
     };
@@ -4602,11 +4838,7 @@ async function saveDesigner(){
   });
   d.lastUpdated.skills = new Date().toISOString();
 
-  d.growth = d.growth.map((g, i) => ({
-    g:    (document.getElementById(`f_goal${i}`)?.value || '').trim(),
-    p:    parseInt(document.getElementById(`f_gp${i}`)?.value) || 0,
-    link: (document.getElementById(`f_gl${i}`)?.value  || '').trim()
-  }));
+  // achievements are managed directly on d via the form panel — no fields to read here
   d.lastUpdated.growth = new Date().toISOString();
 
   // Collect selected project assignments from checkboxes
@@ -4674,7 +4906,7 @@ async function saveProject(){
     p = {
       id: null, // will be set from slug below
       teamIds: [], teamLoad: 70, openRole: null,
-      needs: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
+      needs: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
       stakeholder: { name: '', role: '', style: '', friction: '' },
       growthOps: [], risks: [],
       lastUpdated: Object.fromEntries(Object.keys(CADENCES.project).map(k => [k, new Date().toISOString()]))
@@ -4942,7 +5174,7 @@ function renderSettingsPanel(){
   `).join('');
 
   // Skills
-  const skills = ['Interaction','UX Research','Visual','Prototyping','Systems','Facilitation'];
+  const skills = ['UI Design','UX Design','Product Design','Art Direction','Design System','Motion Design','Prototyping','Presentation','Strategy','AI'];
   document.getElementById('skillsList').innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:6px">
       ${skills.map(s => `<span class="tag accent">${s}</span>`).join('')}
@@ -4983,6 +5215,8 @@ function renderPulse(){
   const avgLoad   = Math.round(designers.reduce((s,d)=>s+d.load,0)/n);
   const atSafe    = designers.filter(d=>d.context<=2).length;
   const over3     = n - atSafe;
+  const benchN    = designers.filter(d => d.context === 0).length;
+  const benchAvail = designers.filter(d => d.context === 0 && d.pto <= 14).length;
   const alertN    = designers.filter(d=>d.status==='alert').length;
 
   const energyCls = lowE > 0 ? 'trend-down' : highE >= n/2 ? 'trend-up' : 'trend-warn';
@@ -5004,11 +5238,11 @@ function renderPulse(){
       <div class="strip-value">${avgLoad}<span class="unit">%</span></div>
       <div class="strip-trend ${loadCls}">${loadLbl}</div>
     </div>
-    <div class="strip-cell">
-      <div class="strip-icon context"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
-      <div class="strip-label">At ≤2 projects</div>
-      <div class="strip-value">${atSafe}<span class="unit">/${n}</span></div>
-      <div class="strip-trend ${over3 > 0 ? 'trend-warn' : 'trend-up'}">${over3 > 0 ? `${over3} on 3+ projects` : '→ all within limit'}</div>
+    <div class="strip-cell" onclick="document.querySelector('.chip[data-filter=bench]').click()" style="cursor:pointer" title="Click to filter bench designers">
+      <div class="strip-icon bench"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><line x1="12" y1="20" x2="12" y2="16"/></svg></div>
+      <div class="strip-label">On bench</div>
+      <div class="strip-value" style="${benchN > 0 ? 'color:var(--ok)' : 'color:var(--muted)'}">${benchN}</div>
+      <div class="strip-trend ${benchN > 0 ? 'trend-up' : 'trend-flat'}">${benchN > 0 ? `↑ ${benchAvail} available · ${benchN - benchAvail} resting` : '→ everyone allocated'}</div>
     </div>
     <div class="strip-cell">
       <div class="strip-icon alerts"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="20" y1="2" x2="22" y2="4"/><line x1="22" y1="2" x2="20" y2="4"/></svg></div>
@@ -5093,15 +5327,37 @@ function renderSidebar(){
           : p.openRole?.reason || 'Open role';
       };
 
-      intakeEl.innerHTML = intakeProjects.map(p => `
+      // Find best bench match for each project
+      const benchDesigners = designers.filter(d => d.context === 0 && d.pto <= 14 && d.status !== 'alert');
+
+      intakeEl.innerHTML = intakeProjects.map(p => {
+        // Simple skill-fit score for bench designers
+        let bestMatch = null, bestScore = -1;
+        benchDesigners.forEach(d => {
+          if(!p.needs || !p.needs.length) return;
+          const score = p.needs.reduce((sum, [skill, lvl]) => {
+            const ds = d.skills.find(([s]) => s === skill);
+            return sum + (ds ? Math.min(ds[1], lvl) : 0);
+          }, 0);
+          if(score > bestScore){ bestScore = score; bestMatch = d; }
+        });
+        const matchHint = bestMatch
+          ? `<div class="intake-match">${bestMatch.name} · ${bestMatch.role.replace('Product Designer','PD').replace('Senior ','Sr. ').replace('Designer','Des.')}</div>`
+          : benchDesigners.length === 0
+          ? ''
+          : '<div class="intake-match" style="color:var(--muted)">No bench match</div>';
+
+        return `
         <div class="queue-item" style="cursor:pointer" onclick="openProjectDrawer('${p.id}')">
           <div class="queue-score ${scoreClass(p)}">${intakeScore(p)}</div>
           <div class="queue-body">
             <div class="queue-title">${p.name}</div>
             <div class="queue-meta">${p.domain} · ${p.duration || '?'} · ${needsSummary(p)}</div>
+            ${matchHint}
           </div>
           <span class="queue-tier ${tierClass(p)}">${p.priority}</span>
-        </div>`).join('');
+        </div>`;
+      }).join('');
     }
   }
 
@@ -5151,6 +5407,8 @@ function updateFilterBadges(){
   document.getElementById('badge-alert').textContent  = designers.filter(d=>d.status==='alert').length;
   document.getElementById('badge-watch').textContent  = designers.filter(d=>d.status==='watch').length;
   document.getElementById('badge-steady').textContent = designers.filter(d=>d.status==='steady').length;
+  const badgeBench = document.getElementById('badge-bench');
+  if(badgeBench) badgeBench.textContent = designers.filter(d => d.context === 0).length;
   const adminBadge = document.getElementById('adminAlertCount');
   const alertN = designers.filter(d=>d.status==='alert').length;
   if(adminBadge){ adminBadge.textContent = alertN; adminBadge.style.display = alertN > 0 ? '' : 'none'; }
