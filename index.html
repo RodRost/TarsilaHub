@@ -1188,6 +1188,25 @@ html,body{
 }
 .form-section-title{font-size:12px;font-weight:600;letter-spacing:0.02em;text-transform:uppercase;color:var(--ink-2)}
 
+/* PROJECT ASSIGNMENT CHECKLIST */
+.proj-checklist{display:flex;flex-direction:column;gap:6px}
+.proj-check-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;
+  border:1px solid var(--line-soft);
+  border-radius:var(--r-md);
+  cursor:pointer;
+  transition:background .1s, border-color .1s;
+  font-size:13px;
+}
+.proj-check-row:hover{background:var(--surface-2);border-color:var(--line)}
+.proj-check-row.checked{background:var(--accent-soft);border-color:#BFDBFE}
+.proj-check-row input[type="checkbox"]{
+  width:15px;height:15px;flex-shrink:0;
+  accent-color:var(--accent);cursor:pointer;
+}
+[data-theme="dark"] .proj-check-row.checked{background:rgba(37,99,235,0.15);border-color:rgba(37,99,235,0.4)}
+
 /* SKILL EDITOR */
 .skill-editor-row{
   display:grid;grid-template-columns:140px 1fr 44px;
@@ -3649,9 +3668,43 @@ function editDesigner(id, focusSub){
         </div>
       `).join('')}
     </div>
+
+    <div class="form-section" id="projectsSection">
+      <div class="form-section-head">
+        <div class="form-section-title">Project assignments</div>
+        <span style="font-size:11.5px;color:var(--muted)">Select which projects this designer is on</span>
+      </div>
+      ${projects.length === 0
+        ? `<div class="form-hint">No active projects yet — add projects first, then assign designers.</div>`
+        : `<div class="proj-checklist">
+          ${projects.map(p => {
+            const colorMap = {fintech:'a', analytics:'b', healthcare:'c', internal:'d', 'b2c':'e', 'b2b-saas':'e', default:'a'};
+            const c = colorMap[p.domain] || 'a';
+            const checked = d.projects && d.projects.some(dp => dp.n === p.name || (dp.n && p.name.includes(dp.n.split(' ')[0])));
+            return `
+              <label class="proj-check-row ${checked ? 'checked' : ''}">
+                <input type="checkbox" class="proj-checkbox" data-project-id="${p.id}" data-project-name="${p.name}" data-project-color="${c}" ${checked ? 'checked' : ''}>
+                <span class="proj proj-${c}">${p.name}</span>
+                <span style="font-size:11.5px;color:var(--muted);margin-left:4px">· ${p.client} · ${p.type}</span>
+                <span class="health-dot" style="margin-left:auto"><span class="dot ${p.health}"></span></span>
+              </label>
+            `;
+          }).join('')}
+        </div>`
+      }
+    </div>
   `;
 
   openModal();
+
+  // Wire checkbox → toggle checked class on parent row
+  setTimeout(() => {
+    document.querySelectorAll('.proj-checkbox').forEach(cb => {
+      cb.addEventListener('change', () => {
+        cb.closest('.proj-check-row').classList.toggle('checked', cb.checked);
+      });
+    });
+  }, 50);
 
   // Scroll to the section the user needs to update
   if(focusSub){
@@ -4241,6 +4294,19 @@ async function saveDesigner(){
   }));
   d.lastUpdated.growth = new Date().toISOString();
 
+  // Collect selected project assignments from checkboxes
+  const selectedProjects = [];
+  document.querySelectorAll('.proj-checkbox:checked').forEach(cb => {
+    selectedProjects.push({
+      id:    cb.dataset.projectId,
+      name:  cb.dataset.projectName,
+      color: cb.dataset.projectColor
+    });
+  });
+  // Update local projects array for immediate display
+  d.projects = selectedProjects.map(p => ({ n: p.name, c: p.color }));
+  d.context  = selectedProjects.length;
+
   if(!d.name || !d.initials){
     document.getElementById('modalError').textContent = 'Name and initials are required.';
     if(isNew) designers.pop();
@@ -4255,7 +4321,16 @@ async function saveDesigner(){
 
   try {
     if(persistenceMode === 'supabase'){
-      await saveDesignerToSupabase(d);
+      await saveDesignerToSupabase(d); // assigns d.id on INSERT
+      // Sync designer_projects: delete old links then insert new ones
+      await sbXhr('DELETE', `designer_projects?designer_id=eq.${d.id}`, null);
+      for(const proj of selectedProjects){
+        await sbXhr('POST', 'designer_projects', {
+          designer_id: d.id,
+          project_id:  proj.id,
+          color_code:  proj.color
+        });
+      }
     } else if(isNew){
       d.id = Math.max(0, ...designers.filter(x => typeof x.id === 'number').map(x => x.id)) + 1;
     }
