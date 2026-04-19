@@ -6790,6 +6790,48 @@ function renderPulse(){
   const multiCls  = over3 > 0 ? 'trend-down' : multiN > n/2 ? 'trend-warn' : 'trend-flat';
   const multiLbl  = over3 > 0 ? `↑ ${over3} on 3+ projects` : multiN > 0 ? `${n - multiN} on 1 or fewer` : '→ all on single projects';
 
+  // ── Ending-soon: designers with a project allocation ending within 30 days ──
+  const MONTHS = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  function parseUntil(str){
+    if(!str) return null;
+    const parts = str.trim().split(/[\s\/\-]+/);
+    // Support "Mar 2025", "03/2025", "2025-03", "March 2025"
+    const monthNames = {january:0,february:1,march:2,april:3,may:4,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
+    let month = null, year = null;
+    for(const part of parts){
+      const p = part.toLowerCase();
+      if(MONTHS[part] !== undefined) month = MONTHS[part];
+      else if(monthNames[p] !== undefined) month = monthNames[p];
+      else if(/^\d{4}$/.test(part)) year = parseInt(part);
+      else if(/^\d{1,2}$/.test(part) && parseInt(part) >= 1 && parseInt(part) <= 12) month = parseInt(part)-1;
+    }
+    if(month !== null && year !== null) return new Date(year, month+1, 0); // last day of month
+    return null;
+  }
+
+  const now = Date.now();
+  const endingSoon = [];
+  const endingSoonNames = [];
+  designers.forEach(d => {
+    (d.projects||[]).forEach(p => {
+      if(!p.until) return;
+      const end = parseUntil(p.until);
+      if(!end) return;
+      const days = Math.round((end - now) / 864e5);
+      if(days >= 0 && days <= 30){
+        if(!endingSoon.find(x => x.id === d.id)){
+          endingSoon.push(d);
+          endingSoonNames.push(`${d.name} (${p.n}, ${p.until})`);
+        }
+      }
+    });
+  });
+
+  const endingN   = endingSoon.length;
+  const endingCls = endingN > 2 ? 'trend-down' : endingN > 0 ? 'trend-warn' : 'trend-up';
+  const endingLbl = endingN === 0 ? '→ no allocations ending' : endingN === 1 ? `↑ ${endingSoonNames[0].split(' (')[0]}` : `↑ ${endingN} ending soon`;
+  const endingTitle = endingN > 0 ? endingSoonNames.join('\n') : 'No allocations ending in the next 30 days';
+
   document.getElementById('pulseStrip').innerHTML = `
     <div class="strip-cell">
       <div class="strip-icon load"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 0 0-10-10"/></svg></div>
@@ -6808,6 +6850,12 @@ function renderPulse(){
       <div class="strip-label">On bench</div>
       <div class="strip-value" style="${benchN > 0 ? 'color:var(--ok)' : 'color:var(--muted)'}">${benchN}</div>
       <div class="strip-trend ${benchN > 0 ? 'trend-up' : 'trend-flat'}">${benchN > 0 ? `↑ ${benchAvail} available · ${benchN - benchAvail} resting` : '→ everyone allocated'}</div>
+    </div>
+    <div class="strip-cell" title="${endingTitle}">
+      <div class="strip-icon" style="background:var(--warn-soft);color:var(--warn)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="18"/></svg></div>
+      <div class="strip-label">Ending in 30d</div>
+      <div class="strip-value" style="${endingN > 0 ? 'color:var(--warn)' : ''}">${endingN}</div>
+      <div class="strip-trend ${endingCls}">${endingLbl}</div>
     </div>
     <div class="strip-cell">
       <div class="strip-icon alerts"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="20" y1="2" x2="22" y2="4"/><line x1="22" y1="2" x2="20" y2="4"/></svg></div>
