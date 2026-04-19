@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FAFAF9;
+  --bg:#F0EFED;
   --surface:#FFFFFF;
   --surface-2:#F4F4F3;
   --surface-hover:#F0F0EE;
@@ -2095,6 +2095,16 @@ html,body{
   <!-- ===== PAGE: PROJECTS ===== -->
   <div class="page page-projects">
 
+  <!-- ===== PROJECT PULSE ===== -->
+  <div class="section-head">
+    <div class="section-title">
+      <div class="section-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <h2>Project Pulse</h2>
+      <span class="count">This week</span>
+    </div>
+  </div>
+  <div class="strip" id="projectPulseStrip" style="margin-bottom:32px"></div>
+
   <!-- ===== SECTION 3: PROJECTS ===== -->
   <div class="section-head">
     <div class="section-title">
@@ -3417,7 +3427,7 @@ function switchPage(name){
   document.querySelectorAll('.header-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === name));
   // Render page-specific content on first visit
   if(name === 'skills'){ renderSkillSummary(); renderSkillsPageFull(); }
-  if(name === 'projects'){ renderTimeline(); }
+  if(name === 'projects'){ renderProjectPulse(); renderTimeline(); }
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -3507,7 +3517,13 @@ const projects = [
 
 const projTable = document.getElementById('projectsTable');
 function renderProjects(){
-  projTable.innerHTML = projects.map(p => {
+  const filtered = projectTableFilter === 'ok'       ? projects.filter(p => p.health === 'ok')
+                 : projectTableFilter === 'warn'      ? projects.filter(p => p.health === 'warn')
+                 : projectTableFilter === 'crit'      ? projects.filter(p => p.health === 'crit')
+                 : projectTableFilter === 'openRole'  ? projects.filter(p => p.openRole)
+                 : projects;
+
+  projTable.innerHTML = filtered.map(p => {
     const team = p.teamIds.map(id => designers.find(d=>d.id===id)).filter(Boolean);
     const shown = team.slice(0,3);
     const more = team.length - shown.length;
@@ -5618,6 +5634,93 @@ function renderCapacity(){
     </div>`;
 }
 
+// ── PROJECT PULSE ──────────────────────────────────────────────
+function renderProjectPulse(){
+  const el = document.getElementById('projectPulseStrip');
+  if(!el) return;
+
+  const n         = projects.length;
+  if(!n){ el.innerHTML = ''; return; }
+
+  const onTrack   = projects.filter(p => p.health === 'ok').length;
+  const atRisk    = projects.filter(p => p.health === 'warn').length;
+  const blocked   = projects.filter(p => p.health === 'crit').length;
+  const openRoles = projects.filter(p => p.openRole).length;
+
+  // Near deadline: within 30 days
+  const now = Date.now();
+  const soon = projects.filter(p => {
+    if(!p.deadline || p.deadline === 'TBD') return false;
+    const months={'Jan':0,'Feb':1,'Mar':2,'Apr':3,'May':4,'Jun':5,'Jul':6,'Aug':7,'Sep':8,'Oct':9,'Nov':10,'Dec':11};
+    const parts = p.deadline.trim().split(' ');
+    if(parts.length < 2) return false;
+    const d = new Date(new Date().getFullYear(), months[parts[1]], parseInt(parts[0]));
+    const diff = (d - now) / 864e5;
+    return diff >= 0 && diff <= 30;
+  }).length;
+
+  const onTrackCls  = onTrack === n ? 'trend-up'   : onTrack >= n/2 ? 'trend-flat' : 'trend-warn';
+  const atRiskCls   = atRisk  === 0 ? 'trend-up'   : atRisk  <= 1  ? 'trend-warn' : 'trend-down';
+  const blockedCls  = blocked === 0 ? 'trend-up'   : 'trend-down';
+  const roleCls     = openRoles === 0 ? 'trend-up'  : openRoles <= 2 ? 'trend-warn' : 'trend-down';
+
+  el.innerHTML = `
+    <div class="strip-cell" style="cursor:pointer" onclick="filterProjectTable('ok')" title="Show on-track projects">
+      <div class="strip-icon ok" style="background:var(--ok-soft);color:var(--ok)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="strip-label">On track</div>
+      <div class="strip-value" style="color:var(--ok)">${onTrack}<span class="unit"> / ${n}</span></div>
+      <div class="strip-trend ${onTrackCls}">${onTrack === n ? '✓ all projects healthy' : onTrack >= n/2 ? `→ ${n-onTrack} need attention` : `↑ most need attention`}</div>
+    </div>
+    <div class="strip-cell" style="cursor:pointer" onclick="filterProjectTable('warn')" title="Show at-risk projects">
+      <div class="strip-icon warn" style="background:var(--warn-soft);color:var(--warn)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="strip-label">At risk</div>
+      <div class="strip-value" style="${atRisk > 0 ? 'color:var(--warn)' : 'color:var(--ok)'}">${atRisk}</div>
+      <div class="strip-trend ${atRiskCls}">${atRisk === 0 ? '✓ none flagged' : atRisk === 1 ? '↑ review this week' : `↑ ${atRisk} need action`}</div>
+    </div>
+    <div class="strip-cell" style="cursor:pointer" onclick="filterProjectTable('crit')" title="Show blocked projects">
+      <div class="strip-icon alerts" style="background:var(--crit-soft);color:var(--crit)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="strip-label">Blocked</div>
+      <div class="strip-value" style="${blocked > 0 ? 'color:var(--crit)' : 'color:var(--ok)'}">${blocked}</div>
+      <div class="strip-trend ${blockedCls}">${blocked === 0 ? '✓ none blocked' : blocked === 1 ? '↑ act immediately' : `↑ ${blocked} blocked — urgent`}</div>
+    </div>
+    <div class="strip-cell" style="cursor:pointer" onclick="filterProjectTable('openRole')" title="Show projects with open roles">
+      <div class="strip-icon load" style="background:var(--accent-soft);color:var(--accent)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      </div>
+      <div class="strip-label">Open roles</div>
+      <div class="strip-value" style="${openRoles > 0 ? 'color:var(--accent)' : 'color:var(--ok)'}">${openRoles}</div>
+      <div class="strip-trend ${roleCls}">${openRoles === 0 ? '✓ all staffed' : openRoles === 1 ? '↑ 1 role to fill' : `↑ ${openRoles} roles to fill`}</div>
+    </div>
+    <div class="strip-cell" title="Projects with deadline within 30 days">
+      <div class="strip-icon context" style="background:var(--warn-soft);color:var(--warn)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="strip-label">Due in 30d</div>
+      <div class="strip-value" style="${soon > 0 ? 'color:var(--warn)' : ''}">${soon}</div>
+      <div class="strip-trend ${soon > 2 ? 'trend-down' : soon > 0 ? 'trend-warn' : 'trend-up'}">${soon === 0 ? '→ nothing imminent' : soon === 1 ? '↑ 1 deadline soon' : `↑ ${soon} deadlines soon`}</div>
+    </div>
+  `;
+}
+
+// ── PROJECT TABLE FILTER (from pulse clicks) ───────────────────
+let projectTableFilter = null;
+function filterProjectTable(type){
+  projectTableFilter = projectTableFilter === type ? null : type;
+  renderProjects();
+  // Highlight active pulse cell
+  document.querySelectorAll('#projectPulseStrip .strip-cell').forEach((cell, i) => {
+    const types = ['ok','warn','crit','openRole',null];
+    cell.style.background = (types[i] === projectTableFilter) ? 'var(--surface-2)' : '';
+    cell.style.borderRadius = '12px';
+  });
+}
+
 // ── PROJECT TIMELINE ──────────────────────────────────────────
 function renderTimeline(){
   const el = document.getElementById('timelinePanel');
@@ -6902,6 +7005,7 @@ function refreshAll(){
   renderTimeline();
   renderAvailability();
   renderSkillSummary();
+  renderProjectPulse();
 }
 
 // ---- FIX: Two-way navigation — project chips in designer drawer ----
@@ -7252,6 +7356,7 @@ function refreshAll(){
   renderTimeline();
   renderAvailability();
   renderSkillSummary();
+  renderProjectPulse();
 })();
 </script>
 
