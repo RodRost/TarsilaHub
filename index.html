@@ -349,9 +349,11 @@ html,body{
   font-weight:500;
 }
 .chip:hover{background:var(--surface-2);border-color:var(--muted-2)}
-.chip.active{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+[data-theme="dark"] .chip.active{background:#F5F5F4;color:#111110;border-color:#F5F5F4}
 .chip .badge{margin-left:4px;font-size:11px;color:var(--muted-2);font-variant-numeric:tabular-nums}
-.chip.active .badge{color:rgba(255,255,255,0.6)}
+.chip.active .badge{color:rgba(0,0,0,0.45)}
+[data-theme="dark"] .chip.active .badge{color:rgba(0,0,0,0.45)}
 
 /* ===== DESIGNER LIST ===== */
 .designer-list{padding:0}
