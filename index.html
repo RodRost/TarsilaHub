@@ -2007,7 +2007,18 @@ html,body{
         <button class="chip" data-filter="steady">Steady<span class="badge" id="badge-steady">—</span></button>
         <button class="chip" data-filter="bench">Bench<span class="badge" id="badge-bench">—</span></button>
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-          <span class="filter-label">Sort</span>
+          <span class="filter-label" style="display:flex;align-items:center;gap:4px">
+            Sort
+            <button id="sortDirBtn" title="Toggle sort direction" style="
+              background:none;border:none;cursor:pointer;padding:2px 3px;
+              color:var(--muted);line-height:0;border-radius:4px;
+              transition:color .12s, background .12s;
+            " onclick="toggleSortDir()">
+              <svg id="sortDirIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </span>
           <button class="chip active" data-sort="status">Status</button>
           <button class="chip" data-sort="load">Capacity</button>
           <button class="chip" data-sort="energy">Energy</button>
@@ -2496,6 +2507,15 @@ html,body{
 </aside>
 
 <script>
+// Assign consistent color a–e based on project ID hash
+function projectColor(id){
+  if(!id) return 'a';
+  const s = String(id);
+  let hash = 0;
+  for(let i=0;i<s.length;i++) hash = ((hash<<5)-hash)+s.charCodeAt(i);
+  return ['a','b','c','d','e'][Math.abs(hash)%5];
+}
+
 // ===== AVATAR HELPERS =====
 // DiceBear "notionists" style — consistent illustrated portraits seeded by name.
 // Falls back to initials if image fails to load.
@@ -3064,6 +3084,20 @@ function shortRole(r){
 }
 
 let currentSort = 'status';
+let sortAsc = true; // true = ascending (default for status/role), false = descending
+
+function toggleSortDir(){
+  sortAsc = !sortAsc;
+  // Update icon — arrow up = ascending, arrow down = descending
+  const icon = document.getElementById('sortDirIcon');
+  if(icon){
+    icon.innerHTML = sortAsc
+      ? '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>'
+      : '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 19 19 12"/>';
+  }
+  const activeFilter = document.querySelector('.chip[data-filter].active');
+  renderList(activeFilter ? activeFilter.dataset.filter : 'all');
+}
 
 function renderList(filter='all'){
   const filtered = filter==='bench'
@@ -3074,11 +3108,12 @@ function renderList(filter='all'){
   const energyOrder = {low:0, steady:1, high:2};
   filtered.sort((a,b) => {
     const roleOrder = {Trainee:0,Junior:1,Senior:2,Lead:3,ACD:4,CD:5};
-    if(currentSort === 'role')   return (roleOrder[a.role]??99) - (roleOrder[b.role]??99);
-    if(currentSort === 'load')   return b.load - a.load;
-    if(currentSort === 'energy') return (energyOrder[a.energy]??1) - (energyOrder[b.energy]??1);
-    // default: status (alert → watch → steady)
-    return ({alert:0,watch:1,steady:2}[a.status]??2) - ({alert:0,watch:1,steady:2}[b.status]??2);
+    const dir = sortAsc ? 1 : -1;
+    if(currentSort === 'role')   return dir * ((roleOrder[a.role]??99) - (roleOrder[b.role]??99));
+    if(currentSort === 'load')   return dir * (a.load - b.load);
+    if(currentSort === 'energy') return dir * ((energyOrder[a.energy]??1) - (energyOrder[b.energy]??1));
+    // status: alert→watch→steady ascending, reverse for descending
+    return dir * (({alert:0,watch:1,steady:2}[a.status]??2) - ({alert:0,watch:1,steady:2}[b.status]??2));
   });
   listEl.innerHTML = filtered.map(d => `
     <div class="designer" data-id="${d.id}">
@@ -3342,13 +3377,12 @@ async function assignDesignerToProject(designerId, projectId, evt){
       await sbXhr('POST', 'designer_projects', {
         designer_id: designerId,
         project_id:  projectId,
-        color_code:  'a',
+        color_code:  projectColor(projectId),
         allocation:  null
       });
     }
     // Update local state
-    const colorMap = {fintech:'a',analytics:'b',healthcare:'c',internal:'d','b2c':'e','b2b-saas':'e'};
-    const c = colorMap[p.domain] || 'a';
+    const c = projectColor(p.id);
     if(!d.projects.find(dp => dp.n === p.name)){
       d.projects.push({ n: p.name, c, alloc: null });
       d.context = d.projects.length;
@@ -4025,7 +4059,7 @@ async function testSupabaseConnection(url, key){
 function dbDesignerToApp(row, dpRows){
   const myProjects = (dpRows || [])
     .filter(dp => dp.designer_id === row.id)
-    .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a', alloc: dp.allocation || null }));
+    .map(dp => ({ n: dp.project_name || dp.project_id, c: projectColor(dp.project_id), alloc: dp.allocation || null }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
     load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '', workdayUrl: row.workday_url || '',
@@ -4651,8 +4685,7 @@ function editDesigner(id, focusSub){
         ? `<div class="form-hint">No active projects yet — add projects first, then assign designers.</div>`
         : `<div class="proj-checklist">
           ${projects.map(p => {
-            const colorMap = {fintech:'a', analytics:'b', healthcare:'c', internal:'d', 'b2c':'e', 'b2b-saas':'e', default:'a'};
-            const c = colorMap[p.domain] || 'a';
+            const c = projectColor(p.id);
             const checked = d.projects && d.projects.some(dp => dp.n === p.name || (dp.n && p.name.includes(dp.n.split(' ')[0])));
             return `
               <label class="proj-check-row ${checked ? 'checked' : ''}">
@@ -6270,7 +6303,7 @@ async function saveDesigner(){
     selectedProjects.push({
       id:    cb.dataset.projectId,
       name:  cb.dataset.projectName,
-      color: cb.dataset.projectColor,
+      color: projectColor(cb.dataset.projectId),
       alloc
     });
   });
