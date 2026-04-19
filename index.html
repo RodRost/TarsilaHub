@@ -1630,7 +1630,19 @@ html,body{
 .pin-btn:hover{background:var(--ink-2)}
 
 
-/* ===== ASSIGN BUTTON ===== */
+.past-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:var(--r-md);
+  background:var(--surface-2);border:1px solid var(--line-soft);
+  margin-bottom:6px;
+  transition:border-color .1s;
+}
+.past-item:last-child{margin-bottom:0}
+.past-item:hover{border-color:var(--muted-2)}
+.past-item-name{font-size:13px;font-weight:500;letter-spacing:-0.005em}
+.past-item-meta{font-size:11.5px;color:var(--muted);margin-top:1px}
+
+/* ASSIGN BUTTON */
 .assign-btn{
   width:100%;margin-top:10px;padding:7px;font-size:12px;
   font-family:inherit;font-weight:500;
@@ -3017,6 +3029,25 @@ function openDrawer(id, _preloaded){
       })()}
     </div>
 
+    <div class="drawer-section">
+      <h4>Previous projects</h4>
+      ${(() => {
+        const past = [...(d.pastProjects||[])];
+        // Also include currently archived projects they were on
+        archivedProjects.forEach(ap => {
+          if((ap.pastTeam||[]).find(pt => pt.id === d.id) && !past.find(pp => pp.id === ap.id)){
+            past.push({ id: ap.id, name: ap.name, client: ap.client, role: d.role });
+          }
+        });
+        if(!past.length) return '<div style="font-size:12.5px;color:var(--muted);font-style:italic">No previous projects recorded yet.</div>';
+        return past.map(pp => `
+          <div class="past-item">
+            <div class="past-item-name">${pp.name}</div>
+            <div class="past-item-meta">${pp.client||''}${pp.role ? ' · '+pp.role : ''}</div>
+          </div>`).join('');
+      })()}
+    </div>
+
     <div class="drawer-section" data-section="recommended-action">
       <h4>Recommended action</h4>
       <div class="intervention ${d.status}">
@@ -3462,6 +3493,22 @@ function openProjectDrawer(projId, _preloaded){
     ` : ''}
 
     <div class="drawer-section">
+      <h4>Previous team members</h4>
+      ${(() => {
+        const past = p.pastTeam || [];
+        if(!past.length) return '<div style="font-size:12.5px;color:var(--muted);font-style:italic">No previous team members recorded yet.</div>';
+        return `<div style="display:flex;flex-wrap:wrap;gap:8px">${past.map(pt => `
+          <div class="past-item" style="cursor:pointer" onclick="openDrawer(${pt.id})">
+            ${avatarEl(pt.name, pt.initials, 'small', '')}
+            <div>
+              <div class="past-item-name">${pt.name}</div>
+              <div class="past-item-meta">${pt.role}</div>
+            </div>
+          </div>`).join('')}</div>`;
+      })()}
+    </div>
+
+    <div class="drawer-section">
       <div class="action-row">
         <button class="btn primary">${p.openRole?'Open staffing decision':'Open project brief'}</button>
         <button class="btn">Export profile</button>
@@ -3716,7 +3763,7 @@ function dbDesignerToApp(row, dpRows){
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
     load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '',
-    skills: row.skills || [], achievements: row.achievements || [], history: row.history || [4,4,4,4,4,4,4],
+    skills: row.skills || [], achievements: row.achievements || [], pastProjects: row.past_projects || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
 }
@@ -3728,7 +3775,7 @@ function dbProjectToApp(row){
     deadline: row.deadline, duration: row.duration, startDate: row.start_date, teamLoad: row.team_load,
     openRole: row.open_role || null, needs: row.needs || [], stakeholder: row.stakeholder || {},
     growthOps: row.growth_ops || [], risks: row.risks || [], lastUpdated: row.last_updated || {},
-    teamIds: (row.team_members || []).map(m => m.id)
+    teamIds: (row.team_members || []).map(m => m.id), pastTeam: row.past_team || []
   };
 }
 
@@ -3761,7 +3808,7 @@ async function saveDesignerToSupabase(d){
   const payload = {
     name: d.name, initials: d.initials, role: d.role, status: d.status,
     load: d.load, energy: d.energy, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
-    skills: d.skills, achievements: d.achievements || [], history: d.history, last_updated: d.lastUpdated
+    skills: d.skills, achievements: d.achievements || [], past_projects: d.pastProjects || [], history: d.history, last_updated: d.lastUpdated
   };
   // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
   const existingId = d.id && d.id !== null && d.id !== 'NEW' ? d.id : null;
@@ -4116,7 +4163,7 @@ function editDesigner(id, focusSub){
     load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
     projects: [],
     skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
-    achievements: [],
+    achievements: [], pastProjects: [],
     history: [4,4,4,4,4,4,4],
     lastUpdated: { profile: new Date().toISOString(), skills: new Date().toISOString(), growth: new Date().toISOString() }
   } : designers.find(x => x.id === id);
@@ -4333,6 +4380,41 @@ function editDesigner(id, focusSub){
         </div>`
       }
     </div>
+
+    <div class="form-section" id="pastProjectsSection">
+      <div class="form-section-head">
+        <div class="form-section-title">Previous projects</div>
+        <button type="button" class="btn" id="addPastProjectBtn" style="padding:4px 12px;font-size:12px">+ Add</button>
+      </div>
+      <div id="pastProjectsList">
+        ${(d.pastProjects||[]).length === 0
+          ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or add manually.</div>'
+          : (d.pastProjects||[]).map((pp,i) => `
+            <div class="past-edit-row" data-idx="${i}">
+              <div>
+                <div style="font-size:13px;font-weight:500">${pp.name}</div>
+                <div style="font-size:11.5px;color:var(--muted)">${pp.client||''}</div>
+              </div>
+              <button type="button" class="photo-remove-btn" onclick="removePastProject(${i})" style="margin-left:auto">Remove</button>
+            </div>`).join('')}
+      </div>
+      <div id="newPastProjectForm" style="display:none;margin-top:10px;padding:12px;background:var(--surface-2);border-radius:var(--r-md);border:1px solid var(--line)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Project name</label>
+            <input type="text" class="form-input" id="pp_name" placeholder="e.g., Aria Research v1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client</label>
+            <input type="text" class="form-input" id="pp_client" placeholder="e.g., Aria Health">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" class="btn primary" id="savePastProjectBtn" style="padding:7px 16px;font-size:12.5px">Add project</button>
+          <button type="button" class="btn" id="cancelPastProjectBtn" style="padding:7px 12px;font-size:12.5px">Cancel</button>
+        </div>
+      </div>
+    </div>
   `;
 
   openModal();
@@ -4343,6 +4425,7 @@ function editDesigner(id, focusSub){
     const saveBtn   = document.getElementById('saveAchievementBtn');
     const cancelBtn = document.getElementById('cancelAchievementBtn');
     const form      = document.getElementById('newAchievementForm');
+    let editingIdx  = null; // null = add mode, number = edit mode
 
     // Skill picker toggle
     document.querySelectorAll('#ach_skills .skill-pick-btn').forEach(btn => {
@@ -4353,51 +4436,93 @@ function editDesigner(id, focusSub){
       btn.addEventListener('click', () => btn.classList.toggle('selected'));
     });
 
-    if(addBtn) addBtn.addEventListener('click', () => {
+    function resetForm(){
+      editingIdx = null;
+      ['ach_title','ach_impact'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+      document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      document.querySelectorAll('#ach_projects .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      const typeEl = document.getElementById('ach_type');
+      const scopeEl = document.getElementById('ach_scope');
+      if(typeEl) typeEl.value = 'craft';
+      if(scopeEl) scopeEl.value = 'internal';
+      if(saveBtn) saveBtn.textContent = 'Save achievement';
+    }
+
+    function openForm(a){
       form.style.display = 'block';
-      document.getElementById('ach_title').focus();
-      addBtn.style.display = 'none';
-      // Set month to current month
-      const monthEl = document.getElementById('ach_month');
-      if(monthEl) monthEl.value = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][new Date().getMonth()];
+      if(addBtn) addBtn.style.display = 'none';
+      if(a){
+        // Populate fields for editing
+        document.getElementById('ach_title').value  = a.title || '';
+        document.getElementById('ach_month').value  = a.month || 'Jan';
+        document.getElementById('ach_impact').value = a.impact || '';
+        document.getElementById('ach_type').value   = a.type || 'craft';
+        document.getElementById('ach_scope').value  = a.scope || 'internal';
+        // Set selected skills
+        document.querySelectorAll('#ach_skills .skill-pick-btn').forEach(b => {
+          b.classList.toggle('selected', (a.skills||[]).includes(b.dataset.skill));
+        });
+        // Set selected projects
+        document.querySelectorAll('#ach_projects .skill-pick-btn').forEach(b => {
+          b.classList.toggle('selected', (a.projectIds||[]).includes(b.dataset.projectId));
+        });
+        if(saveBtn) saveBtn.textContent = 'Update achievement';
+      } else {
+        // Add mode — default month to current
+        const monthEl = document.getElementById('ach_month');
+        if(monthEl) monthEl.value = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][new Date().getMonth()];
+        document.getElementById('ach_title').focus();
+        if(saveBtn) saveBtn.textContent = 'Save achievement';
+      }
+    }
+
+    if(addBtn) addBtn.addEventListener('click', () => {
+      editingIdx = null;
+      resetForm();
+      openForm(null);
     });
 
     if(cancelBtn) cancelBtn.addEventListener('click', () => {
       form.style.display = 'none';
       if(addBtn) addBtn.style.display = '';
-      document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
-      document.querySelectorAll('#ach_projects .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      resetForm();
     });
 
     if(saveBtn) saveBtn.addEventListener('click', () => {
       const title = document.getElementById('ach_title').value.trim();
       if(!title){ document.getElementById('ach_title').focus(); return; }
       const achievement = {
-        id:        'ach_' + Date.now().toString(36),
+        id:         editingIdx !== null ? (d.achievements[editingIdx]?.id || 'ach_'+Date.now().toString(36)) : 'ach_'+Date.now().toString(36),
         title,
-        month:     document.getElementById('ach_month').value,
+        month:      document.getElementById('ach_month').value,
         projectIds: Array.from(document.querySelectorAll('#ach_projects .skill-pick-btn.selected')).map(b=>b.dataset.projectId),
-        skills:    Array.from(document.querySelectorAll('#ach_skills .skill-pick-btn.selected')).map(b=>b.dataset.skill),
-        type:      document.getElementById('ach_type').value,
-        scope:     document.getElementById('ach_scope').value,
-        impact:    document.getElementById('ach_impact').value.trim() || null,
+        skills:     Array.from(document.querySelectorAll('#ach_skills .skill-pick-btn.selected')).map(b=>b.dataset.skill),
+        type:       document.getElementById('ach_type').value,
+        scope:      document.getElementById('ach_scope').value,
+        impact:     document.getElementById('ach_impact').value.trim() || null,
       };
       if(!d.achievements) d.achievements = [];
-      d.achievements.push(achievement);
-      // Re-render the list
+      if(editingIdx !== null){
+        d.achievements[editingIdx] = achievement; // update in place
+      } else {
+        d.achievements.push(achievement);
+      }
       renderAchievementsList(d);
-      // Reset form
       form.style.display = 'none';
       if(addBtn) addBtn.style.display = '';
-      ['ach_title','ach_impact'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-      document.querySelectorAll('#ach_skills .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
-      document.querySelectorAll('#ach_projects .skill-pick-btn.selected').forEach(b=>b.classList.remove('selected'));
+      resetForm();
     });
 
-    // Expose remove function
+    // Expose edit and remove functions
+    window.editAchievement = (idx) => {
+      editingIdx = idx;
+      openForm(d.achievements[idx]);
+      form.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    };
     window.removeAchievement = (idx) => {
       if(!d.achievements) return;
       d.achievements.splice(idx, 1);
+      if(editingIdx === idx){ form.style.display='none'; if(addBtn) addBtn.style.display=''; resetForm(); }
       renderAchievementsList(d);
     };
   }, 50);
@@ -4414,10 +4539,63 @@ function editDesigner(id, focusSub){
             <span class="achievement-edit-month">${a.month||'?'}</span>
             <span class="achievement-edit-title">${a.title||'Untitled'}</span>
             ${a.type ? `<span class="achievement-tag type-tag type-${a.type}" style="font-size:10px">${typeLabels[a.type]||a.type}</span>` : ''}
-            <button type="button" class="photo-remove-btn" onclick="removeAchievement(${i})" style="margin-left:auto;flex-shrink:0">Remove</button>
+            <div style="margin-left:auto;display:flex;gap:6px;flex-shrink:0">
+              <button type="button" class="row-action" onclick="editAchievement(${i})" style="padding:3px 10px;font-size:11.5px">Edit</button>
+              <button type="button" class="photo-remove-btn" onclick="removeAchievement(${i})">Remove</button>
+            </div>
           </div>`).join('');
   }
   let pendingPhoto = d.photo || null; // tracks the photo for this edit session
+
+  // ── Past projects form wiring ──
+  setTimeout(() => {
+    const addBtn    = document.getElementById('addPastProjectBtn');
+    const saveBtn   = document.getElementById('savePastProjectBtn');
+    const cancelBtn = document.getElementById('cancelPastProjectBtn');
+    const form      = document.getElementById('newPastProjectForm');
+
+    function renderPastList(){
+      const listEl = document.getElementById('pastProjectsList');
+      if(!listEl) return;
+      const past = d.pastProjects || [];
+      listEl.innerHTML = past.length === 0
+        ? '<div class="form-hint">No previous projects yet. Added automatically when a project is archived, or add manually.</div>'
+        : past.map((pp,i) => `
+            <div class="past-edit-row" data-idx="${i}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface-2);border-radius:var(--r-md);margin-bottom:6px">
+              <div>
+                <div style="font-size:13px;font-weight:500">${pp.name}</div>
+                <div style="font-size:11.5px;color:var(--muted)">${pp.client||''}</div>
+              </div>
+              <button type="button" class="photo-remove-btn" onclick="removePastProject(${i})" style="margin-left:auto">Remove</button>
+            </div>`).join('');
+    }
+
+    if(addBtn) addBtn.addEventListener('click', () => {
+      form.style.display = 'block';
+      document.getElementById('pp_name').focus();
+    });
+    if(cancelBtn) cancelBtn.addEventListener('click', () => {
+      form.style.display = 'none';
+      document.getElementById('pp_name').value = '';
+      document.getElementById('pp_client').value = '';
+    });
+    if(saveBtn) saveBtn.addEventListener('click', () => {
+      const name = document.getElementById('pp_name').value.trim();
+      if(!name){ document.getElementById('pp_name').focus(); return; }
+      if(!d.pastProjects) d.pastProjects = [];
+      d.pastProjects.push({ name, client: document.getElementById('pp_client').value.trim() });
+      renderPastList();
+      form.style.display = 'none';
+      document.getElementById('pp_name').value = '';
+      document.getElementById('pp_client').value = '';
+    });
+
+    window.removePastProject = (idx) => {
+      if(!d.pastProjects) return;
+      d.pastProjects.splice(idx, 1);
+      renderPastList();
+    };
+  }, 60);
 
   setTimeout(() => {
     const fileInput    = document.getElementById('photoFileInput');
@@ -4520,9 +4698,32 @@ async function archiveProject(id){
   );
   p.retroNote = retroNote ? retroNote.trim() : '';
 
+  // Snapshot current team into pastTeam before archiving
+  const teamSnapshot = p.teamIds.map(tid => {
+    const td = designers.find(x => x.id === tid);
+    return td ? { id: td.id, name: td.name, initials: td.initials, role: td.role } : null;
+  }).filter(Boolean);
+  p.pastTeam = [...(p.pastTeam||[]), ...teamSnapshot.filter(ts => !(p.pastTeam||[]).find(pt => pt.id === ts.id))];
+
+  // Add this project to each team member's pastProjects
+  teamSnapshot.forEach(ts => {
+    const td = designers.find(x => x.id === ts.id);
+    if(td){
+      if(!td.pastProjects) td.pastProjects = [];
+      if(!td.pastProjects.find(pp => pp.id === p.id)){
+        td.pastProjects.push({ id: p.id, name: p.name, client: p.client, role: td.role });
+      }
+    }
+  });
+
   try {
     if(persistenceMode === 'supabase'){
-      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: true, retro_note: p.retroNote || null });
+      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: true, retro_note: p.retroNote || null, past_team: p.pastTeam });
+      // Update each designer's past_projects
+      for(const ts of teamSnapshot){
+        const td = designers.find(x => x.id === ts.id);
+        if(td) await sbXhr('PATCH', `designers?id=eq.${td.id}`, { past_projects: td.pastProjects });
+      }
     }
     const idx = projects.findIndex(x => x.id === id);
     projects.splice(idx, 1);
@@ -5280,7 +5481,7 @@ async function saveDesigner(){
       load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
       projects: [],
       skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
-      achievements: [],
+      achievements: [], pastProjects: [],
       history: [4,4,4,4,4,4,4],
       lastUpdated: { profile: new Date().toISOString(), skills: new Date().toISOString(), growth: new Date().toISOString() }
     };
