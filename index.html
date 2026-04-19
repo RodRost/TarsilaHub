@@ -1342,6 +1342,9 @@ html,body{
 .achievement-edit-month{font-size:11px;font-weight:500;color:var(--muted);min-width:24px}
 .achievement-edit-title{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+.proj-alloc-input:focus{outline:none;border-color:var(--accent)}
+.proj-alloc-input::-webkit-inner-spin-button,.proj-alloc-input::-webkit-outer-spin-button{opacity:1}
+
 /* SKILL EDITOR */
 .skill-editor-row{
   display:grid;grid-template-columns:140px 1fr 44px;
@@ -2971,7 +2974,7 @@ function openDrawer(id, _preloaded){
     <div class="drawer-section">
       <h4>Current projects</h4>
       <div class="projects-cell" style="gap:6px">
-        ${d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}</span>`).join('')}
+        ${d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}${p.alloc ? ` <span style="font-size:10px;font-weight:600;opacity:0.75">${p.alloc}%</span>` : ''}</span>`).join('')}
       </div>
     </div>
 
@@ -3058,14 +3061,15 @@ async function assignDesignerToProject(designerId, projectId, evt){
       await sbXhr('POST', 'designer_projects', {
         designer_id: designerId,
         project_id:  projectId,
-        color_code:  'a'
+        color_code:  'a',
+        allocation:  null
       });
     }
     // Update local state
     const colorMap = {fintech:'a',analytics:'b',healthcare:'c',internal:'d','b2c':'e','b2b-saas':'e'};
     const c = colorMap[p.domain] || 'a';
     if(!d.projects.find(dp => dp.n === p.name)){
-      d.projects.push({ n: p.name, c });
+      d.projects.push({ n: p.name, c, alloc: null });
       d.context = d.projects.length;
     }
     if(!p.teamIds.includes(designerId)) p.teamIds.push(designerId);
@@ -3708,7 +3712,7 @@ async function testSupabaseConnection(url, key){
 function dbDesignerToApp(row, dpRows){
   const myProjects = (dpRows || [])
     .filter(dp => dp.designer_id === row.id)
-    .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a' }));
+    .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a', alloc: dp.allocation || null }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
     load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '',
@@ -3731,12 +3735,12 @@ function dbProjectToApp(row){
 // ---- Load all data from Supabase ----
 async function loadFromSupabase(){
   const dbDesigners = await sbXhr('GET', 'designers?archived=eq.false&order=id&select=*');
-  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,projects(name)');
+  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,projects(name)');
   const dbProjects  = await sbXhr('GET', 'project_with_team?archived=eq.false&order=priority');
 
   const dpRows = (dbDPs || []).map(dp => ({
     designer_id: dp.designer_id, project_id: dp.project_id,
-    color_code: dp.color_code, project_name: dp.projects?.name || dp.project_id
+    color_code: dp.color_code, project_name: dp.projects?.name || dp.project_id, allocation: dp.allocation || null
   }));
 
   designers.length = 0;
@@ -4312,8 +4316,17 @@ function editDesigner(id, focusSub){
               <label class="proj-check-row ${checked ? 'checked' : ''}">
                 <input type="checkbox" class="proj-checkbox" data-project-id="${p.id}" data-project-name="${p.name}" data-project-color="${c}" ${checked ? 'checked' : ''}>
                 <span class="proj proj-${c}">${p.name}</span>
-                <span style="font-size:11.5px;color:var(--muted);margin-left:4px">· ${p.client} · ${p.type}</span>
-                <span class="health-dot" style="margin-left:auto"><span class="dot ${p.health}"></span></span>
+                <span style="font-size:11.5px;color:var(--muted);margin-left:4px">· ${p.client}</span>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+                  <input type="number" class="proj-alloc-input" data-project-id="${p.id}"
+                    min="0" max="100" step="5" placeholder="—"
+                    value="${(d.projects.find(dp => dp.n === p.name)?.alloc) || ''}"
+                    style="width:52px;padding:3px 6px;font-size:12px;font-family:inherit;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink);text-align:center;display:${checked?'block':'none'}"
+                    title="Allocation % on this project"
+                    onclick="event.preventDefault();event.stopPropagation()">
+                  <span style="font-size:11px;color:var(--muted);display:${checked?'inline':'none'}" class="proj-alloc-pct">%</span>
+                  <span class="health-dot"><span class="dot ${p.health}"></span></span>
+                </div>
               </label>
             `;
           }).join('')}
@@ -4441,6 +4454,10 @@ function editDesigner(id, focusSub){
     document.querySelectorAll('.proj-checkbox').forEach(cb => {
       cb.addEventListener('change', () => {
         cb.closest('.proj-check-row').classList.toggle('checked', cb.checked);
+      const allocInput = document.querySelector(`.proj-alloc-input[data-project-id="${cb.dataset.projectId}"]`);
+      const allocPct   = allocInput?.nextElementSibling;
+      if(allocInput){ allocInput.style.display = cb.checked ? 'block' : 'none'; }
+      if(allocPct && allocPct.classList.contains('proj-alloc-pct')){ allocPct.style.display = cb.checked ? 'inline' : 'none'; }
       });
     });
   }, 50);
@@ -5283,18 +5300,28 @@ async function saveDesigner(){
   // achievements are managed directly on d via the form panel — no fields to read here
   d.lastUpdated.growth = new Date().toISOString();
 
-  // Collect selected project assignments from checkboxes
+  // Collect selected project assignments with allocation %
   const selectedProjects = [];
   document.querySelectorAll('.proj-checkbox:checked').forEach(cb => {
+    const allocEl = document.querySelector(`.proj-alloc-input[data-project-id="${cb.dataset.projectId}"]`);
+    const alloc   = allocEl && allocEl.value !== '' ? parseInt(allocEl.value) : null;
     selectedProjects.push({
       id:    cb.dataset.projectId,
       name:  cb.dataset.projectName,
-      color: cb.dataset.projectColor
+      color: cb.dataset.projectColor,
+      alloc
     });
   });
   // Update local projects array for immediate display
-  d.projects = selectedProjects.map(p => ({ n: p.name, c: p.color }));
+  d.projects = selectedProjects.map(p => ({ n: p.name, c: p.color, alloc: p.alloc }));
   d.context  = selectedProjects.length;
+  // Auto-compute load from allocations if all projects have one set
+  const allocValues = selectedProjects.map(p => p.alloc).filter(a => a !== null);
+  if(allocValues.length === selectedProjects.length && selectedProjects.length > 0){
+    d.load = allocValues.reduce((s,a) => s + a, 0);
+    const loadEl = document.getElementById('f_load');
+    if(loadEl) loadEl.value = d.load;
+  }
 
   if(!d.name || !d.initials){
     document.getElementById('modalError').textContent = 'Name and initials are required.';
@@ -5317,7 +5344,8 @@ async function saveDesigner(){
         await sbXhr('POST', 'designer_projects', {
           designer_id: d.id,
           project_id:  proj.id,
-          color_code:  proj.color
+          color_code:  proj.color,
+          allocation:  proj.alloc || null
         });
       }
     } else if(isNew){
