@@ -58,6 +58,8 @@
   --crit:#F87171;
   --crit-soft:#2A1010;
 
+  --warn-border:#5A3A0A;
+  --ok-border:#14532D;
   --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
   --shadow-md:0 2px 8px rgba(0,0,0,0.4);
   --shadow-lg:0 12px 40px rgba(0,0,0,0.6);
@@ -259,7 +261,7 @@ html,body{
 /* ===== HEADER ===== */
 .header{display:flex;justify-content:space-between;align-items:center;padding:12px 0 24px;margin-bottom:24px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px}
-.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:13px;letter-spacing:-0.02em}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--ink);display:flex;align-items:center;justify-content:center;color:var(--bg);font-weight:600;font-size:13px;letter-spacing:-0.02em}
 .brand-name{font-size:15px;font-weight:600;letter-spacing:-0.01em;display:flex;align-items:baseline;gap:5px}
 .brand-name .brand-word-main{font-size:19px;font-weight:700;letter-spacing:-0.02em}
 .brand-name .brand-word-sub{font-size:13px;font-weight:500;color:var(--muted-2)}
@@ -400,6 +402,11 @@ html,body{
 .proj-c{background:#FCE7F3;border-color:#FBCFE8;color:#9D174D}
 .proj-d{background:#DCFCE7;border-color:#BBF7D0;color:#166534}
 .proj-e{background:#FED7AA;border-color:#FDBA74;color:#9A3412}
+[data-theme="dark"] .proj-a{background:#3A2A0A;border-color:#6B4C12;color:#FCD34D}
+[data-theme="dark"] .proj-b{background:#0F2645;border-color:#1E3F6E;color:#93C5FD}
+[data-theme="dark"] .proj-c{background:#3A0E26;border-color:#6B1D44;color:#F9A8D4}
+[data-theme="dark"] .proj-d{background:#0A2B18;border-color:#14532D;color:#86EFAC}
+[data-theme="dark"] .proj-e{background:#3A1A08;border-color:#6B3010;color:#FDBA74}
 
 /* STATUS */
 .status-cell{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
@@ -777,7 +784,9 @@ html,body{
   font-weight:500;
 }
 .tag.accent{background:var(--accent-soft);border-color:#BFDBFE;color:var(--accent)}
+[data-theme="dark"] .tag.accent{border-color:#1E3F6E}
 .tag.gold{background:#FEF3C7;border-color:#FDE68A;color:#854D0E}
+[data-theme="dark"] .tag.gold{background:#3A2A0A;border-color:#6B4C12;color:#FCD34D}
 
 /* STAKEHOLDER */
 .stakeholder-card{
@@ -803,7 +812,7 @@ html,body{
 .risks-box{
   padding:12px 14px;
   background:var(--warn-soft);
-  border:1px solid #FDE68A;
+  border:1px solid var(--warn-border,#FDE68A);
   border-radius:var(--r-md);
   font-size:12.5px;line-height:1.6;
 }
@@ -819,6 +828,9 @@ html,body{
 .intervention.alert{background:var(--crit-soft);border-color:#FECACA}
 .intervention.watch{background:var(--warn-soft);border-color:#FDE68A}
 .intervention.steady{background:var(--ok-soft);border-color:#BBF7D0}
+[data-theme="dark"] .intervention.alert{border-color:#5A1E1E}
+[data-theme="dark"] .intervention.watch{border-color:#5A3A0A}
+[data-theme="dark"] .intervention.steady{border-color:#14532D}
 .intervention b{font-weight:600}
 .intervention.alert b{color:var(--crit)}
 .intervention.watch b{color:var(--warn)}
@@ -828,7 +840,7 @@ html,body{
 .staffed-ok{
   padding:12px 14px;
   background:var(--ok-soft);
-  border:1px solid #BBF7D0;
+  border:1px solid var(--ok-border,#BBF7D0);
   border-radius:var(--r-md);
   font-size:12.5px;line-height:1.5;
 }
@@ -877,6 +889,10 @@ html,body{
 .strip-icon.load   {background:#EFF4FE;color:var(--accent)}
 .strip-icon.context{background:#FEF6EC;color:var(--warn)}
 .strip-icon.focus  {background:#F5F3FF;color:#7C3AED}
+[data-theme="dark"] .strip-icon.energy {background:#14291F}
+[data-theme="dark"] .strip-icon.load   {background:#0F2035}
+[data-theme="dark"] .strip-icon.context{background:#2A1F0A}
+[data-theme="dark"] .strip-icon.focus  {background:#1E1B30}
 .strip-icon.alerts {background:var(--crit-soft);color:var(--crit)}
 
 /* Section header icon */
@@ -900,6 +916,7 @@ html,body{
 .panel-title-icon .p-ic svg{width:13px;height:13px;stroke-width:2}
 .panel-title-icon .p-ic.alerts-ic {background:var(--crit-soft);color:var(--crit)}
 .panel-title-icon .p-ic.dist-ic   {background:#EFF4FE;color:var(--accent)}
+[data-theme="dark"] .panel-title-icon .p-ic.dist-ic{background:#0F2035}
 .panel-title-icon .p-ic.queue-ic  {background:var(--ok-soft);color:var(--ok)}
 
 /* Admin tabs icon */
@@ -915,7 +932,7 @@ html,body{
   display:inline-flex;align-items:center;gap:6px;
   transition:all .12s;
 }
-.admin-btn:hover{background:var(--ink);color:white;border-color:var(--ink)}
+.admin-btn:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .admin-btn .count{
   font-size:11px;font-weight:600;
   background:var(--crit);color:white;
@@ -927,11 +944,12 @@ html,body{
 /* ===== DATA HEALTH BANNER (on main dashboard) ===== */
 .health-banner{
   margin-bottom:24px;padding:14px 18px;
-  background:var(--warn-soft);border:1px solid #FDE68A;
+  background:var(--warn-soft);border:1px solid var(--warn);opacity:0.7;
   border-radius:var(--r-lg);
   display:flex;align-items:center;gap:14px;
 }
 .health-banner.crit{background:var(--crit-soft);border-color:#FECACA}
+[data-theme="dark"] .health-banner.crit{border-color:#5A1E1E}
 .health-banner-icon{
   width:32px;height:32px;border-radius:50%;flex-shrink:0;
   background:var(--warn);color:white;
@@ -946,7 +964,7 @@ html,body{
 .health-banner-action{
   font-family:inherit;font-size:12px;font-weight:500;
   padding:7px 14px;border-radius:var(--r-md);
-  background:var(--ink);color:white;border:none;
+  background:var(--ink);color:var(--bg);border:none;
   cursor:pointer;transition:background .12s;flex-shrink:0;
 }
 .health-banner-action:hover{background:var(--ink-2)}
@@ -975,7 +993,7 @@ html,body{
 .admin-badge{
   font-size:11px;font-weight:500;
   padding:3px 10px;border-radius:999px;
-  background:var(--ink);color:white;
+  background:var(--ink);color:var(--bg);
   letter-spacing:0.02em;
 }
 
@@ -1003,7 +1021,7 @@ html,body{
   font-variant-numeric:tabular-nums;
   font-weight:500;
 }
-.admin-tab.active .tab-count{background:var(--ink);color:white}
+.admin-tab.active .tab-count{background:var(--ink);color:var(--bg)}
 .admin-tab .tab-count.alert{background:var(--crit);color:white}
 
 .admin-panel{display:none}
@@ -1063,7 +1081,7 @@ html,body{
   background:var(--surface);cursor:pointer;color:var(--ink-2);
   transition:all .12s;
 }
-.stale-action:hover{background:var(--ink);color:white;border-color:var(--ink)}
+.stale-action:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 /* FRESHNESS BREAKDOWN */
 .freshness-bars{display:flex;gap:2px;align-items:center}
@@ -1092,7 +1110,7 @@ html,body{
 .admin-add{
   font-family:inherit;font-size:13px;font-weight:500;
   padding:8px 14px;border-radius:var(--r-md);
-  background:var(--ink);color:white;border:none;
+  background:var(--ink);color:var(--bg);border:none;
   cursor:pointer;transition:background .12s;
   display:inline-flex;align-items:center;gap:6px;
 }
@@ -1299,11 +1317,12 @@ html,body{
 .transition-item-title{font-weight:500;font-size:13px;letter-spacing:-0.005em}
 .transition-item-meta{font-size:11.5px;color:var(--muted);line-height:1.5}
 .transition-item.done{background:var(--ok-soft);border-color:#BBF7D0}
+[data-theme="dark"] .transition-item.done{border-color:#14532D}
 .transition-item.done .transition-item-title::before{content:'✓ ';color:var(--ok);font-weight:600}
 .transition-review{
   font-family:inherit;font-size:12px;font-weight:500;
   padding:5px 10px;border-radius:var(--r-sm);
-  background:var(--ink);color:white;border:none;cursor:pointer;
+  background:var(--ink);color:var(--bg);border:none;cursor:pointer;
   transition:background .12s;
 }
 .transition-review:hover{background:var(--ink-2)}
@@ -1332,7 +1351,7 @@ html,body{
   font-family:inherit;font-size:13px;
   padding:6px 10px;width:100%;
   border:1px solid var(--line);border-radius:var(--r-md);
-  background:var(--surface);font-variant-numeric:tabular-nums;
+  background:var(--surface);color:var(--ink);font-variant-numeric:tabular-nums;
 }
 .threshold-input:focus{outline:none;border-color:var(--ink)}
 
@@ -1343,20 +1362,20 @@ html,body{
   display:inline-flex;align-items:center;gap:8px;
   font-family:inherit;font-size:12.5px;font-weight:500;
   padding:8px 14px;border-radius:var(--r-md);
-  border:1px solid #E5E7EB;
-  background:linear-gradient(135deg,#f8f9ff 0%,#f3f4ff 100%);
-  color:#4F46E5;cursor:pointer;
+  border:1px solid var(--line);
+  background:var(--accent-soft);
+  color:var(--accent);cursor:pointer;
   transition:all .15s;letter-spacing:-0.005em;
   width:100%;justify-content:center;margin-top:10px;
 }
 .claude-btn:hover{
-  background:linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%);
-  border-color:#C7D2FE;box-shadow:0 1px 4px rgba(79,70,229,0.12);
+  background:var(--accent);color:#fff;
+  border-color:var(--accent);
 }
 .claude-btn:disabled{opacity:0.55;cursor:not-allowed}
 .claude-btn .c-icon{
   width:16px;height:16px;border-radius:4px;
-  background:linear-gradient(135deg,#6366F1,#8B5CF6);
+  background:var(--accent);
   display:flex;align-items:center;justify-content:center;
   flex-shrink:0;
 }
@@ -1365,24 +1384,24 @@ html,body{
 /* Loading shimmer */
 .claude-loading{
   margin-top:12px;padding:14px 16px;
-  border:1px solid #E0E7FF;border-radius:var(--r-lg);
-  background:#F5F3FF;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--surface-2);
 }
 .claude-loading-bar{
   height:8px;border-radius:999px;
-  background:linear-gradient(90deg,#E0E7FF 25%,#C7D2FE 50%,#E0E7FF 75%);
+  background:linear-gradient(90deg,var(--surface-2) 25%,var(--line) 50%,var(--surface-2) 75%);
   background-size:200% 100%;
   animation:shimmer 1.4s infinite;margin-bottom:8px;
 }
 .claude-loading-bar:last-child{margin-bottom:0;width:65%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .claude-loading-label{
-  font-size:11.5px;color:#6366F1;font-weight:500;
+  font-size:11.5px;color:var(--accent);font-weight:500;
   margin-bottom:10px;display:flex;align-items:center;gap:6px;
 }
 .claude-loading-label::before{
   content:'';width:6px;height:6px;border-radius:50%;
-  background:#6366F1;display:inline-block;
+  background:var(--accent);display:inline-block;
   animation:pulse 1s infinite;
 }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -1390,31 +1409,31 @@ html,body{
 /* Response output */
 .claude-output{
   margin-top:12px;
-  border:1px solid #E0E7FF;border-radius:var(--r-lg);
-  background:#FAFAFF;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--surface);overflow:hidden;
 }
 .claude-output-head{
   padding:10px 14px;
-  background:linear-gradient(135deg,#EEF2FF,#F5F3FF);
-  border-bottom:1px solid #E0E7FF;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--line);
   display:flex;align-items:center;justify-content:space-between;
 }
 .claude-output-label{
   font-size:11px;font-weight:600;letter-spacing:0.04em;
-  text-transform:uppercase;color:#6366F1;
+  text-transform:uppercase;color:var(--accent);
   display:flex;align-items:center;gap:6px;
 }
 .claude-output-label::before{
   content:'';width:6px;height:6px;border-radius:50%;
-  background:#6366F1;display:inline-block;
+  background:var(--accent);display:inline-block;
 }
 .claude-output-refresh{
-  font-family:inherit;font-size:11.5px;color:#6366F1;
+  font-family:inherit;font-size:11.5px;color:var(--accent);
   background:none;border:none;cursor:pointer;
   padding:2px 6px;border-radius:var(--r-sm);
   transition:background .12s;font-weight:500;
 }
-.claude-output-refresh:hover{background:#E0E7FF}
+.claude-output-refresh:hover{background:var(--accent-soft)}
 .claude-output-body{
   padding:14px 16px;
   font-size:13px;line-height:1.65;color:var(--ink-2);
@@ -1428,15 +1447,15 @@ html,body{
 }
 .claude-output-body li{margin-bottom:4px;line-height:1.55}
 .claude-output-body .highlight{
-  background:#EEF2FF;border-radius:4px;
-  padding:1px 5px;color:#4F46E5;font-weight:500;
+  background:var(--accent-soft);border-radius:4px;
+  padding:1px 5px;color:var(--accent);font-weight:500;
 }
 
 /* Digest output (wider, in admin panel) */
 .digest-output{
   margin-top:14px;
-  border:1px solid #E0E7FF;border-radius:var(--r-lg);
-  background:#FAFAFF;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--surface);overflow:hidden;
 }
 .digest-output .claude-output-body{
   font-size:13.5px;line-height:1.7;
@@ -1453,6 +1472,9 @@ html,body{
 .db-status-bar.connected{background:var(--ok-soft);border-color:#BBF7D0;color:var(--ok)}
 .db-status-bar.disconnected{background:var(--warn-soft);border-color:#FDE68A;color:var(--warn)}
 .db-status-bar.error{background:var(--crit-soft);border-color:#FECACA;color:var(--crit)}
+[data-theme="dark"] .db-status-bar.connected{border-color:#14532D}
+[data-theme="dark"] .db-status-bar.disconnected{border-color:#5A3A0A}
+[data-theme="dark"] .db-status-bar.error{border-color:#5A1E1E}
 .db-status-bar .db-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
 .db-status-bar .db-label{flex:1}
 .db-status-bar .db-action{
@@ -1522,7 +1544,7 @@ html,body{
 .pin-btn{
   width:100%;font-family:inherit;font-size:13.5px;font-weight:500;
   padding:11px;border-radius:var(--r-md);
-  background:var(--ink);color:white;border:none;cursor:pointer;
+  background:var(--ink);color:var(--bg);border:none;cursor:pointer;
   transition:background .12s;letter-spacing:-0.005em;
 }
 .pin-btn:hover{background:var(--ink-2)}
@@ -1539,7 +1561,7 @@ html,body{
 .toast{
   position:fixed;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(20px);
-  background:var(--ink);color:white;
+  background:var(--ink);color:var(--bg);
   padding:10px 18px;border-radius:var(--r-lg);
   font-size:13px;font-weight:500;letter-spacing:-0.005em;
   opacity:0;pointer-events:none;
@@ -1691,40 +1713,9 @@ html,body{
               Intake queue
             </div>
           </div>
-          <span class="panel-sub">Top 4</span>
+          <span class="panel-sub" id="intakeQueueSub">—</span>
         </div>
-        <div class="queue-item">
-          <div class="queue-score p0">14</div>
-          <div class="queue-body">
-            <div class="queue-title">Checkout redesign — mobile</div>
-            <div class="queue-meta">Fintech · 3 wk · Needs IxD, research</div>
-          </div>
-          <span class="queue-tier tier-p0">P0</span>
-        </div>
-        <div class="queue-item">
-          <div class="queue-score p1">10</div>
-          <div class="queue-body">
-            <div class="queue-title">Onboarding audit</div>
-            <div class="queue-meta">SaaS · 2 wk · Needs research</div>
-          </div>
-          <span class="queue-tier tier-p1">P1</span>
-        </div>
-        <div class="queue-item">
-          <div class="queue-score p1">9</div>
-          <div class="queue-body">
-            <div class="queue-title">Dashboard v2 discovery</div>
-            <div class="queue-meta">Analytics · 4 wk · Needs IA, viz</div>
-          </div>
-          <span class="queue-tier tier-p1">P1</span>
-        </div>
-        <div class="queue-item">
-          <div class="queue-score p2">6</div>
-          <div class="queue-body">
-            <div class="queue-title">Marketing site refresh</div>
-            <div class="queue-meta">Brand · 6 wk · Needs visual, motion</div>
-          </div>
-          <span class="queue-tier tier-p2">P2</span>
-        </div>
+        <div id="intakeQueueItems"></div>
       </div>
 
     </aside>
@@ -2488,7 +2479,7 @@ function render1on1Button(designer, containerEl){
   if(!proxyUrl && !isClaudeAi){
     // Show setup prompt instead of a broken button
     const notice = document.createElement('div');
-    notice.style.cssText = 'margin-top:10px;padding:10px 12px;background:var(--warn-soft);border:1px solid #FDE68A;border-radius:var(--r-md);font-size:12.5px;color:var(--warn);line-height:1.5';
+    notice.style.cssText = 'margin-top:10px;padding:10px 12px;background:var(--warn-soft);border:1px solid var(--warn);opacity:0.7;border-radius:var(--r-md);font-size:12.5px;color:var(--warn);line-height:1.5';
     notice.innerHTML = 'AI prep notes need a Claude proxy to work from this domain. Go to <b>Admin → Settings → Claude AI proxy</b> to set it up.';
     containerEl.appendChild(notice);
     containerEl.appendChild(outputEl);
@@ -5058,6 +5049,61 @@ function renderSidebar(){
         </div>
       </div>`;
   }).join('') : `<div style="padding:20px 16px;font-size:12.5px;color:var(--muted);text-align:center">No active alerts — team is steady</div>`;
+
+  // ── Intake queue — projects with open roles, sorted by urgency ──
+  function intakeScore(p){
+    let score = 0;
+    if(p.priority === 'P0') score += 10;
+    else if(p.priority === 'P1') score += 6;
+    else score += 2;
+    if(p.health === 'crit') score += 4;
+    else if(p.health === 'warn') score += 2;
+    if(p.openRole?.hours >= 30) score += 2;
+    else if(p.openRole?.hours >= 20) score += 1;
+    return score;
+  }
+
+  const intakeProjects = projects
+    .filter(p => p.openRole)
+    .sort((a, b) => intakeScore(b) - intakeScore(a));
+
+  const intakeSub = document.getElementById('intakeQueueSub');
+  const intakeEl  = document.getElementById('intakeQueueItems');
+
+  if(intakeSub){
+    intakeSub.textContent = intakeProjects.length
+      ? `${intakeProjects.length} open role${intakeProjects.length > 1 ? 's' : ''}`
+      : 'No open roles';
+  }
+
+  if(intakeEl){
+    if(!intakeProjects.length){
+      intakeEl.innerHTML = `<div style="padding:20px 16px;font-size:12.5px;color:var(--muted);text-align:center">All projects fully staffed</div>`;
+    } else {
+      const tierClass = p => p.priority === 'P0' ? 'tier-p0' : p.priority === 'P1' ? 'tier-p1' : 'tier-p2';
+      const scoreClass = p => p.priority === 'P0' ? 'p0' : p.priority === 'P1' ? 'p1' : 'p2';
+      const needsSummary = p => {
+        if(!p.needs || !p.needs.length) return p.openRole?.reason || 'Open role';
+        const top = p.needs
+          .filter(([,lvl]) => lvl >= 3)
+          .slice(0, 2)
+          .map(([name]) => name);
+        return top.length
+          ? `Needs ${top.join(', ')}${p.openRole?.seniority ? ' · ' + p.openRole.seniority : ''}`
+          : p.openRole?.reason || 'Open role';
+      };
+
+      intakeEl.innerHTML = intakeProjects.map(p => `
+        <div class="queue-item" style="cursor:pointer" onclick="openProjectDrawer('${p.id}')">
+          <div class="queue-score ${scoreClass(p)}">${intakeScore(p)}</div>
+          <div class="queue-body">
+            <div class="queue-title">${p.name}</div>
+            <div class="queue-meta">${p.domain} · ${p.duration || '?'} · ${needsSummary(p)}</div>
+          </div>
+          <span class="queue-tier ${tierClass(p)}">${p.priority}</span>
+        </div>`).join('');
+    }
+  }
 
   // Distribution bars
   const loadOk   = designers.filter(d => d.load <= 85).length;
