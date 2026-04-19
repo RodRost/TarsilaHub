@@ -1713,6 +1713,10 @@ html,body{
       <button class="admin-tab" data-admin-tab="settings">
         <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</span>
       </button>
+      <button class="admin-tab" data-admin-tab="archive">
+        <span class="admin-tab-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archive</span>
+        <span class="tab-count" id="archiveTabCount">0</span>
+      </button>
     </div>
 
     <!-- DATA HEALTH -->
@@ -1853,6 +1857,51 @@ html,body{
         <h3>Match engine weights</h3>
         <div class="settings-group-desc">How the 4 factors are weighted in the composite match score. Must sum to 100.</div>
         <div id="weightsList"></div>
+      </div>
+
+    </div>
+
+    <!-- ARCHIVE -->
+    <div class="admin-panel" data-admin-panel="archive">
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Archived designers</div>
+            <div class="panel-sub" style="margin-top:2px">People who have left — their history and contributions are preserved</div>
+          </div>
+        </div>
+        <table class="admin-table" style="border:none">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Last status</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="archivedDesignersTable"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Archived projects</div>
+            <div class="panel-sub" style="margin-top:2px">Completed or cancelled projects — kept for reference and context</div>
+          </div>
+        </div>
+        <table class="admin-table" style="border:none">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Client</th>
+              <th>Priority</th>
+              <th style="text-align:right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="archivedProjectsTable"></tbody>
+        </table>
       </div>
 
     </div>
@@ -2411,8 +2460,8 @@ const drawer = document.getElementById('drawer');
 const overlay = document.getElementById('drawerOverlay');
 const drawerBody = document.getElementById('drawerBody');
 
-function openDrawer(id){
-  const d = designers.find(x=>x.id===id);
+function openDrawer(id, _preloaded){
+  const d = _preloaded || designers.find(x=>x.id===id);
   if(!d) return;
   document.getElementById('drawerName').textContent = d.name;
   document.getElementById('drawerRole').textContent = d.role;
@@ -2692,8 +2741,8 @@ function fitClass(level){ return level==='high'?'high':level==='mid'?'mid':level
 function fitLabel(level){ return level==='high'?'Strong':level==='mid'?'Good':level==='low'?'Limited':'None'; }
 function skillPctClass(pct){ if(pct>=0.8) return 'high'; if(pct>=0.6) return 'mid'; if(pct>=0.4) return 'low'; return 'none'; }
 
-function openProjectDrawer(projId){
-  const p = projects.find(x=>x.id===projId);
+function openProjectDrawer(projId, _preloaded){
+  const p = _preloaded || projects.find(x=>x.id===projId);
   if(!p) return;
 
   document.getElementById('drawerName').textContent = p.name;
@@ -3100,6 +3149,9 @@ function sbXhr(method, path, body){
     if(method === 'POST' || method === 'PATCH'){
       xhr.setRequestHeader('Prefer', 'return=representation');
     }
+    if(method === 'DELETE'){
+      xhr.setRequestHeader('Prefer', 'return=minimal');
+    }
     xhr.timeout = 12000;
     xhr.onload = () => {
       if(xhr.status >= 200 && xhr.status < 300){
@@ -3170,6 +3222,9 @@ async function loadFromSupabase(){
 
   const el = document.getElementById('adminLastSaved');
   if(el) el.textContent = 'loaded from Supabase';
+
+  // Also load archived records in background
+  loadArchivedFromSupabase().then(() => updateArchiveTabCount());
 }
 
 // ---- Save designer ----
@@ -3378,6 +3433,7 @@ function switchAdminPanel(name){
   if(name === 'health') renderHealthPanel();
   if(name === 'people') renderPeopleTable();
   if(name === 'projects') renderProjectsAdminTable();
+  if(name === 'archive') renderArchivePanel();
   if(name === 'settings'){
     renderSettingsPanel();
     // Wire save button if not already present
@@ -3606,23 +3662,230 @@ function editDesigner(id, focusSub){
   }
 }
 
+// ---- Archived data stores (loaded separately from Supabase) ----
+let archivedDesigners = [];
+let archivedProjects  = [];
+
+// ---- Archive a designer ----
 async function archiveDesigner(id){
   const d = designers.find(x => x.id === id);
   if(!d) return;
-  if(!confirm(`Archive ${d.name}? They will be removed from active lists but historical data is preserved.`)) return;
+  if(!confirm(`Archive ${d.name}?\n\nThey'll be removed from active lists. Their profile and history will be preserved in the Archive tab — you can restore them at any time.`)) return;
   try {
-    if(persistenceMode === 'supabase') await archiveDesignerInSupabase(id);
+    if(persistenceMode === 'supabase'){
+      await sbXhr('PATCH', `designers?id=eq.${id}`, { archived: true });
+    }
+    // Move from active → archived arrays
     const idx = designers.findIndex(x => x.id === id);
     designers.splice(idx, 1);
+    archivedDesigners.push({ ...d, archived: true });
     await persistData();
     renderPeopleTable();
     renderHealthPanel();
     renderList('all');
     renderHealthBanner();
     updateHeaderCounts();
-    showToast(`Archived ${d.name}`);
+    updateArchiveTabCount();
+    showToast(`Archived ${d.name} — find them in the Archive tab`);
   } catch(e){
     showToast(`Archive failed: ${e.message}`);
+  }
+}
+
+// ---- Archive a project ----
+async function archiveProject(id){
+  const p = projects.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(`Archive "${p.name}"?\n\nIt will be removed from active lists but preserved in the Archive tab for reference.`)) return;
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: true });
+    }
+    const idx = projects.findIndex(x => x.id === id);
+    projects.splice(idx, 1);
+    archivedProjects.push({ ...p, archived: true });
+    await persistData();
+    renderProjectsAdminTable();
+    renderProjects();
+    renderHealthPanel();
+    renderHealthBanner();
+    updateHeaderCounts();
+    updateArchiveTabCount();
+    showToast(`Archived ${p.name} — find it in the Archive tab`);
+  } catch(e){
+    showToast(`Archive failed: ${e.message}`);
+  }
+}
+
+// ---- Restore a designer from archive ----
+async function restoreDesigner(id){
+  const d = archivedDesigners.find(x => x.id === id);
+  if(!d) return;
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('PATCH', `designers?id=eq.${id}`, { archived: false });
+    }
+    const idx = archivedDesigners.findIndex(x => x.id === id);
+    archivedDesigners.splice(idx, 1);
+    d.archived = false;
+    designers.push(d);
+    designers.sort((a,b) => statusOrder[a.status] - statusOrder[b.status]);
+    await persistData();
+    renderArchivePanel();
+    renderPeopleTable();
+    renderList('all');
+    updateHeaderCounts();
+    updateArchiveTabCount();
+    showToast(`Restored ${d.name} to active team`);
+  } catch(e){
+    showToast(`Restore failed: ${e.message}`);
+  }
+}
+
+// ---- Restore a project from archive ----
+async function restoreProject(id){
+  const p = archivedProjects.find(x => x.id === id);
+  if(!p) return;
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('PATCH', `projects?id=eq.${id}`, { archived: false });
+    }
+    const idx = archivedProjects.findIndex(x => x.id === id);
+    archivedProjects.splice(idx, 1);
+    p.archived = false;
+    projects.push(p);
+    await persistData();
+    renderArchivePanel();
+    renderProjectsAdminTable();
+    renderProjects();
+    updateHeaderCounts();
+    updateArchiveTabCount();
+    showToast(`Restored ${p.name} to active projects`);
+  } catch(e){
+    showToast(`Restore failed: ${e.message}`);
+  }
+}
+
+// ---- Hard delete from archive (permanent) ----
+async function hardDeleteDesigner(id){
+  const d = archivedDesigners.find(x => x.id === id);
+  if(!d) return;
+  if(!confirm(`Permanently delete ${d.name}?\n\nThis is irreversible. All data will be gone forever.`)) return;
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('DELETE', `designer_projects?designer_id=eq.${id}`, null);
+      await sbXhr('DELETE', `designers?id=eq.${id}`, null);
+    }
+    const idx = archivedDesigners.findIndex(x => x.id === id);
+    archivedDesigners.splice(idx, 1);
+    renderArchivePanel();
+    updateArchiveTabCount();
+    showToast(`Permanently deleted ${d.name}`);
+  } catch(e){
+    showToast(`Delete failed: ${e.message}`);
+  }
+}
+
+async function hardDeleteProject(id){
+  const p = archivedProjects.find(x => x.id === id);
+  if(!p) return;
+  if(!confirm(`Permanently delete "${p.name}"?\n\nThis is irreversible. All project data will be gone forever.`)) return;
+  try {
+    if(persistenceMode === 'supabase'){
+      await sbXhr('DELETE', `designer_projects?project_id=eq.${id}`, null);
+      await sbXhr('DELETE', `projects?id=eq.${id}`, null);
+    }
+    const idx = archivedProjects.findIndex(x => x.id === id);
+    archivedProjects.splice(idx, 1);
+    renderArchivePanel();
+    updateArchiveTabCount();
+    showToast(`Permanently deleted ${p.name}`);
+  } catch(e){
+    showToast(`Delete failed: ${e.message}`);
+  }
+}
+
+// ---- Load archived records from Supabase ----
+async function loadArchivedFromSupabase(){
+  try {
+    const dbAD = await sbXhr('GET', 'designers?archived=eq.true&order=id&select=*');
+    const dbAP = await sbXhr('GET', 'projects?archived=eq.true&order=name&select=*');
+    archivedDesigners = (dbAD || []).map(row => dbDesignerToApp(row, []));
+    archivedProjects  = (dbAP || []).map(row => dbProjectToApp(row));
+  } catch(e){
+    console.warn('Could not load archived records:', e.message);
+  }
+}
+
+function updateArchiveTabCount(){
+  const total = archivedDesigners.length + archivedProjects.length;
+  const el = document.getElementById('archiveTabCount');
+  if(el) el.textContent = total;
+}
+
+// ---- Render archive panel ----
+function renderArchivePanel(){
+  updateArchiveTabCount();
+
+  // Archived designers
+  const dTable = document.getElementById('archivedDesignersTable');
+  if(dTable){
+    dTable.innerHTML = archivedDesigners.length ? archivedDesigners.map(d => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${avatarEl(d.name, d.initials)}
+            <div>
+              <div class="row-name">${d.name}</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${d.projects.map(p=>p.n).join(', ') || 'No projects on record'}</div>
+            </div>
+          </div>
+        </td>
+        <td>${shortRole(d.role)}</td>
+        <td><span class="status ${d.status}">${d.status}</span></td>
+        <td class="row-actions">
+          <button class="row-action" onclick="openArchivedDrawer('designer',${d.id})">View profile</button>
+          <button class="row-action" onclick="restoreDesigner(${d.id})">Restore</button>
+          <button class="row-action danger" onclick="hardDeleteDesigner(${d.id})">Delete</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted);font-style:italic">No archived designers</td></tr>`;
+  }
+
+  // Archived projects
+  const pTable = document.getElementById('archivedProjectsTable');
+  if(pTable){
+    pTable.innerHTML = archivedProjects.length ? archivedProjects.map(p => {
+      const tierClass = p.priority==='P0'?'tier-p0':p.priority==='P1'?'tier-p1':'tier-p2';
+      return `
+        <tr>
+          <td>
+            <div class="row-name">${p.name}</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:2px">${p.type} · ${['Discovery','Design','Build','Ship'][p.phase]} phase</div>
+          </td>
+          <td>${p.client}</td>
+          <td><span class="queue-tier ${tierClass}">${p.priority}</span></td>
+          <td class="row-actions">
+            <button class="row-action" onclick="openArchivedDrawer('project','${p.id}')">View profile</button>
+            <button class="row-action" onclick="restoreProject('${p.id}')">Restore</button>
+            <button class="row-action danger" onclick="hardDeleteProject('${p.id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('') : `<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted);font-style:italic">No archived projects</td></tr>`;
+  }
+}
+
+// ---- Open a drawer for an archived record (read-only) ----
+function openArchivedDrawer(type, id){
+  if(type === 'designer'){
+    const d = archivedDesigners.find(x => x.id === id);
+    if(!d) return;
+    openDrawer(d.id, d); // pass the archived designer directly
+  } else {
+    const p = archivedProjects.find(x => x.id === id);
+    if(!p) return;
+    openProjectDrawer(p.id, p);
   }
 }
 
@@ -3665,6 +3928,7 @@ function renderProjectsAdminTable(){
         <td class="row-actions">
           ${p.phase < 3 ? `<button class="row-action" onclick="phaseTransition('${p.id}')">Transition</button>` : ''}
           <button class="row-action" onclick="editProject('${p.id}')">Edit</button>
+          <button class="row-action danger" onclick="archiveProject('${p.id}')">Archive</button>
         </td>
       </tr>
     `;
@@ -4734,6 +4998,7 @@ function refreshAll(){
   renderProjects();
   renderHealthBanner();
   updateHeaderCounts();
+  updateArchiveTabCount();
 })();
 </script>
 
