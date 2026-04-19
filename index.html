@@ -2343,7 +2343,7 @@ async function callClaude(systemPrompt, userMessage, outputEl, onDone){
 
   const endpoint = proxyUrl || 'https://api.anthropic.com/v1/messages';
   const payload  = {
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1000,
     system: systemPrompt,
     messages: [{ role: 'user', content: userMessage }]
@@ -2356,8 +2356,15 @@ async function callClaude(systemPrompt, userMessage, outputEl, onDone){
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if(data.error) throw new Error(data.error.message || data.error);
-    const text = data.content?.find(b => b.type === 'text')?.text || 'No response.';
+    if(!res.ok || data.error){
+      const msg = data.error?.message || data.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    const text = data.content?.find(b => b.type === 'text')?.text;
+    if(!text){
+      console.error('Unexpected API response:', JSON.stringify(data).slice(0, 300));
+      throw new Error('The model returned an empty response. Check the browser console for details.');
+    }
     onDone(text, outputEl);
   } catch(e) {
     outputEl.innerHTML = `<div class="claude-output">
