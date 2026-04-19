@@ -2021,7 +2021,6 @@ html,body{
           </span>
           <button class="chip active" data-sort="status">Status</button>
           <button class="chip" data-sort="load">Capacity</button>
-          <button class="chip" data-sort="energy">Energy</button>
           <button class="chip" data-sort="role">Role</button>
         </div>
       </div>
@@ -2787,7 +2786,7 @@ extra.forEach((e,i) => {
   designers.push({
     id: 14+i, name:e[0], initials:e[1], role:e[2], status:"steady",
     load: 65 + Math.floor(Math.random()*18),
-    energy: "steady", meetingLoad: "balanced",
+    meetingLoad: "balanced",
     context: Math.random()>0.7 ? 1 : 2,
     pto: 5 + Math.floor(Math.random()*25),
     projects: Math.random()>0.5 ? [{n:"Lumen",c:"e"},{n:"Vela",c:"e"}] : [{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
@@ -2903,7 +2902,7 @@ function renderClaudeOutput(text, outputEl, onRefresh){
 function serializeDesigner(d){
   const skillStr = d.skills.map(([s,l]) => `${s}:${['—','Foundational','Developing','Consistent','Leading','Expert'][l]}`).join(', ');
   const achievStr = (d.achievements||[]).slice(0,3).map(a => `"${a.title}" [${(a.skills||[]).join(', ')}] (${a.month}${a.projectId ? ', '+a.projectId : ''})`).join('; ');
-  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Recent achievements:[${achievStr}]`;
+  return `${d.name} | ${d.role} | Load:${d.load}% | | Meetings:${d.meetingLoad} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Recent achievements:[${achievStr}]`;
 }
 
 function serializeProject(p){
@@ -3021,10 +3020,10 @@ function buildDigestPrompt(){
   const staleItems = computeStaleItems();
   const staleCount = staleItems.filter(i => i.level === 'stale').length;
 
-  const teamPulse = `Team energy: ${designers.filter(d=>d.energy==='high').length} high · ${designers.filter(d=>d.energy==='low').length} low · ${designers.filter(d=>d.energy==='steady').length} steady | Avg load: ${Math.round(designers.reduce((s,d)=>s+d.load,0)/designers.length)}% | On ≤2 projects: ${designers.filter(d=>d.context<=2).length}/${designers.length} | Stale data fields: ${staleCount}`;
+  const teamPulse = `Avg load: ${Math.round(designers.reduce((s,d)=>s+d.load,0)/designers.length)}% | On ≤2 projects: ${designers.filter(d=>d.context<=2).length}/${designers.length} | Stale data fields: ${staleCount}`;
 
   const alertStr = alertDesigners.map(d => serializeDesigner(d)).join('\n');
-  const watchStr = watchDesigners.slice(0,3).map(d => `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Status:WATCH`).join('\n');
+  const watchStr = watchDesigners.slice(0,3).map(d => `${d.name} | ${d.role} | Load:${d.load}% | | Status:WATCH`).join('\n');
   const projectStr = atRiskProjects.map(p => `${p.name} | ${p.healthLabel} | Priority:${p.priority} | Deadline:${p.deadline} | Risks:${p.risks.join('; ') || 'none flagged'}`).join('\n');
   const staleStr = staleItems.slice(0,5).map(i => `${i.name} · ${i.sub} (${i.level}, ${i.days}d)`).join('; ');
 
@@ -3115,13 +3114,11 @@ function renderList(filter='all'){
     : filter==='all' ? [...designers] : designers.filter(d=>d.status===filter);
 
   // Sort
-  const energyOrder = {low:0, steady:1, high:2};
   filtered.sort((a,b) => {
     const roleOrder = {Trainee:0,Junior:1,Senior:2,Lead:3,ACD:4,CD:5};
     const dir = sortAsc ? 1 : -1;
     if(currentSort === 'role')   return dir * ((roleOrder[a.role]??99) - (roleOrder[b.role]??99));
     if(currentSort === 'load')   return dir * (a.load - b.load);
-    if(currentSort === 'energy') return dir * ((energyOrder[a.energy]??1) - (energyOrder[b.energy]??1));
     // status: alert→watch→steady ascending, reverse for descending
     return dir * (({alert:0,watch:1,steady:2}[a.status]??2) - ({alert:0,watch:1,steady:2}[b.status]??2));
   });
@@ -3138,10 +3135,6 @@ function renderList(filter='all'){
         <div class="signal">
           <div class="signal-name">Capacity</div>
           <div class="signal-bar ${signalClass('load',d.load)}"><div class="fill" style="width:${signalWidth('load',d.load)}%"></div></div>
-        </div>
-        <div class="signal">
-          <div class="signal-name">Energy</div>
-          <div class="signal-bar ${signalClass('energy',d.energy)} energy-pill"></div>
         </div>
         <div class="signal">
           <div class="signal-name">Projects</div>
@@ -3219,11 +3212,6 @@ function openDrawer(id, _preloaded){
           <div class="signal-card-status ${signalClass('load',d.load)}">${d.load>95?'Above ceiling':d.load>85?'Near ceiling':'Within band'}</div>
         </div>
         <div class="signal-card">
-          <div class="signal-card-label">Energy</div>
-          <div class="signal-card-val" style="font-size:16px;padding-top:4px">${d.energy==='high'?'High':d.energy==='low'?'Low':'Steady'}</div>
-          <div class="signal-card-status ${signalClass('energy',d.energy)}">${d.energy==='low'?'Needs attention':d.energy==='steady'?'On track':'Feeling good'}</div>
-        </div>
-        <div class="signal-card">
           <div class="signal-card-label">Active projects</div>
           <div class="signal-card-val">${d.context}</div>
           <div class="signal-card-status ${signalClass('context',d.context)}">${d.context>=3?'Too many contexts':'Healthy'}</div>
@@ -3250,13 +3238,7 @@ function openDrawer(id, _preloaded){
         <b>PTO balance:</b> ${d.pto} days since last break ${d.pto>90?'— overdue':d.pto>60?'— approaching threshold':'— on pace'}
       </div>
     </div>
-
-    <div class="drawer-section">
-      <h4>Energy trend</h4>
-      ${energySparkline(d.history, d.lastUpdated)}
-    </div>
-
-    <div class="drawer-section">
+<div class="drawer-section">
       <h4>Current projects</h4>
       <div class="projects-cell" style="gap:6px">
         ${d.projects.map(p=>`<span class="proj proj-${p.c}">${p.n}${p.alloc ? ` <span style="font-size:10px;font-weight:600;opacity:0.75">${p.alloc}%</span>` : ''}</span>`).join('')}
@@ -3615,7 +3597,6 @@ function openProjectDrawer(projId, _preloaded){
   document.getElementById('drawerPhoto').innerHTML = ''; // no photo for projects
 
   const team = p.teamIds.map(id => designers.find(d=>d.id===id)).filter(Boolean);
-  const teamEnergy = team.length ? (team.reduce((s,t)=>s+t.energy,0)/team.length).toFixed(1) : '—';
 
   let matches = [];
   if(p.openRole){
@@ -3680,7 +3661,7 @@ function openProjectDrawer(projId, _preloaded){
     </div>
 
     <div class="drawer-section">
-      <h4>Team · ${team.length} ${team.length===1?'designer':'designers'} · avg energy ${teamEnergy}</h4>
+      <h4>Team · ${team.length} ${team.length===1?'designer':'designers'}</h4>
       ${team.map(t=>{
         const statusDot = t.status==='alert'?'crit':t.status==='watch'?'warn':'ok';
         return `
@@ -3691,7 +3672,7 @@ function openProjectDrawer(projId, _preloaded){
             <div class="team-member-role">${shortRole(t.role)}</div>
           </div>
           <div class="team-member-stat">
-            <span class="dot ${statusDot}"></span>${t.load}% · ${t.energy}
+            <span class="dot ${statusDot}"></span>${t.load}%
           </div>
         </div>
         `;
@@ -4078,7 +4059,7 @@ function dbDesignerToApp(row, dpRows){
     .map(dp => ({ n: dp.project_name || dp.project_id, c: projectColor(dp.project_id), alloc: dp.allocation || null }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
-    load: row.load, energy: row.energy || 'steady', meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '', workdayUrl: row.workday_url || '',
+    load: row.load, meetingLoad: row.meeting_load || 'balanced', context: row.context, pto: row.pto, photo: row.photo || '', assessmentUrl: row.assessment_url || '', workdayUrl: row.workday_url || '',
     skills: row.skills || [], achievements: row.achievements || [], pastProjects: row.past_projects || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
@@ -4123,7 +4104,7 @@ async function loadFromSupabase(){
 async function saveDesignerToSupabase(d){
   const payload = {
     name: d.name, initials: d.initials, role: d.role, status: d.status,
-    load: d.load, energy: d.energy, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
+    load: d.load, meeting_load: d.meetingLoad, context: d.context, pto: d.pto, photo: d.photo || null,
     skills: d.skills, achievements: d.achievements || [], past_projects: d.pastProjects || [], history: d.history,
     assessment_url: d.assessmentUrl || null, workday_url: d.workdayUrl || null, last_updated: d.lastUpdated
   };
@@ -4477,7 +4458,7 @@ function editDesigner(id, focusSub){
   const d = isNew ? {
     id: 'NEW',
     name: '', role: 'Junior', initials: '', status: 'steady',
-    load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
+    load: 70, meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
     projects: [],
     skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
     achievements: [], pastProjects: [],
@@ -4546,13 +4527,6 @@ function editDesigner(id, focusSub){
           <select class="form-select" id="f_status">
             ${['steady','watch','alert'].map(s =>
               `<option value="${s}" ${d.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Energy</label>
-          <select class="form-select" id="f_energy">
-            ${['high','steady','low'].map(e =>
-              `<option value="${e}" ${d.energy===e?'selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
           </select>
         </div>
         <div class="form-group">
@@ -6367,7 +6341,7 @@ async function saveDesigner(){
     d = {
       id: null,
       status: 'steady',
-      load: 70, energy: 'steady', meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
+      load: 70, meetingLoad: 'balanced', context: 1, pto: 0, photo: '',
       projects: [],
       skills: [['UI Design',2],['UX Design',2],['Product Design',2],['Art Direction',2],['Design System',2],['Motion Design',1],['Prototyping',2],['Presentation',2],['Strategy',1],['AI',1]],
       achievements: [], pastProjects: [],
@@ -6381,7 +6355,6 @@ async function saveDesigner(){
   d.initials = document.getElementById('f_initials').value.trim().toUpperCase();
   d.role     = document.getElementById('f_role').value;
   d.status      = document.getElementById('f_status')?.value || d.status;
-  d.energy      = document.getElementById('f_energy')?.value || d.energy;
   d.meetingLoad = document.getElementById('f_meeting_load')?.value || d.meetingLoad || 'balanced';
   d.load        = parseInt(document.getElementById('f_load')?.value) || d.load;
   d.pto         = parseInt(document.getElementById('f_pto')?.value) ?? d.pto;
@@ -6706,7 +6679,6 @@ function renderSettingsPanel(){
   // Thresholds
   const thresholds = [
     { label: 'Capacity %', hint: 'Watch and alert ceilings', watch: 85, alert: 95, unit: '%' },
-    { label: 'Energy 1–5', hint: 'Watch and alert floors (lower is worse)', watch: 3.5, alert: 3.0, unit: '' },
     { label: 'Active projects', hint: 'Max contexts before alert', watch: 2, alert: 3, unit: '' },
 
   ];
@@ -6778,8 +6750,6 @@ function updateHeaderCounts(){
 // ---- RENDER PULSE STRIP (computed from live data) ----
 function renderPulse(){
   const n = designers.length;
-  const highE   = designers.filter(d=>d.energy==='high').length;
-  const lowE    = designers.filter(d=>d.energy==='low').length;
   const avgLoad   = Math.round(designers.reduce((s,d)=>s+d.load,0)/n);
   const atSafe    = designers.filter(d=>d.context<=2).length;
   const benchN    = designers.filter(d => d.context === 0).length;
@@ -6788,9 +6758,6 @@ function renderPulse(){
 
   const multiN  = designers.filter(d => d.context >= 2).length;
   const over3   = designers.filter(d => d.context >= 3).length;
-
-  const energyCls = lowE > 0 ? 'trend-down' : highE >= n/2 ? 'trend-up' : 'trend-warn';
-  const energyLbl = lowE > 0 ? `↓ ${lowE} reporting low` : highE >= n/2 ? '↑ mostly high' : '→ mostly steady';
   const loadCls   = avgLoad > 90 ? 'trend-down' : avgLoad > 85 ? 'trend-warn' : 'trend-flat';
   const loadLbl   = avgLoad > 90 ? '↑ above ceiling' : avgLoad > 85 ? '↑ near target' : '→ within target';
   const alertCls  = alertN === 0 ? 'trend-up' : alertN <= 2 ? 'trend-warn' : 'trend-down';
@@ -6798,12 +6765,6 @@ function renderPulse(){
   const multiLbl  = over3 > 0 ? `↑ ${over3} on 3+ projects` : multiN > 0 ? `${n - multiN} on 1 or fewer` : '→ all on single projects';
 
   document.getElementById('pulseStrip').innerHTML = `
-    <div class="strip-cell">
-      <div class="strip-icon energy"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-      <div class="strip-label">Team energy</div>
-      <div class="strip-value">${highE}<span class="unit"> high · ${lowE} low</span></div>
-      <div class="strip-trend ${energyCls}">${energyLbl}</div>
-    </div>
     <div class="strip-cell">
       <div class="strip-icon load"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 0 0-10-10"/></svg></div>
       <div class="strip-label">Average capacity</div>
@@ -6845,7 +6806,6 @@ function renderSidebar(){
   document.getElementById('sidebarAlerts').innerHTML = shown.length ? shown.map(d => {
     const isAlert = d.status === 'alert';
     const reasons = [];
-    if(d.energy === 'low') reasons.push('Energy low');
     if(d.load > 95) reasons.push(`Load ${d.load}%`);
     if(d.context >= 3) reasons.push(`${d.context} active projects`);
     if(d.pto > 90) reasons.push(`${d.pto} days since PTO`);
@@ -6943,9 +6903,6 @@ function renderSidebar(){
   const loadOk   = designers.filter(d => d.load <= 85).length;
   const loadWarn = designers.filter(d => d.load > 85 && d.load <= 95).length;
   const loadCrit = designers.filter(d => d.load > 95).length;
-  const eneOk    = designers.filter(d => d.energy === 'high').length;
-  const eneWarn  = designers.filter(d => d.energy === 'steady').length;
-  const eneCrit  = designers.filter(d => d.energy === 'low').length;
   const ctxOk    = designers.filter(d => d.context <= 2).length;
   const ctxWarn  = designers.filter(d => d.context === 2 && d.load > 80).length; // high load + dual
   const ctxCrit  = designers.filter(d => d.context >= 3).length;
@@ -6958,14 +6915,6 @@ function renderSidebar(){
         ${loadOk   > 0 ? `<div class="dist-seg ok"   style="flex:${loadOk}">${loadOk}</div>`   : ''}
         ${loadWarn > 0 ? `<div class="dist-seg warn" style="flex:${loadWarn}">${loadWarn}</div>` : ''}
         ${loadCrit > 0 ? `<div class="dist-seg crit" style="flex:${loadCrit}">${loadCrit}</div>` : ''}
-      </div>
-    </div>
-    <div class="dist-row">
-      <div class="dist-label"><b>Energy 1–5</b><span>Healthy ≥3.5</span></div>
-      <div class="dist-bar">
-        ${eneOk   > 0 ? `<div class="dist-seg ok"   style="flex:${eneOk}">${eneOk}</div>`   : ''}
-        ${eneWarn > 0 ? `<div class="dist-seg warn" style="flex:${eneWarn}">${eneWarn}</div>` : ''}
-        ${eneCrit > 0 ? `<div class="dist-seg crit" style="flex:${eneCrit}">${eneCrit}</div>` : ''}
       </div>
     </div>
     <div class="dist-row" style="margin-bottom:0">
