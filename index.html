@@ -2113,91 +2113,91 @@ function icon(name, cls=''){
 
 const designers = [
   { id:1, name:"Camila Ruiz", initials:"CR", role:"Senior Product Designer", status:"alert",
-    load:102, energy:2.6, context:3, focus:4, pto:62,
+    load:102, energy:"low",    context:3, pto:62,
     projects:[{n:"Kairos Dashboard",c:"b"},{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["Interaction",4],["UX Research",3],["Visual",3],["Prototyping",4],["Systems",3],["Facilitation",3]],
     growth:[{g:"Lead a discovery sprint end-to-end",p:60,link:"via Kairos Dashboard"},{g:"Mentor a mid-level designer",p:40,link:"paired with N. Rivera"}],
     history:[3,3,3,3,2,2,2]
   },
   { id:2, name:"Tomás Leite", initials:"TL", role:"Product Designer", status:"alert",
-    load:88, energy:3.1, context:2, focus:3, pto:104,
+    load:88,  energy:"low",    context:2, pto:104,
     projects:[{n:"Aria Research",c:"c"},{n:"Vela",c:"e"}],
     skills:[["UX Research",4],["Interaction",3],["Visual",2],["Prototyping",3],["Facilitation",4],["Systems",2]],
     growth:[{g:"Publish a research methodology doc",p:30,link:"via Aria Research"},{g:"Take 2+ weeks of PTO this quarter",p:0,link:"blocker"}],
     history:[4,4,3,3,3,3,3]
   },
   { id:3, name:"Priya Shah", initials:"PS", role:"Senior Product Designer", status:"watch",
-    load:84, energy:3.2, context:2, focus:6, pto:30,
+    load:84,  energy:"steady", context:2, pto:30,
     projects:[{n:"Kairos",c:"b"},{n:"Lumen",c:"e"}],
     skills:[["Visual",4],["Interaction",3],["Systems",4],["Prototyping",3],["UX Research",2],["Facilitation",3]],
     growth:[{g:"Ship Kairos v2 with measurable impact",p:55,link:"via Kairos"},{g:"Deepen research craft",p:25,link:"stretch assignment"}],
     history:[4,4,3,3,3,3,3]
   },
   { id:4, name:"Miguel Kato", initials:"MK", role:"Staff Designer", status:"watch",
-    load:92, energy:3.4, context:3, focus:5, pto:45,
+    load:92,  energy:"steady", context:3, pto:45,
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"},{n:"Lumen",c:"e"}],
     skills:[["Systems",4],["Interaction",4],["Visual",3],["Prototyping",4],["Facilitation",4],["UX Research",3]],
     growth:[{g:"Establish design critique cadence across team",p:70,link:"ongoing"},{g:"Reduce to 2 projects",p:0,link:"in progress"}],
     history:[4,4,4,3,3,4,3]
   },
   { id:5, name:"Ana Sørensen", initials:"AS", role:"Senior Product Designer", status:"steady",
-    load:78, energy:4.1, context:2, focus:12, pto:18,
+    load:78,  energy:"high",   context:2, pto:18,
     projects:[{n:"Meridian",c:"a"},{n:"Pax DS",c:"d"}],
     skills:[["Interaction",4],["Visual",4],["Systems",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
     growth:[{g:"Lead Meridian checkout end-to-end",p:80,link:"via Meridian"},{g:"Present at team critique",p:50,link:"scheduled Nov 14"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:6, name:"Jonah Bekele", initials:"JB", role:"Product Designer", status:"steady",
-    load:74, energy:4.0, context:2, focus:14, pto:12,
+    load:74,  energy:"high",   context:2, pto:12,
     projects:[{n:"Lumen",c:"e"},{n:"Pax DS",c:"d"}],
     skills:[["Visual",4],["Systems",3],["Interaction",3],["Prototyping",2],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Build visual system for Lumen",p:65,link:"via Lumen"},{g:"Improve prototyping skills",p:40,link:"course + practice"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:7, name:"Hana Fujimoto", initials:"HF", role:"Senior Product Designer", status:"steady",
-    load:81, energy:4.2, context:2, focus:10, pto:22,
+    load:81,  energy:"high",   context:2, pto:22,
     projects:[{n:"Vela",c:"e"},{n:"Orion",c:"c"}],
     skills:[["UX Research",4],["Interaction",3],["Facilitation",4],["Visual",2],["Systems",3],["Prototyping",3]],
     growth:[{g:"Run quarterly user research review",p:75,link:"via Vela"},{g:"Coach a junior on research methods",p:55,link:"paired with E. Duarte"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:8, name:"Nadia Rivera", initials:"NR", role:"Mid Designer", status:"steady",
-    load:72, energy:3.8, context:1, focus:16, pto:8,
+    load:72,  energy:"steady", context:1, pto:8,
     projects:[{n:"Lumen",c:"e"}],
     skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",2],["UX Research",2],["Facilitation",1]],
     growth:[{g:"Reach 'applying' in Interaction Design",p:60,link:"via Lumen"},{g:"Receive feedback from a senior weekly",p:80,link:"paired with C. Ruiz"}],
     history:[3,3,4,4,4,4,4]
   },
   { id:9, name:"Elena Duarte", initials:"ED", role:"Junior Designer", status:"steady",
-    load:68, energy:3.9, context:1, focus:18, pto:5,
+    load:68,  energy:"steady", context:1, pto:5,
     projects:[{n:"Vela",c:"e"}],
     skills:[["Visual",2],["Interaction",2],["Systems",1],["Prototyping",2],["UX Research",1],["Facilitation",1]],
     growth:[{g:"Ship 3 small features independently",p:66,link:"via Vela"},{g:"Build portfolio of research notes",p:40,link:"stretch"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:10, name:"Rafael Gómez", initials:"RG", role:"Product Designer", status:"steady",
-    load:70, energy:3.9, context:2, focus:13, pto:15,
+    load:70,  energy:"steady", context:2, pto:15,
     projects:[{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
     skills:[["Visual",3],["Interaction",3],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Lead Orion design",p:55,link:"via Orion"},{g:"Contribute 5 components to Pax",p:40,link:"via Pax DS"}],
     history:[4,4,4,4,4,4,4]
   },
   { id:11, name:"Sofia Viana", initials:"SV", role:"Mid Designer", status:"steady",
-    load:66, energy:4.0, context:2, focus:11, pto:10,
+    load:66,  energy:"high",   context:2, pto:10,
     projects:[{n:"Orion",c:"c"},{n:"Lumen",c:"e"}],
     skills:[["Visual",3],["Interaction",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Reach 'applying' in Prototyping",p:70,link:"via Orion"},{g:"Own a feature end-to-end",p:50,link:"via Lumen"}],
     history:[4,4,3,4,4,4,4]
   },
   { id:12, name:"Lucas Tanaka", initials:"LT", role:"Senior Product Designer", status:"watch",
-    load:86, energy:3.3, context:2, focus:7, pto:38,
+    load:86,  energy:"steady", context:2, pto:38,
     projects:[{n:"Meridian",c:"a"},{n:"Kairos",c:"b"}],
     skills:[["Interaction",4],["Systems",4],["Visual",3],["Prototyping",3],["UX Research",3],["Facilitation",3]],
     growth:[{g:"Lead architecture decisions on Kairos",p:50,link:"via Kairos"},{g:"Take ownership of team design system",p:30,link:"stretch"}],
     history:[4,4,4,3,3,3,3]
   },
   { id:13, name:"Isabela Nunes", initials:"IN", role:"Mid Designer", status:"watch",
-    load:89, energy:3.1, context:3, focus:6, pto:52,
+    load:89,  energy:"low",    context:3, pto:52,
     projects:[{n:"Kairos",c:"b"},{n:"Aria",c:"c"},{n:"Orion",c:"c"}],
     skills:[["Interaction",3],["Visual",2],["Systems",2],["Prototyping",3],["UX Research",2],["Facilitation",2]],
     growth:[{g:"Reduce to 2 projects",p:0,link:"active intervention"},{g:"Deepen interaction craft",p:30,link:"stretch"}],
@@ -2216,9 +2216,8 @@ extra.forEach((e,i) => {
   designers.push({
     id: 14+i, name:e[0], initials:e[1], role:e[2], status:"steady",
     load: 65 + Math.floor(Math.random()*18),
-    energy: 3.6 + Math.random()*0.6,
+    energy: "steady",
     context: Math.random()>0.7 ? 1 : 2,
-    focus: 10 + Math.floor(Math.random()*8),
     pto: 5 + Math.floor(Math.random()*25),
     projects: Math.random()>0.5 ? [{n:"Lumen",c:"e"},{n:"Vela",c:"e"}] : [{n:"Orion",c:"c"},{n:"Pax DS",c:"d"}],
     skills: [["Visual",2+Math.floor(Math.random()*3)],["Interaction",2+Math.floor(Math.random()*3)],["Systems",1+Math.floor(Math.random()*3)],["Prototyping",2+Math.floor(Math.random()*3)],["UX Research",1+Math.floor(Math.random()*3)],["Facilitation",1+Math.floor(Math.random()*3)]],
@@ -2326,7 +2325,7 @@ function renderClaudeOutput(text, outputEl, onRefresh){
 function serializeDesigner(d){
   const skillStr = d.skills.map(([s,l]) => `${s}:${['—','Learn','Apply','Lead','Teach'][l]}`).join(', ');
   const growthStr = d.growth.map(g => `"${g.g}" (${g.p}%)`).join('; ');
-  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy.toFixed(1)}/5 | Status:${d.status.toUpperCase()} | Context:${d.context} projects | Focus:${d.focus}h/wk | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Growth:[${growthStr}]`;
+  return `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Status:${d.status.toUpperCase()} | Context:${d.context} projects | PTO:${d.pto}d since break | Projects:${d.projects.map(p=>p.n).join(', ')} | Skills:[${skillStr}] | Growth:[${growthStr}]`;
 }
 
 function serializeProject(p){
@@ -2425,10 +2424,10 @@ function buildDigestPrompt(){
   const staleItems = computeStaleItems();
   const staleCount = staleItems.filter(i => i.level === 'stale').length;
 
-  const teamPulse = `Team energy avg: ${(designers.reduce((s,d)=>s+d.energy,0)/designers.length).toFixed(1)}/5 | Avg load: ${Math.round(designers.reduce((s,d)=>s+d.load,0)/designers.length)}% | On ≤2 projects: ${designers.filter(d=>d.context<=2).length}/${designers.length} | Stale data fields: ${staleCount}`;
+  const teamPulse = `Team energy: ${designers.filter(d=>d.energy==='high').length} high · ${designers.filter(d=>d.energy==='low').length} low · ${designers.filter(d=>d.energy==='steady').length} steady | Avg load: ${Math.round(designers.reduce((s,d)=>s+d.load,0)/designers.length)}% | On ≤2 projects: ${designers.filter(d=>d.context<=2).length}/${designers.length} | Stale data fields: ${staleCount}`;
 
   const alertStr = alertDesigners.map(d => serializeDesigner(d)).join('\n');
-  const watchStr = watchDesigners.slice(0,3).map(d => `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy.toFixed(1)} | Status:WATCH`).join('\n');
+  const watchStr = watchDesigners.slice(0,3).map(d => `${d.name} | ${d.role} | Load:${d.load}% | Energy:${d.energy} | Status:WATCH`).join('\n');
   const projectStr = atRiskProjects.map(p => `${p.name} | ${p.healthLabel} | Priority:${p.priority} | Deadline:${p.deadline} | Risks:${p.risks.join('; ') || 'none flagged'}`).join('\n');
   const staleStr = staleItems.slice(0,5).map(i => `${i.name} · ${i.sub} (${i.level}, ${i.days}d)`).join('; ');
 
@@ -2481,16 +2480,16 @@ const listEl = document.getElementById('designerList');
 
 function signalClass(signal, value){
   if(signal==='load'){ if(value>95) return 'crit'; if(value>85) return 'warn'; return 'ok'; }
-  if(signal==='energy'){ if(value<3.0) return 'crit'; if(value<3.5) return 'warn'; return 'ok'; }
+  if(signal==='energy'){ if(value==='low') return 'crit'; if(value==='steady') return 'warn'; return 'ok'; }
   if(signal==='context'){ if(value>=3) return 'crit'; return 'ok'; }
-  if(signal==='focus'){ if(value<5) return 'crit'; if(value<10) return 'warn'; return 'ok'; }
+
   return 'ok';
 }
 function signalWidth(signal, value){
   if(signal==='load') return Math.min(value,120)/120*100;
-  if(signal==='energy') return value/5*100;
+  if(signal==='energy'){ if(value==='low') return 25; if(value==='steady') return 60; return 100; }
   if(signal==='context') return Math.min(value,4)/4*100;
-  if(signal==='focus') return Math.min(value,20)/20*100;
+
   return 50;
 }
 function shortRole(r){
@@ -2515,7 +2514,7 @@ function renderList(filter='all'){
         </div>
         <div class="signal">
           <div class="signal-name">Energy</div>
-          <div class="signal-bar ${signalClass('energy',d.energy)}"><div class="fill" style="width:${signalWidth('energy',d.energy)}%"></div></div>
+          <div class="signal-bar ${signalClass('energy',d.energy)} energy-pill"></div>
         </div>
         <div class="signal">
           <div class="signal-name">Contexts</div>
@@ -2523,7 +2522,7 @@ function renderList(filter='all'){
         </div>
         <div class="signal">
           <div class="signal-name">Focus</div>
-          <div class="signal-bar ${signalClass('focus',d.focus)}"><div class="fill" style="width:${signalWidth('focus',d.focus)}%"></div></div>
+
         </div>
       </div>
       <div class="projects-cell">
@@ -2531,7 +2530,7 @@ function renderList(filter='all'){
       </div>
       <div class="status-cell">
         <span class="status ${d.status}">${d.status}</span>
-        <span class="load-text">${d.load}% · ${d.energy.toFixed(1)}</span>
+        <span class="load-text">${d.load}%</span>
       </div>
       <span class="chevron">→</span>
     </div>
@@ -2572,18 +2571,13 @@ function openDrawer(id, _preloaded){
         </div>
         <div class="signal-card">
           <div class="signal-card-label">Energy</div>
-          <div class="signal-card-val">${d.energy.toFixed(1)}<span class="unit">/5</span></div>
-          <div class="signal-card-status ${signalClass('energy',d.energy)}">${d.energy<3?'Below threshold':d.energy<3.5?'Watch zone':'Healthy'}</div>
+          <div class="signal-card-val" style="font-size:16px;padding-top:4px">${d.energy==='high'?'High':d.energy==='low'?'Low':'Steady'}</div>
+          <div class="signal-card-status ${signalClass('energy',d.energy)}">${d.energy==='low'?'Needs attention':d.energy==='steady'?'On track':'Feeling good'}</div>
         </div>
         <div class="signal-card">
           <div class="signal-card-label">Active projects</div>
           <div class="signal-card-val">${d.context}</div>
           <div class="signal-card-status ${signalClass('context',d.context)}">${d.context>=3?'Too many contexts':'Healthy'}</div>
-        </div>
-        <div class="signal-card">
-          <div class="signal-card-label">Focus time</div>
-          <div class="signal-card-val">${d.focus}<span class="unit">h/wk</span></div>
-          <div class="signal-card-status ${signalClass('focus',d.focus)}">${d.focus<5?'Critically low':d.focus<10?'Below target':'Above target'}</div>
         </div>
       </div>
       <div class="pto-note">
@@ -2920,7 +2914,7 @@ function openProjectDrawer(projId, _preloaded){
             <div class="team-member-role">${shortRole(t.role)}</div>
           </div>
           <div class="team-member-stat">
-            <span class="dot ${statusDot}"></span>${t.load}% · ${t.energy.toFixed(1)}
+            <span class="dot ${statusDot}"></span>${t.load}% · ${t.energy}
           </div>
         </div>
         `;
@@ -2979,7 +2973,7 @@ function openProjectDrawer(projId, _preloaded){
         const antis = matches.filter(m=>m.antiMatch && m.skillFit>=0.6).slice(0,1);
         if(!antis.length) return '';
         const m = antis[0], d = m.designer;
-        const reason = d.status==='alert' ? `in alert status (energy ${d.energy.toFixed(1)}, load ${d.load}%)` :
+        const reason = d.status==='alert' ? `in alert status (energy ${d.energy}, load ${d.load}%)` :
                        d.load>95 ? `over 95% ceiling at ${d.load}%` :
                        `already on ${d.context} projects`;
         return `
@@ -3287,7 +3281,7 @@ function dbDesignerToApp(row, dpRows){
     .map(dp => ({ n: dp.project_name || dp.project_id, c: dp.color_code || 'a' }));
   return {
     id: row.id, name: row.name, initials: row.initials, role: row.role, status: row.status,
-    load: row.load, energy: parseFloat(row.energy), context: row.context, focus: row.focus, pto: row.pto,
+    load: row.load, energy: row.energy || 'steady', context: row.context, pto: row.pto,
     skills: row.skills || [], growth: row.growth || [], history: row.history || [4,4,4,4,4,4,4],
     lastUpdated: row.last_updated || {}, projects: myProjects
   };
@@ -3332,7 +3326,7 @@ async function loadFromSupabase(){
 async function saveDesignerToSupabase(d){
   const payload = {
     name: d.name, initials: d.initials, role: d.role, status: d.status,
-    load: d.load, energy: d.energy, context: d.context, focus: d.focus, pto: d.pto,
+    load: d.load, energy: d.energy, context: d.context, pto: d.pto,
     skills: d.skills, growth: d.growth, history: d.history, last_updated: d.lastUpdated
   };
   // Use null/falsy check — Supabase IDs are integers, but JS may parse them as number or string
@@ -3384,7 +3378,7 @@ async function persistDataLocally(){
   if(typeof window.storage === 'undefined') return;
   try {
     const payload = {
-      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, growth:d.growth, load:d.load, energy:d.energy, context:d.context, focus:d.focus, pto:d.pto, status:d.status, history:d.history })),
+      designers: designers.map(d => ({ id:d.id, name:d.name, role:d.role, initials:d.initials, lastUpdated:d.lastUpdated, skills:d.skills, growth:d.growth, load:d.load, energy:d.energy, context:d.context, pto:d.pto, status:d.status, history:d.history })),
       projects:  projects.map(p  => ({ id:p.id, name:p.name, client:p.client, phase:p.phase, health:p.health, healthLabel:p.healthLabel, priority:p.priority, deadline:p.deadline, lastUpdated:p.lastUpdated, needs:p.needs, stakeholder:p.stakeholder, risks:p.risks, growthOps:p.growthOps })),
       savedAt: new Date().toISOString()
     };
@@ -3684,7 +3678,7 @@ function editDesigner(id, focusSub){
   const d = isNew ? {
     id: 'NEW',
     name: '', role: 'Product Designer', initials: '', status: 'steady',
-    load: 70, energy: 3.8, context: 1, focus: 12, pto: 0,
+    load: 70, energy: 'steady', context: 1, pto: 0,
     projects: [],
     skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
     growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
@@ -3719,6 +3713,37 @@ function editDesigner(id, focusSub){
             ${['Junior Designer','Mid Designer','Product Designer','Senior Product Designer','Staff Designer'].map(r =>
               `<option value="${r}" ${d.role === r ? 'selected' : ''}>${r}</option>`).join('')}
           </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-head">
+        <div class="form-section-title">Wellbeing signals</div>
+        <span style="font-size:11.5px;color:var(--muted)">Updated by ops or via check-in form</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="f_status">
+            ${['steady','watch','alert'].map(s =>
+              `<option value="${s}" ${d.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Energy</label>
+          <select class="form-select" id="f_energy">
+            ${['high','steady','low'].map(e =>
+              `<option value="${e}" ${d.energy===e?'selected':''}>${e.charAt(0).toUpperCase()+e.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Load %</label>
+          <input type="number" class="form-input" id="f_load" value="${d.load}" min="0" max="150" placeholder="70">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Days since last PTO</label>
+          <input type="number" class="form-input" id="f_pto" value="${d.pto}" min="0" placeholder="0">
         </div>
       </div>
     </div>
@@ -4362,7 +4387,7 @@ async function saveDesigner(){
     d = {
       id: null,
       status: 'steady',
-      load: 70, energy: 3.8, context: 1, focus: 12, pto: 0,
+      load: 70, energy: 'steady', context: 1, pto: 0,
       projects: [],
       skills: [['Interaction',2],['UX Research',2],['Visual',2],['Prototyping',2],['Systems',2],['Facilitation',2]],
       growth: [{g:'',p:0,link:''},{g:'',p:0,link:''}],
@@ -4375,6 +4400,10 @@ async function saveDesigner(){
   d.name     = document.getElementById('f_name').value.trim();
   d.initials = document.getElementById('f_initials').value.trim().toUpperCase();
   d.role     = document.getElementById('f_role').value;
+  d.status   = document.getElementById('f_status')?.value || d.status;
+  d.energy   = document.getElementById('f_energy')?.value || d.energy;
+  d.load     = parseInt(document.getElementById('f_load')?.value) || d.load;
+  d.pto      = parseInt(document.getElementById('f_pto')?.value) ?? d.pto;
   d.lastUpdated.profile = new Date().toISOString();
 
   document.querySelectorAll('[data-skill-idx]').forEach(el => {
@@ -4689,7 +4718,7 @@ function renderSettingsPanel(){
     { label: 'Load %', hint: 'Watch and alert ceilings', watch: 85, alert: 95, unit: '%' },
     { label: 'Energy 1–5', hint: 'Watch and alert floors (lower is worse)', watch: 3.5, alert: 3.0, unit: '' },
     { label: 'Active projects', hint: 'Max contexts before alert', watch: 2, alert: 3, unit: '' },
-    { label: 'Focus hours/week', hint: 'Watch and alert floors (lower is worse)', watch: 10, alert: 5, unit: 'h' }
+
   ];
   document.getElementById('thresholdsList').innerHTML = thresholds.map((t, i) => `
     <div class="threshold-row">
@@ -4759,25 +4788,25 @@ function updateHeaderCounts(){
 // ---- RENDER PULSE STRIP (computed from live data) ----
 function renderPulse(){
   const n = designers.length;
-  const avgEnergy = designers.reduce((s,d)=>s+d.energy,0)/n;
+  const highE   = designers.filter(d=>d.energy==='high').length;
+  const lowE    = designers.filter(d=>d.energy==='low').length;
   const avgLoad   = Math.round(designers.reduce((s,d)=>s+d.load,0)/n);
   const atSafe    = designers.filter(d=>d.context<=2).length;
   const over3     = n - atSafe;
-  const avgFocus  = Math.round(designers.reduce((s,d)=>s+d.focus,0)/n);
   const alertN    = designers.filter(d=>d.status==='alert').length;
 
+  const energyCls = lowE > 0 ? 'trend-down' : highE >= n/2 ? 'trend-up' : 'trend-warn';
+  const energyLbl = lowE > 0 ? `↓ ${lowE} reporting low` : highE >= n/2 ? '↑ mostly high' : '→ mostly steady';
   const loadCls   = avgLoad > 90 ? 'trend-down' : avgLoad > 85 ? 'trend-warn' : 'trend-flat';
   const loadLbl   = avgLoad > 90 ? '↑ above ceiling' : avgLoad > 85 ? '↑ near target' : '→ within target';
-  const energyCls = avgEnergy < 3.3 ? 'trend-down' : avgEnergy > 3.7 ? 'trend-up' : 'trend-warn';
-  const focusCls  = avgFocus >= 10 ? 'trend-up' : avgFocus >= 7 ? 'trend-warn' : 'trend-down';
   const alertCls  = alertN === 0 ? 'trend-up' : alertN <= 2 ? 'trend-warn' : 'trend-down';
 
   document.getElementById('pulseStrip').innerHTML = `
     <div class="strip-cell">
       <div class="strip-icon energy"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
       <div class="strip-label">Team energy</div>
-      <div class="strip-value">${avgEnergy.toFixed(1)}<span class="unit">/5</span></div>
-      <div class="strip-trend ${energyCls}">${avgEnergy >= 3.5 ? '↑ healthy range' : avgEnergy >= 3.0 ? '→ watch zone' : '↓ below threshold'}</div>
+      <div class="strip-value">${highE}<span class="unit"> high · ${lowE} low</span></div>
+      <div class="strip-trend ${energyCls}">${energyLbl}</div>
     </div>
     <div class="strip-cell">
       <div class="strip-icon load"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 12a10 10 0 0 0-10-10"/></svg></div>
@@ -4790,12 +4819,6 @@ function renderPulse(){
       <div class="strip-label">At ≤2 projects</div>
       <div class="strip-value">${atSafe}<span class="unit">/${n}</span></div>
       <div class="strip-trend ${over3 > 0 ? 'trend-warn' : 'trend-up'}">${over3 > 0 ? `${over3} on 3+ projects` : '→ all within limit'}</div>
-    </div>
-    <div class="strip-cell">
-      <div class="strip-icon focus"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="12" y2="10"/><circle cx="12" cy="14" r="8"/></svg></div>
-      <div class="strip-label">Avg focus time</div>
-      <div class="strip-value">${avgFocus}<span class="unit">h/wk</span></div>
-      <div class="strip-trend ${focusCls}">${avgFocus >= 10 ? '↑ above 10h threshold' : avgFocus >= 7 ? '→ below target' : '↓ critically low'}</div>
     </div>
     <div class="strip-cell">
       <div class="strip-icon alerts"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="20" y1="2" x2="22" y2="4"/><line x1="22" y1="2" x2="20" y2="4"/></svg></div>
@@ -4820,10 +4843,9 @@ function renderSidebar(){
   document.getElementById('sidebarAlerts').innerHTML = shown.length ? shown.map(d => {
     const isAlert = d.status === 'alert';
     const reasons = [];
-    if(d.energy < 3.0) reasons.push(`Energy ${d.energy.toFixed(1)}/5`);
+    if(d.energy === 'low') reasons.push('Energy low');
     if(d.load > 95) reasons.push(`Load ${d.load}%`);
     if(d.context >= 3) reasons.push(`${d.context} active projects`);
-    if(d.focus < 5) reasons.push(`Focus only ${d.focus}h/wk`);
     if(d.pto > 90) reasons.push(`${d.pto} days since PTO`);
     const reasonStr = reasons.length ? reasons.join(' · ') : `Status: ${d.status}`;
     const level = isAlert ? 'Level 2 intervention recommended.' : 'Level 1 check-in suggested.';
@@ -4842,9 +4864,9 @@ function renderSidebar(){
   const loadOk   = designers.filter(d => d.load <= 85).length;
   const loadWarn = designers.filter(d => d.load > 85 && d.load <= 95).length;
   const loadCrit = designers.filter(d => d.load > 95).length;
-  const eneOk    = designers.filter(d => d.energy >= 3.5).length;
-  const eneWarn  = designers.filter(d => d.energy >= 3.0 && d.energy < 3.5).length;
-  const eneCrit  = designers.filter(d => d.energy < 3.0).length;
+  const eneOk    = designers.filter(d => d.energy === 'high').length;
+  const eneWarn  = designers.filter(d => d.energy === 'steady').length;
+  const eneCrit  = designers.filter(d => d.energy === 'low').length;
   const ctxOk    = designers.filter(d => d.context <= 2).length;
   const ctxWarn  = designers.filter(d => d.context === 2 && d.load > 80).length; // high load + dual
   const ctxCrit  = designers.filter(d => d.context >= 3).length;
