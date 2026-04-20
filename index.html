@@ -4001,8 +4001,8 @@ const LOCAL_STORE_KEY = 'atelier_admin_data';
 // Once you've connected via the Settings panel, copy your URL and key
 // into these two constants so every visitor auto-connects without setup.
 // The anon key is safe to embed — RLS controls what anonymous users can do.
-const EMBEDDED_SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co/rest/v1/';
-const EMBEDDED_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w';
+const EMBEDDED_SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co/rest/v1/'; // e.g. 'https://xxxx.supabase.co'
+const EMBEDDED_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w'; // e.g. 'eyJhbGci...'
 
 // ---- CLAUDE PROXY URL ----
 // After creating the claude-proxy Edge Function in Supabase, paste its URL here.
@@ -4103,9 +4103,19 @@ function dbProjectToApp(row){
 
 // ---- Load all data from Supabase ----
 async function loadFromSupabase(){
-  const dbDesigners = await sbXhr('GET', 'designers?archived=eq.false&order=id&select=*');
-  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,since,until');
-  const dbProjects  = await sbXhr('GET', 'project_with_team?archived=eq.false&order=priority');
+  let designers_data, dps_data, projects_data;
+  try { designers_data = await sbXhr('GET', 'designers?archived=eq.false&order=id&select=*'); }
+  catch(e){ throw new Error(`designers table: ${e.message}`); }
+
+  try { dps_data = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,since,until'); }
+  catch(e){ throw new Error(`designer_projects table: ${e.message}`); }
+
+  try { projects_data = await sbXhr('GET', 'project_with_team?archived=eq.false&order=priority'); }
+  catch(e){ throw new Error(`project_with_team view: ${e.message} — make sure you ran the view migration SQL`); }
+
+  const dbDesigners = designers_data;
+  const dbDPs       = dps_data;
+  const dbProjects  = projects_data;
 
   // Build a project name lookup from the projects response — no FK join needed
   const projNameMap = {};
