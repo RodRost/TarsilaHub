@@ -4001,8 +4001,8 @@ const LOCAL_STORE_KEY = 'atelier_admin_data';
 // Once you've connected via the Settings panel, copy your URL and key
 // into these two constants so every visitor auto-connects without setup.
 // The anon key is safe to embed — RLS controls what anonymous users can do.
-const EMBEDDED_SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co/rest/v1/'; // e.g. 'https://xxxx.supabase.co'
-const EMBEDDED_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w'; // e.g. 'eyJhbGci...'
+const EMBEDDED_SB_URL = 'https://rlwoxwrsxhpjsndzxeut.supabase.co/rest/v1/';
+const EMBEDDED_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsd294d3JzeGhwanNuZHp4ZXV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NjUyMzAsImV4cCI6MjA5MjE0MTIzMH0.6ZoQyj8Y6Xqvf9I-Yog1D4IuxJ7bG65yi7iazHZyY4w';
 
 // ---- CLAUDE PROXY URL ----
 // After creating the claude-proxy Edge Function in Supabase, paste its URL here.
@@ -4027,7 +4027,7 @@ function loadSbCredentials(){
     persistenceMode = 'supabase';
     return;
   }
-  try { sbUrl = localStorage.getItem(SB_URL_KEY) || ''; sbKey = localStorage.getItem(SB_KEY_KEY) || ''; } catch(e){}
+  try { sbUrl = (localStorage.getItem(SB_URL_KEY) || '').trim().replace(/\/+$/, ''); sbKey = (localStorage.getItem(SB_KEY_KEY) || '').trim(); } catch(e){}
   if(sbUrl && sbKey) persistenceMode = 'supabase';
   else if(typeof window.storage !== 'undefined') persistenceMode = 'local';
   else persistenceMode = 'memory';
@@ -4104,12 +4104,18 @@ function dbProjectToApp(row){
 // ---- Load all data from Supabase ----
 async function loadFromSupabase(){
   const dbDesigners = await sbXhr('GET', 'designers?archived=eq.false&order=id&select=*');
-  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,since,until,projects(name)');
+  const dbDPs       = await sbXhr('GET', 'designer_projects?select=designer_id,project_id,color_code,allocation,since,until');
   const dbProjects  = await sbXhr('GET', 'project_with_team?archived=eq.false&order=priority');
+
+  // Build a project name lookup from the projects response — no FK join needed
+  const projNameMap = {};
+  (dbProjects || []).forEach(p => { projNameMap[p.id] = p.name; });
 
   const dpRows = (dbDPs || []).map(dp => ({
     designer_id: dp.designer_id, project_id: dp.project_id,
-    color_code: dp.color_code, project_name: dp.projects?.name || dp.project_id, allocation: dp.allocation || null, since: dp.since || null, until: dp.until || null
+    color_code: dp.color_code,
+    project_name: projNameMap[dp.project_id] || dp.project_id,
+    allocation: dp.allocation || null, since: dp.since || null, until: dp.until || null
   }));
 
   designers.length = 0;
